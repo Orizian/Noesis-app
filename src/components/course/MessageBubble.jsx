@@ -42,7 +42,7 @@ export default function MessageBubble({ message }) {
                 prose-code:text-emerald-400 prose-code:bg-zinc-900 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
                 prose-blockquote:border-emerald-700 prose-blockquote:text-zinc-400"
             >
-              {message.content}
+              {cleanContent}
             </ReactMarkdown>
           )}
         </div>
