@@ -3,6 +3,11 @@ import ReactMarkdown from 'react-markdown';
 
 export default function MessageBubble({ message }) {
   const isUser = message.role === 'user';
+  
+  const content = message.content || '';
+  const isPassed = content.includes('[PASS]');
+  const isFailed = content.includes('[FAIL]');
+  const cleanContent = content.replace(/\[PASS\]/g, '').replace(/\[FAIL\]/g, '').trim();
 
   return (
     <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -12,13 +17,19 @@ export default function MessageBubble({ message }) {
         </div>
       )}
       <div className={`max-w-[85%] ${isUser ? 'flex flex-col items-end' : ''}`}>
+        {!isUser && (isPassed || isFailed) && (
+          <div className={`mb-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider
+            ${isPassed ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/50' : 'bg-red-950/60 text-red-400 border border-red-800/50'}`}>
+            {isPassed ? '✓ Pass' : '✗ Fail'}
+          </div>
+        )}
         <div className={`rounded-2xl px-4 py-3 ${
           isUser 
             ? 'bg-zinc-700 text-zinc-100' 
             : 'bg-zinc-800/80 border border-zinc-700/50 text-zinc-200'
         }`}>
           {isUser ? (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
           ) : (
             <ReactMarkdown
               className="text-sm prose prose-sm prose-invert max-w-none 
