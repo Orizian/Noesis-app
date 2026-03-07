@@ -47,8 +47,18 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import CourseOverview from './pages/CourseOverview';
+import RootDetail from './pages/RootDetail';
+import __Layout from './Layout.jsx';
 
-export const pagesConfig = {
-	Pages: {}
+
+export const PAGES = {
+    "CourseOverview": CourseOverview,
+    "RootDetail": RootDetail,
 }
 
+export const pagesConfig = {
+    mainPage: "CourseOverview",
+    Pages: PAGES,
+    Layout: __Layout,
+};
