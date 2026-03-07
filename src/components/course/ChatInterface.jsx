@@ -141,6 +141,9 @@ ${rubric}
     if (mode === 'cold' && !coldSubmitted) {
       setColdSubmitted(true);
     }
+    if (mode === 'practice') {
+      onPracticeSubmit?.();
+    }
 
     const systemPrompt = buildSystemPrompt();
     const conversationContext = newMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n');
