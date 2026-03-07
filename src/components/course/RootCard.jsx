@@ -1,42 +1,61 @@
 import React from 'react';
-import { ChevronRight, Circle, Clock, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, Circle, Clock, CheckCircle2, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
-const statusConfig = {
+const STATUS_CONFIG = {
   not_started: {
-    icon: Circle,
+    Icon: Circle,
     label: 'Not Started',
-    badgeClass: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-    borderClass: 'border-l-zinc-600',
-    dotClass: 'bg-zinc-500'
+    badgeClass: 'bg-zinc-800 text-zinc-500 border-zinc-700',
+    borderClass: 'border-l-zinc-700',
+    cardClass: '',
   },
   in_progress: {
-    icon: Clock,
+    Icon: Clock,
     label: 'In Progress',
-    badgeClass: 'bg-amber-950/50 text-amber-400 border-amber-800/50',
-    borderClass: 'border-l-amber-500',
-    dotClass: 'bg-amber-500'
+    badgeClass: 'bg-blue-950/50 text-blue-400 border-blue-800/50',
+    borderClass: 'border-l-blue-500',
+    cardClass: '',
   },
   complete: {
-    icon: CheckCircle2,
+    Icon: CheckCircle2,
     label: 'Complete',
     badgeClass: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50',
     borderClass: 'border-l-emerald-500',
-    dotClass: 'bg-emerald-500'
-  }
+    cardClass: '',
+  },
+  mastered: {
+    Icon: Star,
+    label: 'Mastered',
+    badgeClass: 'bg-amber-950/50 text-amber-400 border-amber-900/50',
+    borderClass: 'border-l-amber-500',
+    cardClass: 'bg-amber-950/10',
+  },
 };
+
+function fmtDate(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 export default function RootCard({ root, progress }) {
   const status = progress?.status || 'not_started';
-  const config = statusConfig[status];
-  const Icon = config.icon;
+  const cfg = STATUS_CONFIG[status];
+  const { Icon } = cfg;
+
+  const passedCount = [
+    progress?.root_question_passed,
+    progress?.branch_1_passed,
+    progress?.branch_2_passed,
+    progress?.branch_3_passed,
+  ].filter(Boolean).length;
 
   return (
     <Link to={createPageUrl('RootDetail') + `?rootId=${root.id}`}>
-      <div className={`group relative bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 md:p-6 
+      <div className={`group relative bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 
         hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-300 cursor-pointer
-        border-l-[3px] ${config.borderClass}`}>
+        border-l-[3px] ${cfg.borderClass} ${cfg.cardClass}`}>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 
@@ -45,18 +64,22 @@ export default function RootCard({ root, progress }) {
               {String(root.id).padStart(2, '0')}
             </div>
             <div className="min-w-0">
-              <h3 className="text-[15px] font-medium text-zinc-100 truncate group-hover:text-white transition-colors">
+              <h3 className="text-[15px] font-medium text-zinc-100 group-hover:text-white transition-colors leading-snug">
                 {root.title}
               </h3>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full border ${config.badgeClass}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${config.dotClass}`} />
-                  {config.label}
+              <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1.5">
+                <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full border ${cfg.badgeClass}`}>
+                  <Icon className="w-3 h-3" />
+                  {cfg.label}
                 </span>
-                {progress && (
-                  <span className="text-xs text-zinc-500">
-                    {[progress.root_question_passed, progress.branch_1_passed, progress.branch_2_passed, progress.branch_3_passed].filter(Boolean).length}/4 passed
-                  </span>
+                {passedCount > 0 && (
+                  <span className="text-xs text-zinc-600">{passedCount}/4 passed</span>
+                )}
+                {status === 'complete' && progress?.completedAt && (
+                  <span className="text-xs text-zinc-600">Completed {fmtDate(progress.completedAt)}</span>
+                )}
+                {status === 'mastered' && progress?.masteredAt && (
+                  <span className="text-xs text-amber-700/70">Mastered {fmtDate(progress.masteredAt)}</span>
                 )}
               </div>
             </div>
