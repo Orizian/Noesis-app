@@ -27,18 +27,10 @@ function QuestionCard({ title, label, question, isRoot, passed, onMarkPassed }) 
       >
         <div className="flex items-center gap-3 min-w-0">
           {/* Status indicator */}
-          {!isRoot && (
-            passed
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-              : <Circle className="w-4 h-4 text-zinc-600 flex-shrink-0" />
-          )}
-          {isRoot && Icon === null && null}
-          {!isRoot && Icon && null /* shown via status icon above */}
-          {isRoot && (
-            passed
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-              : <Circle className="w-4 h-4 text-zinc-600 flex-shrink-0" />
-          )}
+          {passed
+            ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+            : <Circle className="w-4 h-4 text-zinc-600 flex-shrink-0" />
+          }
           <div className="min-w-0">
             <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{title}</span>
             {label && !isRoot && (
