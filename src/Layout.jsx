@@ -3,11 +3,10 @@ import { ProfileProvider, useProfile } from './components/profiles/ProfileContex
 import ProfileSelect from './pages/ProfileSelect';
 
 function AppShell({ children, currentPageName }) {
-  const { activeProfileId, selectProfile } = useProfile();
+  const { activeProfileId } = useProfile();
 
-  // Always show profile select first
   if (!activeProfileId) {
-    return <ProfileSelect onNavigate={(id) => selectProfile(id)} />;
+    return <ProfileSelect />;
   }
 
   return <>{children}</>;
