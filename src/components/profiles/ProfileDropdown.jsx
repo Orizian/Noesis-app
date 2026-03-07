@@ -66,6 +66,14 @@ export default function ProfileDropdown() {
               <Edit2 className="w-4 h-4 text-zinc-500" />
               Edit Profile
             </button>
+            <Link
+              to={createPageUrl('Stats')}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors text-left"
+            >
+              <BarChart2 className="w-4 h-4 text-zinc-500" />
+              My Stats
+            </Link>
           </div>
           <div className="py-1 border-t border-zinc-800">
             <button
