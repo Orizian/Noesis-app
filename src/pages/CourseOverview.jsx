@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { ROOTS } from '../components/courseData';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
@@ -8,7 +8,7 @@ import { getProfileProgress } from '../components/profiles/profileStorage';
 import { BookOpen } from 'lucide-react';
 
 export default function CourseOverview() {
-  const { activeProfileId, profilesVersion, refresh } = useProfile();
+  const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
   const tapTimer = useRef(null);
@@ -21,6 +21,7 @@ export default function CourseOverview() {
       const next = prev + 1;
       if (next >= 7) {
         setShowDevTools(true);
+        clearTimeout(tapTimer.current);
         return 0;
       }
       clearTimeout(tapTimer.current);
@@ -98,6 +99,3 @@ export default function CourseOverview() {
     </div>
   );
 }
-
-// Need useRef
-import { useRef } from 'react';
