@@ -7,7 +7,7 @@ import ColdAttemptPanel from './ColdAttemptPanel';
 import { useProfile } from '../profiles/ProfileContext';
 import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm } from '../profiles/profileStorage';
 
-export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode }) {
+export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered }) {
   const { activeProfileId } = useProfile();
 
   const [messages, setMessages] = useState([]);
