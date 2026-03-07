@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ROOTS, BRANCH_RUBRICS } from '../components/courseData';
+import { ROOTS } from '../components/courseData';
 import ModeSelector from '../components/course/ModeSelector';
 import QuestionBank from '../components/course/QuestionBank';
 import QuestionSelector from '../components/course/QuestionSelector';
 import ChatInterface from '../components/course/ChatInterface';
+import ProfileDropdown from '../components/profiles/ProfileDropdown';
+import { useProfile } from '../components/profiles/ProfileContext';
 import { ArrowLeft, Circle, Clock, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 const statusConfig = {
@@ -20,87 +20,71 @@ export default function RootDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = ROOTS.find(r => r.id === rootId) || ROOTS[0];
+  const navigate = useNavigate();
 
   const [activeMode, setActiveMode] = useState('teach');
   const [selectedQuestion, setSelectedQuestion] = useState('root');
-  const queryClient = useQueryClient();
 
-  const { data: allProgress = [] } = useQuery({
-    queryKey: ['rootProgress'],
-    queryFn: () => base44.entities.RootProgress.list(),
-  });
+  const { activeProfileId, getRootProgress, setRootProgress, refresh } = useProfile();
 
-  const progress = allProgress.find(p => p.root_id === rootId);
+  // Read progress from profile localStorage
+  const progress = getRootProgress(rootId);
   const status = progress?.status || 'not_started';
   const StatusIcon = statusConfig[status].icon;
 
-  const updateProgressMutation = useMutation({
-    mutationFn: async ({ questionType }) => {
-      let existing = progress;
-      
-      if (!existing) {
-        existing = await base44.entities.RootProgress.create({
-          root_id: rootId,
-          status: 'in_progress',
-          root_question_passed: false,
-          branch_1_passed: false,
-          branch_2_passed: false,
-          branch_3_passed: false,
-        });
-      }
-
-      const updates = {};
-      if (questionType === 'root') updates.root_question_passed = true;
-      if (questionType === 'branch_1') updates.branch_1_passed = true;
-      if (questionType === 'branch_2') updates.branch_2_passed = true;
-      if (questionType === 'branch_3') updates.branch_3_passed = true;
-
-      // Check if root question is now passed to mark complete
-      const willBeComplete = (questionType === 'root' || existing.root_question_passed);
-      if (willBeComplete) {
-        updates.status = 'complete';
-      } else {
-        updates.status = 'in_progress';
-      }
-
-      await base44.entities.RootProgress.update(existing.id, updates);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rootProgress'] });
-    }
-  });
-
-  const handlePassColdAttempt = (questionType) => {
-    updateProgressMutation.mutate({ questionType });
-  };
-
   // Mark as in_progress when user first visits teach mode
   useEffect(() => {
-    if (!progress && activeMode === 'teach') {
-      base44.entities.RootProgress.create({
-        root_id: rootId,
+    if (activeProfileId && !progress && activeMode === 'teach') {
+      setRootProgress(rootId, {
         status: 'in_progress',
         root_question_passed: false,
         branch_1_passed: false,
         branch_2_passed: false,
         branch_3_passed: false,
-      }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['rootProgress'] });
       });
     }
-  }, [rootId, activeMode]);
+  }, [rootId, activeMode, activeProfileId]);
+
+  const handlePassColdAttempt = (questionType) => {
+    if (!activeProfileId) return;
+    const current = progress || {
+      status: 'in_progress',
+      root_question_passed: false,
+      branch_1_passed: false,
+      branch_2_passed: false,
+      branch_3_passed: false,
+    };
+
+    const updates = { ...current };
+    if (questionType === 'root') updates.root_question_passed = true;
+    if (questionType === 'branch_1') updates.branch_1_passed = true;
+    if (questionType === 'branch_2') updates.branch_2_passed = true;
+    if (questionType === 'branch_3') updates.branch_3_passed = true;
+
+    const willBeComplete = updates.root_question_passed;
+    updates.status = willBeComplete ? 'complete' : 'in_progress';
+
+    setRootProgress(rootId, updates);
+  };
+
+  const handleSwitchMode = (newMode) => {
+    setActiveMode(newMode);
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
-        {/* Back + Header */}
-        <Link 
-          to={createPageUrl('CourseOverview')} 
-          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Course Overview
-        </Link>
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            to={createPageUrl('CourseOverview')}
+            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Course Overview
+          </Link>
+          <ProfileDropdown />
+        </div>
 
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
@@ -141,6 +125,7 @@ export default function RootDetail() {
             mode={activeMode}
             questionType={activeMode === 'teach' ? 'root' : selectedQuestion}
             onPassColdAttempt={handlePassColdAttempt}
+            onSwitchMode={handleSwitchMode}
           />
         </div>
 
