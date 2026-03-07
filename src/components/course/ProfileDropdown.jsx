@@ -7,7 +7,7 @@ import ConfirmModal from '../profiles/ConfirmModal';
 import ProfileModal from '../profiles/ProfileModal';
 import { getActiveProfile, setActiveProfile, updateProfile, resetAllProgress } from '../profileStore';
 
-export default function ProfileDropdown({ onProfileChange }) {
+export default function ProfileDropdown({ onProfileChange, onReplayTutorial }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(() => getActiveProfile());
