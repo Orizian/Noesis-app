@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { BRANCH_RUBRICS } from '../courseData';
+import { BRANCH_RUBRICS, DICTIONARY } from '../courseData';
 import MessageBubble from './MessageBubble';
 import ColdAttemptPanel from './ColdAttemptPanel';
 import { useProfile } from '../profiles/ProfileContext';
-import { incrementColdAttempt, getColdAttemptCount } from '../profiles/profileStorage';
+import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm } from '../profiles/profileStorage';
 
 export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode }) {
   const { activeProfileId } = useProfile();
