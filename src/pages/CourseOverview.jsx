@@ -18,11 +18,11 @@ export default function CourseOverview() {
   const [showDevTools, setShowDevTools] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Guard: redirect to profile select if no active profile
-  if (!profile) {
-    navigate(createPageUrl('ProfileSelect'));
-    return null;
-  }
+  useEffect(() => {
+    if (!getActiveProfile()) navigate(createPageUrl('ProfileSelect'), { replace: true });
+  }, []);
+
+  if (!profile) return null;
 
   const refresh = useCallback(() => {
     setProfile(getActiveProfile());
