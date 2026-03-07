@@ -237,6 +237,7 @@ export default function RootDetail() {
           progress={progressCompat}
           onMarkBranchPassed={handleMarkBranchPassed}
         />
+        </div>
       </div>
 
       {showResetConfirm && (
