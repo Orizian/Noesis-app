@@ -69,7 +69,7 @@ export default function RootCard({ root, progress }) {
               </h3>
               <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1.5">
                 <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full border ${cfg.badgeClass}`}>
-                  <Icon className="w-3 h-3" />
+                  <StatusIcon className="w-3 h-3" />
                   {cfg.label}
                 </span>
                 {passedCount > 0 && (
