@@ -231,6 +231,7 @@ export default function RootDetail() {
         </div>
 
         {/* Question Bank */}
+        <div id="tutorial-question-bank">
         <QuestionBank
           root={root}
           progress={progressCompat}
