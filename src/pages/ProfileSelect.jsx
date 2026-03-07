@@ -34,7 +34,8 @@ export default function ProfileSelect() {
   };
 
   const handleCreated = (profile) => {
-    setProfiles(getProfiles());
+    const p = getProfiles();
+    setProfiles(Array.isArray(p) ? p : []);
     setShowCreate(false);
     refresh();
     selectProfile(profile.id);
