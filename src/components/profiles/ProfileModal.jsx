@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Eye, EyeOff, Delete } from 'lucide-react';
+import { X, Lock, Delete } from 'lucide-react';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../profileStore';
 
 const NUMPAD = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
