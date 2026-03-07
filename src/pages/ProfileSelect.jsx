@@ -18,7 +18,10 @@ function timeAgo(ts) {
 
 export default function ProfileSelect() {
   const { selectProfile, refresh } = useProfile();
-  const [profiles, setProfiles] = useState(() => getProfiles());
+  const [profiles, setProfiles] = useState(() => {
+    const p = getProfiles();
+    return Array.isArray(p) ? p : [];
+  });
   const [showCreate, setShowCreate] = useState(false);
   const [pinProfile, setPinProfile] = useState(null);
 
