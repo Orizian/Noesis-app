@@ -77,17 +77,20 @@ export function setActiveProfile(id) {
   const s = getStore(); s.activeProfileId = id; saveStore(s);
 }
 
-export function createProfile({ name, color, emoji }) {
+export function createProfile({ name, color, emoji, pin }) {
   const s = getStore();
   const id = `p_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
   const profile = {
     id, name,
     color: color || AVATAR_COLORS[0],
     emoji: emoji || null,
+    pin: pin || null,
+    hasSeenTutorial: false,
     createdAt: new Date().toISOString(),
     lastStudiedAt: null,
     streak: 0, longestStreak: 0, lastStreakDate: null,
     totalColdAttempts: 0, totalColdPasses: 0, totalPracticeAttempts: 0,
+    coldAttemptCounts: {}, // { "rootId_questionType": number }
     roots: {},
   };
   s.profiles.push(profile);
