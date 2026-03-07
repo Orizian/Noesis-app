@@ -117,21 +117,130 @@ export function getProfileCompletionPercent(profileId) {
   const profile = getProfileById(profileId);
   if (!profile?.progress) return 0;
   const total = 8;
-  const complete = Object.values(profile.progress).filter(p => p.status === 'complete').length;
+  const complete = Object.values(profile.progress).filter(p => p.status === 'complete' || p.status === 'mastered').length;
   return Math.round((complete / total) * 100);
 }
 
 export function markRootComplete(profileId, rootId) {
+  const existing = getProfileRootProgress(profileId, rootId) || {};
   setProfileRootProgress(profileId, rootId, {
+    ...existing,
     status: 'complete',
     root_question_passed: true,
     branch_1_passed: true,
     branch_2_passed: true,
     branch_3_passed: true,
+    completedAt: existing.completedAt || Date.now(),
   });
 }
 
 export function markRootMastered(profileId, rootId) {
-  // Mastered = complete with all branches
-  markRootComplete(profileId, rootId);
+  const existing = getProfileRootProgress(profileId, rootId) || {};
+  setProfileRootProgress(profileId, rootId, {
+    ...existing,
+    status: 'mastered',
+    root_question_passed: true,
+    branch_1_passed: true,
+    branch_2_passed: true,
+    branch_3_passed: true,
+    completedAt: existing.completedAt || Date.now(),
+    masteredAt: existing.masteredAt || Date.now(),
+  });
+}
+
+// Timestamps helpers
+export function setRootStartedAt(profileId, rootId) {
+  const existing = getProfileRootProgress(profileId, rootId) || {};
+  if (!existing.startedAt) {
+    setProfileRootProgress(profileId, rootId, { ...existing, startedAt: Date.now() });
+  }
+}
+
+export function setRootCompletedAt(profileId, rootId) {
+  const existing = getProfileRootProgress(profileId, rootId) || {};
+  if (!existing.completedAt) {
+    setProfileRootProgress(profileId, rootId, { ...existing, completedAt: Date.now() });
+  }
+}
+
+// Encountered dictionary terms per profile per root
+export function getEncounteredTerms(profileId, rootId) {
+  const profile = getProfileById(profileId);
+  return profile?.encounteredTerms?.[rootId] || [];
+}
+
+export function addEncounteredTerm(profileId, rootId, term) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].encounteredTerms) profiles[idx].encounteredTerms = {};
+  if (!profiles[idx].encounteredTerms[rootId]) profiles[idx].encounteredTerms[rootId] = [];
+  if (!profiles[idx].encounteredTerms[rootId].includes(term)) {
+    profiles[idx].encounteredTerms[rootId].push(term);
+    saveProfiles(profiles);
+  }
+}
+
+// Mode open tracking (for Practice dot nudge)
+export function getOpenedModes(profileId, rootId) {
+  const profile = getProfileById(profileId);
+  return profile?.openedModes?.[rootId] || [];
+}
+
+export function recordModeOpened(profileId, rootId, mode) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].openedModes) profiles[idx].openedModes = {};
+  if (!profiles[idx].openedModes[rootId]) profiles[idx].openedModes[rootId] = [];
+  if (!profiles[idx].openedModes[rootId].includes(mode)) {
+    profiles[idx].openedModes[rootId].push(mode);
+    saveProfiles(profiles);
+  }
+}
+
+// Stats helpers
+export function getProfileStats(profileId) {
+  const profile = getProfileById(profileId);
+  if (!profile) return null;
+  const progress = profile.progress || {};
+  const counts = profile.coldAttemptCounts || {};
+
+  let totalAttempts = 0;
+  let totalPassed = 0;
+  Object.keys(counts).forEach(key => { totalAttempts += counts[key]; });
+  // passed = roots/branches that are passed
+  const allProgress = Object.values(progress);
+  allProgress.forEach(p => {
+    if (p.root_question_passed) totalPassed++;
+    if (p.branch_1_passed) totalPassed++;
+    if (p.branch_2_passed) totalPassed++;
+    if (p.branch_3_passed) totalPassed++;
+  });
+
+  const complete = allProgress.filter(p => p.status === 'complete').length;
+  const mastered = allProgress.filter(p => p.status === 'mastered').length;
+  const inProgress = allProgress.filter(p => p.status === 'in_progress').length;
+  const notStarted = 8 - complete - mastered - inProgress;
+
+  const firstSession = profile.createdAt ? Math.floor((Date.now() - profile.createdAt) / (1000 * 60 * 60 * 24)) : 0;
+
+  // Strongest root: highest status then earliest completion
+  const statusRank = { mastered: 3, complete: 2, in_progress: 1, not_started: 0 };
+  let strongestRootId = null;
+  let bestRank = -1;
+  let bestDate = Infinity;
+  for (let i = 1; i <= 8; i++) {
+    const p = progress[i];
+    if (!p) continue;
+    const rank = statusRank[p.status] || 0;
+    const date = p.completedAt || Infinity;
+    if (rank > bestRank || (rank === bestRank && date < bestDate)) {
+      bestRank = rank;
+      bestDate = date;
+      strongestRootId = i;
+    }
+  }
+
+  return { totalAttempts, totalPassed, complete, mastered, inProgress, notStarted, firstSession, strongestRootId, progress };
 }
