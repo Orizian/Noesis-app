@@ -60,10 +60,12 @@ export default function RootCard({ root, progress }) {
       return () => clearTimeout(t);
     } else {
       setDisplayStatus(status);
+      prevStatusRef.current = status;
     }
   }, [status]);
 
-  const displayCfg = STATUS_CONFIG[displayStatus];
+  const safeDisplayStatus = STATUS_CONFIG[displayStatus] ? displayStatus : status;
+  const displayCfg = STATUS_CONFIG[safeDisplayStatus];
   const DisplayIcon = displayCfg.Icon;
 
   const passedCount = [
