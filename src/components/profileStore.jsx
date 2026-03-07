@@ -231,6 +231,53 @@ export function resetAllProgress(profileId) {
   saveStore(s);
 }
 
+// ─── Tutorial ─────────────────────────────────────────────────────────────
+export function markTutorialSeen(profileId) {
+  const s = getStore();
+  const p = s.profiles.find(x => x.id === profileId);
+  if (!p) return;
+  p.hasSeenTutorial = true;
+  saveStore(s);
+}
+
+// ─── Cold Attempt Counts ──────────────────────────────────────────────────
+export function getColdAttemptCount(profileId, rootId, questionType) {
+  const s = getStore();
+  const p = s.profiles.find(x => x.id === profileId);
+  if (!p) return 0;
+  const key = `${rootId}_${questionType}`;
+  return p.coldAttemptCounts?.[key] || 0;
+}
+
+export function incrementColdAttemptCount(profileId, rootId, questionType) {
+  const s = getStore();
+  const p = s.profiles.find(x => x.id === profileId);
+  if (!p) return 1;
+  if (!p.coldAttemptCounts) p.coldAttemptCounts = {};
+  const key = `${rootId}_${questionType}`;
+  p.coldAttemptCounts[key] = (p.coldAttemptCounts[key] || 0) + 1;
+  saveStore(s);
+  return p.coldAttemptCounts[key];
+}
+
+// ─── PIN management ────────────────────────────────────────────────────────
+export function setProfilePin(profileId, pin) {
+  updateProfile(profileId, { pin: pin || null });
+}
+
+export function resetProfilePinAndProgress(profileId) {
+  const s = getStore();
+  const p = s.profiles.find(x => x.id === profileId);
+  if (!p) return;
+  p.pin = null;
+  p.roots = {};
+  p.streak = 0; p.longestStreak = 0; p.lastStreakDate = null;
+  p.totalColdAttempts = 0; p.totalColdPasses = 0; p.totalPracticeAttempts = 0;
+  p.coldAttemptCounts = {};
+  p.lastStudiedAt = null;
+  saveStore(s);
+}
+
 // ─── Dev tools ────────────────────────────────────────────────────────────
 export function devMarkAllComplete(profileId) {
   const s = getStore();
