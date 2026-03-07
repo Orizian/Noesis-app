@@ -5,45 +5,114 @@ import QuestionBank from '../components/course/QuestionBank';
 import QuestionSelector from '../components/course/QuestionSelector';
 import ChatInterface from '../components/course/ChatInterface';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
+import RootDictionary from '../components/course/RootDictionary';
+import CompetencyMeter from '../components/course/CompetencyMeter';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { ArrowLeft, Circle, Clock, CheckCircle2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft, Circle, Zap, CheckCircle2, Star
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import {
+  getColdAttemptCount,
+  getOpenedModes,
+  recordModeOpened,
+  setRootStartedAt,
+} from '../components/profiles/profileStorage';
+import { format } from 'date-fns';
 
 const statusConfig = {
   not_started: { icon: Circle, label: 'Not Started', className: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
-  in_progress: { icon: Clock, label: 'In Progress', className: 'bg-amber-950/50 text-amber-400 border-amber-800/50' },
+  in_progress: { icon: Zap, label: 'In Progress', className: 'bg-blue-950/50 text-blue-400 border-blue-800/50' },
   complete: { icon: CheckCircle2, label: 'Complete', className: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50' },
+  mastered: { icon: Star, label: 'Mastered', className: 'bg-violet-950/50 text-violet-300 border-violet-800/50' },
 };
+
+function BranchCompletionRing({ progress }) {
+  const passed = [
+    progress?.root_question_passed,
+    progress?.branch_1_passed,
+    progress?.branch_2_passed,
+    progress?.branch_3_passed,
+  ].filter(Boolean).length;
+  const total = 4;
+  const size = 48;
+  const stroke = 3;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (passed / total) * circ;
+  const color = passed === 4 ? '#8b5cf6' : passed >= 2 ? '#10b981' : '#3b82f6';
+
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="absolute top-0 left-0 -rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#27272a" strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} fill="none"
+          stroke={color} strokeWidth={stroke}
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+        />
+      </svg>
+      <span className="relative z-10 text-xs font-mono text-zinc-400">{passed}/{total}</span>
+    </div>
+  );
+}
 
 export default function RootDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = ROOTS.find(r => r.id === rootId) || ROOTS[0];
-  const navigate = useNavigate();
 
-  const [activeMode, setActiveMode] = useState('teach');
+  const [activeMode, setActiveMode] = useState(null); // null = no mode selected yet
   const [selectedQuestion, setSelectedQuestion] = useState('root');
+  const [competencyStage, setCompetencyStage] = useState(1);
+  const [dictKey, setDictKey] = useState(0); // force re-render of dictionary on term encountered
 
   const { activeProfileId, getRootProgress, setRootProgress, refresh } = useProfile();
 
-  // Read progress from profile localStorage
   const progress = getRootProgress(rootId);
   const status = progress?.status || 'not_started';
-  const StatusIcon = statusConfig[status].icon;
+  const cfg = statusConfig[status] || statusConfig.not_started;
+  const StatusIcon = cfg.icon;
 
-  // Mark as in_progress when user first visits teach mode
+  // Determine initial competency stage based on prior status
   useEffect(() => {
-    if (activeProfileId && !progress && activeMode === 'teach') {
+    const s = progress?.status || 'not_started';
+    if (s === 'complete' || s === 'mastered') {
+      setCompetencyStage(4);
+    } else {
+      setCompetencyStage(1);
+    }
+  }, [rootId]);
+
+  // Mode open tracking for practice dot
+  const openedModes = activeProfileId ? getOpenedModes(activeProfileId, rootId) : [];
+  const hasOpenedTeach = openedModes.includes('teach');
+  const hasOpenedPractice = openedModes.includes('practice');
+  const showPracticeDot = hasOpenedTeach && !hasOpenedPractice;
+
+  const handleModeChange = (newMode) => {
+    setActiveMode(newMode);
+    if (activeProfileId) {
+      recordModeOpened(activeProfileId, rootId, newMode);
+    }
+    // Mark in_progress when teach mode first opened
+    if (newMode === 'teach' && activeProfileId && !progress) {
       setRootProgress(rootId, {
         status: 'in_progress',
         root_question_passed: false,
         branch_1_passed: false,
         branch_2_passed: false,
         branch_3_passed: false,
+        startedAt: Date.now(),
       });
+    } else if (newMode === 'teach' && activeProfileId && progress && !progress.startedAt) {
+      setRootProgress(rootId, { ...progress, startedAt: Date.now() });
     }
-  }, [rootId, activeMode, activeProfileId]);
+  };
 
   const handlePassColdAttempt = (questionType) => {
     if (!activeProfileId) return;
@@ -54,7 +123,6 @@ export default function RootDetail() {
       branch_2_passed: false,
       branch_3_passed: false,
     };
-
     const updates = { ...current };
     if (questionType === 'root') updates.root_question_passed = true;
     if (questionType === 'branch_1') updates.branch_1_passed = true;
@@ -63,13 +131,30 @@ export default function RootDetail() {
 
     const willBeComplete = updates.root_question_passed;
     updates.status = willBeComplete ? 'complete' : 'in_progress';
+    if (willBeComplete && !updates.completedAt) updates.completedAt = Date.now();
 
     setRootProgress(rootId, updates);
   };
 
-  const handleSwitchMode = (newMode) => {
-    setActiveMode(newMode);
+  const handleCompetencyChange = (stage) => {
+    setCompetencyStage(prev => Math.max(prev, stage));
   };
+
+  const handleTermEncountered = () => {
+    setDictKey(k => k + 1);
+  };
+
+  // Attempt counts
+  const attemptCounts = activeProfileId ? {
+    root: getColdAttemptCount(activeProfileId, rootId, 'root'),
+    branch_1: getColdAttemptCount(activeProfileId, rootId, 'branch_1'),
+    branch_2: getColdAttemptCount(activeProfileId, rootId, 'branch_2'),
+    branch_3: getColdAttemptCount(activeProfileId, rootId, 'branch_3'),
+  } : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+
+  const hasAnyAttempts = Object.values(attemptCounts).some(c => c > 0);
+
+  const fmt = (ts) => ts ? format(new Date(ts), 'MMM d, yyyy') : null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -86,26 +171,79 @@ export default function RootDetail() {
           <ProfileDropdown />
         </div>
 
+        {/* Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-xs font-mono text-zinc-600 mb-1">ROOT {String(root.id).padStart(2, '0')}</div>
-              <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{root.title}</h1>
+            <div className="flex items-start gap-4">
+              <BranchCompletionRing progress={progress} />
+              <div>
+                <div className="text-xs font-mono text-zinc-600 mb-1">ROOT {String(root.id).padStart(2, '0')}</div>
+                <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{root.title}</h1>
+              </div>
             </div>
-            <span className={`flex-shrink-0 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border ${statusConfig[status].className}`}>
+            <span className={`flex-shrink-0 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-[600ms] ${cfg.className}`}>
               <StatusIcon className="w-3.5 h-3.5" />
-              {statusConfig[status].label}
+              {cfg.label}
             </span>
           </div>
+
+          {/* Timestamps */}
+          {(progress?.startedAt || progress?.completedAt || progress?.masteredAt) && (
+            <div className="mt-3 flex flex-wrap gap-3">
+              {progress?.startedAt && (
+                <span className="text-xs text-zinc-600">Started {fmt(progress.startedAt)}</span>
+              )}
+              {progress?.completedAt && (
+                <span className="text-xs text-zinc-600">· Completed {fmt(progress.completedAt)}</span>
+              )}
+              {progress?.masteredAt && (
+                <span className="text-xs text-zinc-600">· Mastered {fmt(progress.masteredAt)}</span>
+              )}
+            </div>
+          )}
+
+          {/* Cold attempt counters */}
+          {hasAnyAttempts && (
+            <div className="mt-3 flex flex-wrap gap-3">
+              {attemptCounts.root > 0 && (
+                <span className="text-xs text-zinc-600">Root: {attemptCounts.root} attempt{attemptCounts.root !== 1 ? 's' : ''}</span>
+              )}
+              {attemptCounts.branch_1 > 0 && (
+                <span className="text-xs text-zinc-600">· Branch 1: {attemptCounts.branch_1} attempt{attemptCounts.branch_1 !== 1 ? 's' : ''}</span>
+              )}
+              {attemptCounts.branch_2 > 0 && (
+                <span className="text-xs text-zinc-600">· Branch 2: {attemptCounts.branch_2} attempt{attemptCounts.branch_2 !== 1 ? 's' : ''}</span>
+              )}
+              {attemptCounts.branch_3 > 0 && (
+                <span className="text-xs text-zinc-600">· Branch 3: {attemptCounts.branch_3} attempt{attemptCounts.branch_3 !== 1 ? 's' : ''}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mode Selector */}
         <div className="mb-6">
-          <ModeSelector activeMode={activeMode} onModeChange={setActiveMode} />
+          <ModeSelector
+            activeMode={activeMode || ''}
+            onModeChange={handleModeChange}
+            showPracticeDot={showPracticeDot}
+          />
         </div>
 
+        {/* Empty state — no mode selected yet and root not started */}
+        {!activeMode && (
+          <div className="mb-10 py-12 text-center">
+            <p className="text-zinc-500 text-sm">Start with Teach Me to build your understanding of this concept.</p>
+          </div>
+        )}
+
+        {/* Competency meter — Teach Me only */}
+        {activeMode === 'teach' && (
+          <CompetencyMeter stage={competencyStage} />
+        )}
+
         {/* Question Selector (for Practice and Cold modes) */}
-        {(activeMode === 'practice' || activeMode === 'cold') && (
+        {activeMode && (activeMode === 'practice' || activeMode === 'cold') && (
           <div className="mb-4">
             <label className="text-xs text-zinc-500 mb-2 block">Select question</label>
             <QuestionSelector
@@ -118,19 +256,28 @@ export default function RootDetail() {
         )}
 
         {/* Chat Area */}
-        <div className="mb-10">
-          <ChatInterface
-            key={`${root.id}-${activeMode}-${selectedQuestion}`}
-            root={root}
-            mode={activeMode}
-            questionType={activeMode === 'teach' ? 'root' : selectedQuestion}
-            onPassColdAttempt={handlePassColdAttempt}
-            onSwitchMode={handleSwitchMode}
-          />
+        {activeMode && (
+          <div className="mb-10">
+            <ChatInterface
+              key={`${root.id}-${activeMode}-${selectedQuestion}`}
+              root={root}
+              mode={activeMode}
+              questionType={activeMode === 'teach' ? 'root' : selectedQuestion}
+              onPassColdAttempt={handlePassColdAttempt}
+              onSwitchMode={handleModeChange}
+              onCompetencyChange={handleCompetencyChange}
+              onTermEncountered={handleTermEncountered}
+            />
+          </div>
+        )}
+
+        {/* Dictionary */}
+        <div className="mb-6">
+          <RootDictionary key={dictKey} rootId={rootId} />
         </div>
 
         {/* Question Bank */}
-        <QuestionBank root={root} />
+        <QuestionBank root={root} progress={progress} />
       </div>
     </div>
   );
