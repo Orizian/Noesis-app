@@ -49,12 +49,14 @@
  */
 import CourseOverview from './pages/CourseOverview';
 import RootDetail from './pages/RootDetail';
+import ProfileSelect from './pages/ProfileSelect';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "CourseOverview": CourseOverview,
     "RootDetail": RootDetail,
+    "ProfileSelect": ProfileSelect,
 }
 
 export const pagesConfig = {
