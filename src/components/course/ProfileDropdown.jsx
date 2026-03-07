@@ -81,6 +81,15 @@ export default function ProfileDropdown({ onProfileChange, onReplayTutorial }) {
               <BarChart2 className="w-4 h-4 text-zinc-500" />
               My Stats
             </button>
+            {onReplayTutorial && (
+              <button
+                onClick={() => { setOpen(false); onReplayTutorial(); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-zinc-500" />
+                How to use this app
+              </button>
+            )}
             <button
               onClick={handleSwitchProfile}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
