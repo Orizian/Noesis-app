@@ -50,6 +50,7 @@
 import CourseOverview from './pages/CourseOverview';
 import ProfileSelect from './pages/ProfileSelect';
 import RootDetail from './pages/RootDetail';
+import Stats from './pages/Stats';
 import __Layout from './Layout.jsx';
 
 
@@ -57,6 +58,7 @@ export const PAGES = {
     "CourseOverview": CourseOverview,
     "ProfileSelect": ProfileSelect,
     "RootDetail": RootDetail,
+    "Stats": Stats,
 }
 
 export const pagesConfig = {
