@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, User, BarChart2, Trash2, Edit2, ChevronDown } from 'lucide-react';
+import { LogOut, BarChart2, Trash2, Edit2, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { useProfile } from './ProfileContext';
 import ProfileAvatar from './ProfileAvatar';
 import { deleteProfile, getProfiles } from './profileStorage';
