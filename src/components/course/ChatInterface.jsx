@@ -3,13 +3,24 @@ import { Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { BRANCH_RUBRICS } from '../courseData';
 import MessageBubble from './MessageBubble';
+import ColdAttemptPanel from './ColdAttemptPanel';
+import { useProfile } from '../profiles/ProfileContext';
+import { incrementColdAttempt, getColdAttemptCount } from '../profiles/profileStorage';
 
-export default function ChatInterface({ root, mode, questionType, onPassColdAttempt }) {
+export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode }) {
+  const { activeProfileId } = useProfile();
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [coldSubmitted, setColdSubmitted] = useState(false);
+
+  // Cold attempt state
+  const [coldPhase, setColdPhase] = useState('input'); // 'input' | 'evaluating' | 'results'
+  const [coldResult, setColdResult] = useState(null);
+  const [coldAttemptNum, setColdAttemptNum] = useState(1);
+  const [pendingColdResult, setPendingColdResult] = useState(null);
+
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -25,71 +36,89 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
     return `Branch ${branchIndex + 1} — ${root.branches[branchIndex]?.label}`;
   };
 
+  const getRubric = () => {
+    if (questionType === 'root') return root.rubric;
+    const branchKey = questionType;
+    const branchRubrics = BRANCH_RUBRICS[root.id];
+    return branchRubrics?.[branchKey] || root.rubric;
+  };
+
   useEffect(() => {
     setMessages([]);
     setInitialized(false);
-    setColdSubmitted(false);
+    setColdPhase('input');
+    setColdResult(null);
+    setPendingColdResult(null);
     setInput('');
+    if (activeProfileId && mode === 'cold') {
+      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
+      setColdAttemptNum(count + 1);
+    }
   }, [root.id, mode, questionType]);
 
   useEffect(() => {
     if (initialized) return;
-    if (mode === 'teach') {
-      initTeachMode();
-    }
+    if (mode === 'teach') initTeachMode();
+    else if (mode === 'practice' || mode === 'cold') startPracticeOrCold();
     setInitialized(true);
-  }, [initialized, mode, root.id, questionType]);
+  }, [initialized]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
-
-  const initTeachMode = async () => {
-    setLoading(true);
-    const systemPrompt = buildSystemPrompt();
-    const initPrompt = `Begin the teaching session for this root. The question we're working toward understanding is:\n\n"${getQuestion()}"\n\nStart by stating what this question is really asking, map what we'll build and why, then ask what my current understanding is. Remember: scenario first, no walls of text, 2-4 sentences max for your opening seed.`;
-    
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `${systemPrompt}\n\nUser: ${initPrompt}`
-    });
-
-    setMessages([{ role: 'assistant', content: response }]);
-    setLoading(false);
-  };
-
-  const getRubric = () => {
-    if (questionType === 'root') return root.rubric;
-    const branchKey = questionType; // e.g. "branch_1"
-    const branchRubrics = BRANCH_RUBRICS[root.id];
-    return branchRubrics?.[branchKey] || root.rubric;
-  };
+  }, [messages, coldPhase]);
 
   const buildSystemPrompt = () => {
     const question = getQuestion();
     const rubric = getRubric();
-    
+    const isFirstTeach = messages.length === 0;
+
     if (mode === 'teach') {
       return `You are a mastery-based exercise science instructor. You are teaching Root ${root.id}: "${root.title}".
 
 The target question is: "${question}"
 
 TEACHING PROTOCOL — follow this exactly:
+
+ORIENTATION PHASE:
 1. Open by stating what the question is really asking beneath the surface
 2. Map the session — what concepts will be built and why
 3. Ask what the learner's current understanding is
-4. Build understanding: SCENARIO FIRST, then mechanism, then terminology. Never reverse this order.
-5. After every explanation ask "Does that click, or do you want more depth?"
-6. Follow every cross-domain connection the learner raises
-7. Never lecture unprompted. Never ask multiple questions simultaneously.
-8. Seed explanation for zero prior knowledge: 2-4 sentences maximum, then scenario immediately
-9. When asked to "go deeper," approach from a DIFFERENT angle — never repeat at the same depth
-10. Do NOT reveal mastery rubric criteria in advance
+4. Listen carefully to diagnose their actual foundation
+
+ANALOGY FIRST:
+5. Before any technical content, introduce the core mechanism through a concrete real-world analogy that makes it physically intuitive
+6. Stay with the analogy until the learner can extend it themselves — predict a change or explain a difference
+7. Only move to formal mechanism explanation after the analogy is solid
+8. Connect every mechanism piece back to the analogy
+9. Check understanding with PREDICTION questions only — never definition questions. Never "what is X" — always "what would happen if X changed"
+10. Only move to the root scenario after simpler versions of the mechanism are solid. Build up gradually.
+
+IF UNDERSTANDING BREAKS DOWN:
+- Never repeat the same explanation at the same depth
+- Find a different analogy, different entry point, different physical intuition
+- Never signal impatience. Never treat any question as too basic.
+
+BUILD understanding: SCENARIO FIRST, then mechanism, then terminology. Never reverse this order.
+After every explanation: "Does that click, or do you want more depth?"
+Follow every cross-domain connection the learner raises.
+Never lecture unprompted. Never ask multiple questions simultaneously.
+Seed explanation for zero prior knowledge: 2-4 sentences maximum, then scenario immediately.
+When asked to "go deeper," approach from a DIFFERENT angle — never repeat at the same depth.
+Do NOT reveal mastery rubric criteria in advance.
+
+TRANSITION SUGGESTIONS (make each once only, never repeat):
+- If learner demonstrates strong reasoning on simplified scenarios but hasn't worked through the full root scenario: suggest "You're reasoning through this really well. Practice mode lets you try the actual question with feedback before committing to a cold attempt — worth a go." Say this once only. If they want to keep talking, continue.
+- If learner has worked through the full root scenario with mechanistically correct reasoning: suggest "You've built a solid model of this. Practice mode is a good warmup if you want it, or go straight to the cold attempt if you're feeling ready." Say this once only.
+
+AFTER FAILED COLD ATTEMPT (if learner returns):
+- Acknowledge briefly without dwelling
+- Rebuild specific missing pieces using NEW analogies and NEW scenarios — never repeat the same explanations from the first session
 
 Keep responses conversational. No walls of text. Short paragraphs. Use concrete examples.`;
     }
-    
+
     if (mode === 'practice') {
       return `You are evaluating exercise science understanding for Root ${root.id}: "${root.title}".
 
@@ -108,65 +137,45 @@ ${rubric}
 5. They can attempt multiple times
 6. Be encouraging but honest — precision matters in science`;
     }
-    
+
     if (mode === 'cold') {
       return `You are administering a cold assessment for Root ${root.id}: "${root.title}".
 
 The question is: "${question}"
 
-COLD ATTEMPT PROTOCOL:
-1. Present the question
-2. Wait for the learner's complete answer
-3. Do NOT help, hint, or guide before they submit
-4. After submission, evaluate BINARY — PASS or FAIL — against these criteria:
+COLD ATTEMPT PROTOCOL — CRITICAL FORMAT INSTRUCTIONS:
+After the learner submits their answer, you MUST evaluate it and format your response EXACTLY as follows:
+
+First, include [PASS] or [FAIL] on its own line based on whether they met the majority of criteria.
+
+Then list each criterion using this EXACT format, one per line:
+[CRITERIA:met] Plain English description of criterion that was met
+[CRITERIA:unmet] Plain English description of criterion that was not met
+
+Then provide a 2-4 sentence narrative:
+[NARRATIVE] Your 2-4 sentence assessment. For pass: specific and affirming without sycophancy. For fail: specific and actionable, identifying precisely what was missing and what to focus on.
+
+The criteria to evaluate against (convert each into plain English for the rubric breakdown — do not copy verbatim, make each criterion a clear readable statement):
 ${rubric}
 
-5. State explicitly which criteria were MET and which were NOT MET
-6. If PASS: congratulate briefly and note which elements were strongest. Include the exact text "[PASS]" in your response.
-7. If FAIL: state what was missing without re-teaching. Direct them to Teach Me mode for those concepts. Include the exact text "[FAIL]" in your response.
-8. After evaluation, you may briefly explain any missed criteria but do not re-teach`;
+Rules:
+- Do NOT help, hint, or guide before they submit
+- Evaluate BINARY — PASS requires meeting the core criteria clearly
+- State which criteria were MET and which were NOT MET
+- After evaluation you may briefly discuss but do not re-teach in this mode`;
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    
-    const userMessage = input.trim();
-    setInput('');
-    
-    const newMessages = [...messages, { role: 'user', content: userMessage }];
-    setMessages(newMessages);
+  const initTeachMode = async () => {
     setLoading(true);
-
-    if (mode === 'cold' && !coldSubmitted) {
-      setColdSubmitted(true);
-    }
-
     const systemPrompt = buildSystemPrompt();
-    const conversationContext = newMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n');
-    
-    const fullPrompt = `${systemPrompt}\n\nConversation so far:\n${conversationContext}\n\nRespond as the assistant.${
-      mode === 'cold' && !coldSubmitted 
-        ? ' The student has just submitted their cold attempt answer. Evaluate it now following the Cold Attempt Protocol. Remember to include [PASS] or [FAIL] in your response.'
-        : ''
-    }`;
+    const initPrompt = `Begin the teaching session for Root ${root.id}: "${root.title}". The question we're working toward is:\n\n"${getQuestion()}"\n\nStart with the orientation: state what this question is really asking beneath the surface, map what we'll build, then ask about their current understanding. Keep it to 2-4 sentences and one question. No walls of text.`;
 
-    const response = await base44.integrations.Core.InvokeLLM({ prompt: fullPrompt });
-    
-    setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    
-    if (mode === 'cold' && response.includes('[PASS]')) {
-      onPassColdAttempt(questionType);
-    }
-    
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: `${systemPrompt}\n\nUser: ${initPrompt}`
+    });
+    setMessages([{ role: 'assistant', content: response }]);
     setLoading(false);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
   };
 
   const startPracticeOrCold = () => {
@@ -184,22 +193,126 @@ ${rubric}
     }
   };
 
-  useEffect(() => {
-    if (initialized && (mode === 'practice' || mode === 'cold') && messages.length === 0) {
-      startPracticeOrCold();
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+
+    const newMessages = [...messages, { role: 'user', content: userMessage }];
+    setMessages(newMessages);
+    setLoading(true);
+
+    // Cold attempt: switch to evaluating phase
+    if (mode === 'cold' && coldPhase === 'input') {
+      // Increment attempt counter
+      const newCount = activeProfileId
+        ? incrementColdAttempt(activeProfileId, root.id, questionType)
+        : coldAttemptNum;
+      setColdAttemptNum(newCount);
+      setColdPhase('evaluating');
+      setColdResult(null);
     }
-  }, [initialized, mode, questionType]);
+
+    const systemPrompt = buildSystemPrompt();
+    const conversationContext = newMessages.map(m =>
+      `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
+    ).join('\n\n');
+
+    const isColdSubmit = mode === 'cold' && coldPhase === 'input';
+
+    const fullPrompt = `${systemPrompt}\n\nConversation so far:\n${conversationContext}\n\nRespond as the assistant.${
+      isColdSubmit
+        ? ' The student has just submitted their cold attempt answer. Evaluate it now following the COLD ATTEMPT PROTOCOL exactly, using the [PASS]/[FAIL], [CRITERIA:met]/[CRITERIA:unmet], and [NARRATIVE] tags as specified.'
+        : ''
+    }`;
+
+    const response = await base44.integrations.Core.InvokeLLM({ prompt: fullPrompt });
+
+    if (mode === 'cold' && isColdSubmit) {
+      // Don't add to messages — show in panel instead
+      setColdResult(response);
+      if (response.includes('[PASS]')) {
+        onPassColdAttempt(questionType);
+      }
+    } else {
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+    }
+
+    setLoading(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleColdContinue = () => {
+    // Dismiss panel — parent will update status (already done via onPassColdAttempt)
+    setColdPhase('done');
+  };
+
+  const handleColdRetry = () => {
+    setColdPhase('input');
+    setColdResult(null);
+    setMessages([{
+      role: 'assistant',
+      content: `**Cold Attempt — ${getQuestionLabel()}** (Attempt ${coldAttemptNum + 1})\n\n> ${getQuestion()}\n\nTry again. Answer from memory — no assistance until you submit.`
+    }]);
+    if (activeProfileId) {
+      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
+      setColdAttemptNum(count + 1);
+    }
+  };
+
+  const handleTeachMe = () => {
+    if (onSwitchMode) onSwitchMode('teach');
+  };
+
+  // Cold attempt — show evaluation / results view
+  if (mode === 'cold' && coldPhase === 'evaluating') {
+    return (
+      <div className="bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden">
+        <div className="px-4 py-2.5 bg-red-950/30 border-b border-red-900/30">
+          <p className="text-xs text-red-400 font-medium">Evaluating your response</p>
+        </div>
+        <div className="p-6">
+          <ColdAttemptPanel
+            result={coldResult}
+            questionType={questionType}
+            attemptNumber={coldAttemptNum}
+            onContinue={handleColdContinue}
+            onRetry={handleColdRetry}
+            onTeachMe={handleTeachMe}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === 'cold' && coldPhase === 'done') {
+    return (
+      <div className="bg-zinc-950 rounded-xl border border-zinc-800 p-6 text-center">
+        <div className="text-emerald-500 text-lg mb-2">✓</div>
+        <p className="text-zinc-300 font-medium">Root question passed.</p>
+        <p className="text-zinc-500 text-sm mt-1">Status updated. You can continue to the next root.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[500px] md:h-[560px] bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden">
-      {mode === 'cold' && !coldSubmitted && (
+      {mode === 'cold' && coldPhase === 'input' && (
         <div className="px-4 py-2.5 bg-red-950/30 border-b border-red-900/30">
           <p className="text-xs text-red-400 font-medium">
             Cold attempt active — answer from memory, no assistance until you submit
+            {coldAttemptNum > 1 && <span className="text-red-600 ml-2">· Attempt {coldAttemptNum}</span>}
           </p>
         </div>
       )}
-      
+
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
         {messages.map((msg, i) => (
           <MessageBubble key={i} message={msg} />
@@ -228,14 +341,12 @@ ${rubric}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              mode === 'cold' && coldSubmitted
-                ? "Ask about the evaluation..."
-                : mode === 'cold'
-                  ? "Type your complete answer..."
-                  : "Type your message..."
+              mode === 'cold'
+                ? "Type your complete answer..."
+                : "Type your message..."
             }
             rows={1}
-            className="flex-1 resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 
+            className="flex-1 resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200
               placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600
               min-h-[44px] max-h-[140px]"
             style={{ height: 'auto', minHeight: '44px' }}
@@ -247,7 +358,7 @@ ${rubric}
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 
+            className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700
               disabled:text-zinc-500 text-white flex items-center justify-center transition-colors"
           >
             <Send className="w-4 h-4" />
