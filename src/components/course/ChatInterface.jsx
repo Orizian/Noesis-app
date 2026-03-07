@@ -189,7 +189,20 @@ Rules:
     const response = await base44.integrations.Core.InvokeLLM({
       prompt: `${systemPrompt}\n\nUser: ${initPrompt}`
     });
-    setMessages([{ role: 'assistant', content: response }]);
+    // Parse competency signal from init
+    const competencyMatch = response.match(/\[COMPETENCY:([1-5])\]/);
+    if (competencyMatch && onCompetencyChange) {
+      onCompetencyChange(parseInt(competencyMatch[1]));
+    }
+    const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
+    if (termMatches.length > 0 && activeProfileId) {
+      termMatches.forEach(m => addEncounteredTerm(activeProfileId, root.id, m[1].trim()));
+    }
+    const cleanResponse = response
+      .replace(/\[COMPETENCY:[1-5]\]/g, '')
+      .replace(/\[TERM:[^\]]+\]/g, '')
+      .trim();
+    setMessages([{ role: 'assistant', content: cleanResponse }]);
     setLoading(false);
   };
 
