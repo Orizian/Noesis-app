@@ -37,7 +37,6 @@ export default function ProfileSelect() {
     const p = getProfiles();
     setProfiles(Array.isArray(p) ? p : []);
     setShowCreate(false);
-    refresh();
     selectProfile(profile.id);
   };
 
