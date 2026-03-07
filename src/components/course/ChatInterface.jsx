@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { BRANCH_RUBRICS } from '../courseData';
 import MessageBubble from './MessageBubble';
 
-export default function ChatInterface({ root, mode, questionType, onPassColdAttempt }) {
+export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onPracticeSubmit }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
