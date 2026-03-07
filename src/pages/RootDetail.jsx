@@ -11,7 +11,7 @@ import ConfirmModal from '../components/profiles/ConfirmModal';
 import {
   getActiveProfile, getRootData, markRootInProgress,
   markQuestionPassed, markRootComplete, markBranchPassed,
-  resetRootProgress, recordPracticeAttemptStat,
+  resetRootProgress, recordPracticeAttemptStat, getColdAttemptCount,
 } from '../components/profileStore';
 import {
   ArrowLeft, Circle, Clock, CheckCircle2, Star, RotateCcw, CheckSquare,
