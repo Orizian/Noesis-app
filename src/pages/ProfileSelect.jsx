@@ -28,7 +28,7 @@ export default function ProfileSelect({ onNavigate }) {
 
   const navigate = (id) => {
     selectProfile(id);
-    if (onNavigate) onNavigate(id);
+    window.location.href = createPageUrl('CourseOverview');
   };
 
   const handleProfileClick = (profile) => {
