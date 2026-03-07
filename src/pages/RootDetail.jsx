@@ -44,6 +44,13 @@ export default function RootDetail() {
   const [selectedQuestion, setSelectedQuestion] = useState('root');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  // Track first visit for teach-me opening message
+  const [wasFirstVisit] = useState(() => {
+    const p = getActiveProfile();
+    if (!p) return false;
+    const rd = getRootData(p.id, rootId);
+    return rd.status === 'not_started' && !rd.startedAt;
+  });
 
   const refresh = useCallback(() => {
     const p = getActiveProfile();
