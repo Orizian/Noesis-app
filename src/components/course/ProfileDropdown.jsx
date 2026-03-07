@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ChevronDown, RefreshCw, BarChart2, RotateCcw, Pencil } from 'lucide-react';
+import { ChevronDown, RefreshCw, BarChart2, RotateCcw, Pencil, HelpCircle } from 'lucide-react';
 import AvatarCircle from '../profiles/AvatarCircle';
 import ConfirmModal from '../profiles/ConfirmModal';
 import ProfileModal from '../profiles/ProfileModal';
