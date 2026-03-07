@@ -75,9 +75,24 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
     const isFirstTeach = messages.length === 0;
 
     if (mode === 'teach') {
+      const dictTerms = (DICTIONARY[root.id] || []).map(t => t.term).join(', ');
       return `You are a mastery-based exercise science instructor. You are teaching Root ${root.id}: "${root.title}".
 
 The target question is: "${question}"
+
+COMPETENCY SIGNALING — CRITICAL:
+After every response in teach mode, include a competency signal on its own line at the end:
+[COMPETENCY:1] — if the learner has not yet demonstrated understanding of the analogy
+[COMPETENCY:2] — when the learner correctly extends the analogy or predicts a change within the analogy framework
+[COMPETENCY:3] — when the learner correctly answers two or more consecutive prediction questions about the actual mechanism
+[COMPETENCY:4] — when the learner works through a simplified scenario correctly without significant guidance
+[COMPETENCY:5] — when the learner works through the full root scenario with mechanistically correct reasoning
+Only advance the stage when genuinely earned. Never retreat to a lower number once advanced.
+
+DICTIONARY TERM SIGNALING:
+The available dictionary terms for this root are: ${dictTerms}
+When you introduce or use one of these terms for the first time in your explanation, include a hidden tag at the end of your response: [TERM:exact term name]
+Only signal a term the first time you introduce it. Multiple terms can be signaled in one response: [TERM:term1][TERM:term2]
 
 TEACHING PROTOCOL — follow this exactly:
 
