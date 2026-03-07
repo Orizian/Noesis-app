@@ -7,7 +7,6 @@ import CreateProfileModal from '../components/profiles/CreateProfileModal';
 import PinEntryOverlay from '../components/profiles/PinEntryOverlay';
 import { useProfile } from '../components/profiles/ProfileContext';
 
-
 function timeAgo(ts) {
   if (!ts) return 'Not started yet';
   const diff = Date.now() - ts;
