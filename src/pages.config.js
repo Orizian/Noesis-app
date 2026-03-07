@@ -49,16 +49,12 @@
  */
 import CourseOverview from './pages/CourseOverview';
 import RootDetail from './pages/RootDetail';
-import ProfileSelect from './pages/ProfileSelect';
-import StatsPage from './pages/StatsPage';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "CourseOverview": CourseOverview,
     "RootDetail": RootDetail,
-    "ProfileSelect": ProfileSelect,
-    "StatsPage": StatsPage,
 }
 
 export const pagesConfig = {

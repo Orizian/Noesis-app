@@ -3,31 +3,13 @@ import { Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { BRANCH_RUBRICS } from '../courseData';
 import MessageBubble from './MessageBubble';
-import ColdEvaluationPanel from './ColdEvaluationPanel';
-import {
-  getActiveProfile, getColdAttemptCount, incrementColdAttemptCount,
-  getRootData,
-} from '../profileStore';
 
-export default function ChatInterface({
-  root,
-  mode,
-  questionType,
-  onPassColdAttempt,
-  onPracticeSubmit,
-  isFirstVisit, // bool — root has never been opened before for this profile
-}) {
+export default function ChatInterface({ root, mode, questionType, onPassColdAttempt }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
-
-  // Cold attempt state
-  const [coldPhase, setColdPhase] = useState('answering'); // 'answering' | 'evaluating' | 'results'
-  const [coldEvalRaw, setColdEvalRaw] = useState(null);
-  const [coldAttemptNum, setColdAttemptNum] = useState(1);
-  const [coldPassed, setColdPassed] = useState(false);
-
+  const [coldSubmitted, setColdSubmitted] = useState(false);
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -43,23 +25,18 @@ export default function ChatInterface({
     return `Branch ${branchIndex + 1} — ${root.branches[branchIndex]?.label}`;
   };
 
-  // Reset when mode/question/root changes
   useEffect(() => {
     setMessages([]);
     setInitialized(false);
-    setColdPhase('answering');
-    setColdEvalRaw(null);
+    setColdSubmitted(false);
     setInput('');
-    const profile = getActiveProfile();
-    if (profile) {
-      const count = getColdAttemptCount(profile.id, root.id, questionType);
-      setColdAttemptNum(count + 1);
-    }
   }, [root.id, mode, questionType]);
 
   useEffect(() => {
     if (initialized) return;
-    if (mode === 'teach') initTeachMode();
+    if (mode === 'teach') {
+      initTeachMode();
+    }
     setInitialized(true);
   }, [initialized, mode, root.id, questionType]);
 
@@ -67,26 +44,32 @@ export default function ChatInterface({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, coldPhase]);
+  }, [messages]);
 
-  useEffect(() => {
-    if (initialized && (mode === 'practice' || mode === 'cold') && messages.length === 0) {
-      startPracticeOrCold();
-    }
-  }, [initialized, mode, questionType]);
+  const initTeachMode = async () => {
+    setLoading(true);
+    const systemPrompt = buildSystemPrompt();
+    const initPrompt = `Begin the teaching session for this root. The question we're working toward understanding is:\n\n"${getQuestion()}"\n\nStart by stating what this question is really asking, map what we'll build and why, then ask what my current understanding is. Remember: scenario first, no walls of text, 2-4 sentences max for your opening seed.`;
+    
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: `${systemPrompt}\n\nUser: ${initPrompt}`
+    });
+
+    setMessages([{ role: 'assistant', content: response }]);
+    setLoading(false);
+  };
 
   const getRubric = () => {
     if (questionType === 'root') return root.rubric;
+    const branchKey = questionType; // e.g. "branch_1"
     const branchRubrics = BRANCH_RUBRICS[root.id];
-    return branchRubrics?.[questionType] || root.rubric;
+    return branchRubrics?.[branchKey] || root.rubric;
   };
-
-  const getCriteriaCount = () => questionType === 'root' ? 4 : 3;
 
   const buildSystemPrompt = () => {
     const question = getQuestion();
     const rubric = getRubric();
-
+    
     if (mode === 'teach') {
       return `You are a mastery-based exercise science instructor. You are teaching Root ${root.id}: "${root.title}".
 
@@ -106,7 +89,7 @@ TEACHING PROTOCOL — follow this exactly:
 
 Keep responses conversational. No walls of text. Short paragraphs. Use concrete examples.`;
     }
-
+    
     if (mode === 'practice') {
       return `You are evaluating exercise science understanding for Root ${root.id}: "${root.title}".
 
@@ -125,55 +108,65 @@ ${rubric}
 5. They can attempt multiple times
 6. Be encouraging but honest — precision matters in science`;
     }
-
+    
     if (mode === 'cold') {
-      const n = getCriteriaCount();
       return `You are administering a cold assessment for Root ${root.id}: "${root.title}".
 
 The question is: "${question}"
 
-Rubric (${n} criteria — DO NOT SHARE WITH LEARNER):
+COLD ATTEMPT PROTOCOL:
+1. Present the question
+2. Wait for the learner's complete answer
+3. Do NOT help, hint, or guide before they submit
+4. After submission, evaluate BINARY — PASS or FAIL — against these criteria:
 ${rubric}
 
-COLD ATTEMPT EVALUATION PROTOCOL:
-After the learner submits their answer, evaluate it and return ONLY valid JSON in this exact format (no markdown, no extra text):
-
-{
-  "passed": true or false,
-  "criteria_results": [
-    { "label": "Plain-language description of what this criterion assessed", "met": true or false },
-    ... (${n} items total)
-  ],
-  "narrative": "2-4 sentences. For pass: affirm what was strong without being sycophantic. For fail: specific and actionable — name exactly what was missing and where to focus."
-}
-
-PASS = ${n === 4 ? '3 or more' : '2 or more'} criteria met.
-FAIL = fewer than ${n === 4 ? '3' : '2'} criteria met.
-
-Write criterion labels in plain conversational language — e.g. "Identified the specific structural mechanism" not internal rubric jargon.`;
+5. State explicitly which criteria were MET and which were NOT MET
+6. If PASS: congratulate briefly and note which elements were strongest. Include the exact text "[PASS]" in your response.
+7. If FAIL: state what was missing without re-teaching. Direct them to Teach Me mode for those concepts. Include the exact text "[FAIL]" in your response.
+8. After evaluation, you may briefly explain any missed criteria but do not re-teach`;
     }
   };
 
-  const initTeachMode = async () => {
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+    
+    const userMessage = input.trim();
+    setInput('');
+    
+    const newMessages = [...messages, { role: 'user', content: userMessage }];
+    setMessages(newMessages);
     setLoading(true);
-    const systemPrompt = buildSystemPrompt();
 
-    let initPrompt;
-    if (isFirstVisit) {
-      // Warm orienting message for first-ever visit to this root
-      initPrompt = `Begin the teaching session for Root ${root.id}: "${root.title}". 
-      
-Since this is the learner's first time here, start with a brief orienting message: tell them "We're going to build your understanding of [Root Name] together. I'll start with a scenario rather than definitions — just respond with whatever comes to mind and we'll build from there." Then immediately transition into your opening teaching move. Keep the whole opening under 5 sentences total.`;
-    } else {
-      initPrompt = `Begin the teaching session for this root. The question we're working toward understanding is:\n\n"${getQuestion()}"\n\nStart by stating what this question is really asking, map what we'll build and why, then ask what my current understanding is. Remember: scenario first, no walls of text, 2-4 sentences max for your opening seed.`;
+    if (mode === 'cold' && !coldSubmitted) {
+      setColdSubmitted(true);
     }
 
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `${systemPrompt}\n\nUser: ${initPrompt}`
-    });
+    const systemPrompt = buildSystemPrompt();
+    const conversationContext = newMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n');
+    
+    const fullPrompt = `${systemPrompt}\n\nConversation so far:\n${conversationContext}\n\nRespond as the assistant.${
+      mode === 'cold' && !coldSubmitted 
+        ? ' The student has just submitted their cold attempt answer. Evaluate it now following the Cold Attempt Protocol. Remember to include [PASS] or [FAIL] in your response.'
+        : ''
+    }`;
 
-    setMessages([{ role: 'assistant', content: response }]);
+    const response = await base44.integrations.Core.InvokeLLM({ prompt: fullPrompt });
+    
+    setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+    
+    if (mode === 'cold' && response.includes('[PASS]')) {
+      onPassColdAttempt(questionType);
+    }
+    
     setLoading(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const startPracticeOrCold = () => {
@@ -191,173 +184,76 @@ Since this is the learner's first time here, start with a brief orienting messag
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-
-    const userMessage = input.trim();
-    setInput('');
-
-    const newMessages = [...messages, { role: 'user', content: userMessage }];
-    setMessages(newMessages);
-    setLoading(true);
-
-    if (mode === 'practice') {
-      onPracticeSubmit?.();
+  useEffect(() => {
+    if (initialized && (mode === 'practice' || mode === 'cold') && messages.length === 0) {
+      startPracticeOrCold();
     }
-
-    const systemPrompt = buildSystemPrompt();
-    const conversationContext = newMessages
-      .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-      .join('\n\n');
-
-    if (mode === 'cold' && coldPhase === 'answering') {
-      // Transition to evaluation phase
-      setColdPhase('evaluating');
-      setColdEvalRaw(null);
-
-      // Increment attempt counter
-      const profile = getActiveProfile();
-      let attemptNum = 1;
-      if (profile) {
-        attemptNum = incrementColdAttemptCount(profile.id, root.id, questionType);
-        setColdAttemptNum(attemptNum);
-      }
-
-      const fullPrompt = `${systemPrompt}\n\nConversation:\n${conversationContext}\n\nThe student has just submitted their answer. Evaluate it now and return the JSON result as specified. No markdown fences, no extra text — pure JSON only.`;
-
-      const response = await base44.integrations.Core.InvokeLLM({ prompt: fullPrompt });
-      setColdEvalRaw(response);
-      setLoading(false);
-      return;
-    }
-
-    const fullPrompt = `${systemPrompt}\n\nConversation so far:\n${conversationContext}\n\nRespond as the assistant.`;
-    const response = await base44.integrations.Core.InvokeLLM({ prompt: fullPrompt });
-    setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    setLoading(false);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // Cold attempt panel handlers
-  const handleColdDismiss = (passed) => {
-    if (passed) onPassColdAttempt?.(questionType);
-    setColdPhase('dismissed');
-  };
-
-  const handleTryAgain = () => {
-    // Reset to answering phase with same attempt counter already incremented
-    setColdPhase('answering');
-    setColdEvalRaw(null);
-    startPracticeOrCold();
-  };
-
-  const handleTeachMe = () => {
-    // The parent page handles mode switching via prop — we signal via a custom event
-    window.dispatchEvent(new CustomEvent('switchToTeachMe'));
-  };
-
-  const isColdEvaluating = mode === 'cold' && (coldPhase === 'evaluating' || coldPhase === 'results');
-  const showColdPanel = mode === 'cold' && (coldPhase === 'evaluating' || (coldPhase === 'results' && coldEvalRaw));
-
-  // After dismiss, show messages normally with count
-  const alreadyAttempted = getColdAttemptCount(getActiveProfile()?.id, root.id, questionType);
+  }, [initialized, mode, questionType]);
 
   return (
-    <div className="flex flex-col bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden"
-      style={{ minHeight: showColdPanel ? 'auto' : '500px', maxHeight: showColdPanel ? 'none' : undefined }}>
-
-      {/* Cold attempt active banner */}
-      {mode === 'cold' && coldPhase === 'answering' && (
-        <div className="px-4 py-2.5 bg-red-950/30 border-b border-red-900/30 flex items-center justify-between">
+    <div className="flex flex-col h-[500px] md:h-[560px] bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden">
+      {mode === 'cold' && !coldSubmitted && (
+        <div className="px-4 py-2.5 bg-red-950/30 border-b border-red-900/30">
           <p className="text-xs text-red-400 font-medium">
             Cold attempt active — answer from memory, no assistance until you submit
           </p>
-          {alreadyAttempted > 0 && (
-            <span className="text-xs text-zinc-600">Attempt {alreadyAttempted + 1}</span>
-          )}
         </div>
       )}
-
-      {/* Evaluation panel overlay */}
-      {showColdPanel ? (
-        <ColdEvaluationPanel
-          isEvaluating={coldPhase === 'evaluating' && !coldEvalRaw}
-          evalResult={coldEvalRaw}
-          questionType={questionType}
-          attemptNumber={coldAttemptNum}
-          onDismiss={handleColdDismiss}
-          onTryAgain={handleTryAgain}
-          onTeachMe={handleTeachMe}
-        />
-      ) : (
-        <>
-          <div
-            ref={scrollRef}
-            className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"
-            style={{ minHeight: '400px', maxHeight: '520px' }}
-          >
-            {messages.map((msg, i) => (
-              <MessageBubble key={i} message={msg} />
-            ))}
-            {loading && (
-              <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-lg bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center">
-                  <Loader2 className="w-3.5 h-3.5 text-emerald-500 animate-spin" />
-                </div>
-                <div className="bg-zinc-800/80 border border-zinc-700/50 rounded-2xl px-4 py-3">
-                  <div className="flex gap-1.5">
-                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" />
-                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                  </div>
-                </div>
+      
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+        {messages.map((msg, i) => (
+          <MessageBubble key={i} message={msg} />
+        ))}
+        {loading && (
+          <div className="flex gap-3">
+            <div className="w-7 h-7 rounded-lg bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center">
+              <Loader2 className="w-3.5 h-3.5 text-emerald-500 animate-spin" />
+            </div>
+            <div className="bg-zinc-800/80 border border-zinc-700/50 rounded-2xl px-4 py-3">
+              <div className="flex gap-1.5">
+                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" />
+                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
               </div>
-            )}
-          </div>
-
-          <div className="p-3 md:p-4 border-t border-zinc-800">
-            <div className="flex gap-2 items-end">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  mode === 'cold' && coldPhase === 'dismissed'
-                    ? "Ask about the evaluation..."
-                    : mode === 'cold'
-                      ? "Type your complete answer..."
-                      : "Type your message..."
-                }
-                rows={1}
-                disabled={loading}
-                className="flex-1 resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 
-                  placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600
-                  min-h-[44px] max-h-[140px] disabled:opacity-50"
-                style={{ height: 'auto', minHeight: '44px' }}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px';
-                }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || loading}
-                className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 
-                  disabled:text-zinc-500 text-white flex items-center justify-center transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </button>
             </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
+
+      <div className="p-3 md:p-4 border-t border-zinc-800">
+        <div className="flex gap-2 items-end">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              mode === 'cold' && coldSubmitted
+                ? "Ask about the evaluation..."
+                : mode === 'cold'
+                  ? "Type your complete answer..."
+                  : "Type your message..."
+            }
+            rows={1}
+            className="flex-1 resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 
+              placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600
+              min-h-[44px] max-h-[140px]"
+            style={{ height: 'auto', minHeight: '44px' }}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px';
+            }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || loading}
+            className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 
+              disabled:text-zinc-500 text-white flex items-center justify-center transition-colors"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
