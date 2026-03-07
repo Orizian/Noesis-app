@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   getProfiles, setActiveProfile, createProfile,
-  updateProfile, deleteProfile,
+  updateProfile, deleteProfile, resetProfilePinAndProgress,
 } from '../components/profileStore';
 import ProfileCard from '../components/profiles/ProfileCard';
 import ProfileModal from '../components/profiles/ProfileModal';
 import ConfirmModal from '../components/profiles/ConfirmModal';
+import PinEntry from '../components/profiles/PinEntry';
 
 export default function ProfileSelect() {
   const navigate = useNavigate();
@@ -17,23 +18,47 @@ export default function ProfileSelect() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
   const [deletingProfile, setDeletingProfile] = useState(null);
+  const [pinProfile, setPinProfile] = useState(null); // profile requiring PIN
+  const [forgotPinProfile, setForgotPinProfile] = useState(null);
 
   const reload = () => setProfiles(getProfiles());
 
   const handleSelect = (id) => {
-    setActiveProfile(id);
+    const profile = profiles.find(p => p.id === id);
+    if (profile?.pin) {
+      setPinProfile(profile);
+    } else {
+      setActiveProfile(id);
+      navigate(createPageUrl('CourseOverview'));
+    }
+  };
+
+  const handlePinSuccess = () => {
+    setActiveProfile(pinProfile.id);
+    setPinProfile(null);
     navigate(createPageUrl('CourseOverview'));
   };
 
-  const handleCreate = ({ name, color, emoji }) => {
-    createProfile({ name, color, emoji });
+  const handleForgotPin = () => {
+    setForgotPinProfile(pinProfile);
+    setPinProfile(null);
+  };
+
+  const handleConfirmForgotPin = () => {
+    resetProfilePinAndProgress(forgotPinProfile.id);
+    reload();
+    setForgotPinProfile(null);
+  };
+
+  const handleCreate = ({ name, color, emoji, pin }) => {
+    createProfile({ name, color, emoji, pin });
     reload();
     setShowCreate(false);
     navigate(createPageUrl('CourseOverview'));
   };
 
-  const handleEdit = ({ name, color, emoji }) => {
-    updateProfile(editingProfile.id, { name, color, emoji });
+  const handleEdit = ({ name, color, emoji, pin }) => {
+    updateProfile(editingProfile.id, { name, color, emoji, pin });
     reload();
     setEditingProfile(null);
   };
@@ -107,7 +132,27 @@ export default function ProfileSelect() {
         <p className="text-zinc-600 text-sm mt-8">No profiles yet — create one to get started.</p>
       )}
 
-      {/* Modals */}
+      {/* PIN Entry overlay */}
+      {pinProfile && (
+        <PinEntry
+          profile={pinProfile}
+          onSuccess={handlePinSuccess}
+          onForgotPin={handleForgotPin}
+        />
+      )}
+
+      {/* Forgot PIN confirmation */}
+      {forgotPinProfile && (
+        <ConfirmModal
+          title={`Reset "${forgotPinProfile.name}"?`}
+          message="Resetting via Forgot PIN removes the PIN and clears all progress for this profile. This cannot be undone."
+          confirmLabel="Reset Profile"
+          onConfirm={handleConfirmForgotPin}
+          onCancel={() => { setForgotPinProfile(null); setPinProfile(forgotPinProfile); }}
+        />
+      )}
+
+      {/* Create modal */}
       {showCreate && (
         <ProfileModal
           title="Create Profile"
