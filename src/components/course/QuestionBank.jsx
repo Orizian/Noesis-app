@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Beaker, Link2, Lightbulb } from 'lucide-react';
+import { ChevronDown, Beaker, Link2, Lightbulb, CheckCircle2, Circle } from 'lucide-react';
 
 const branchIcons = {
   'Edge Case': Beaker,
@@ -7,7 +7,7 @@ const branchIcons = {
   'Counterintuitive Prediction': Lightbulb
 };
 
-function QuestionCard({ title, label, question, accentColor, isRoot }) {
+function QuestionCard({ title, label, question, isRoot, passed }) {
   const [expanded, setExpanded] = useState(false);
   const Icon = !isRoot ? branchIcons[label] : null;
 
@@ -30,7 +30,14 @@ function QuestionCard({ title, label, question, accentColor, isRoot }) {
             )}
           </div>
         </div>
-        <ChevronDown className={`w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {passed !== undefined && (
+            passed
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              : <Circle className="w-4 h-4 text-zinc-600" />
+          )}
+          <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+        </div>
       </button>
       {expanded && (
         <div className="px-4 pb-4 border-t border-zinc-800/50">
@@ -41,7 +48,7 @@ function QuestionCard({ title, label, question, accentColor, isRoot }) {
   );
 }
 
-export default function QuestionBank({ root }) {
+export default function QuestionBank({ root, progress }) {
   return (
     <div className="space-y-3">
       <h3 className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-1">Question Bank</h3>
@@ -49,16 +56,21 @@ export default function QuestionBank({ root }) {
         title="Root Question"
         question={root.rootQuestion}
         isRoot={true}
+        passed={progress?.root_question_passed}
       />
-      {root.branches.map((branch, i) => (
-        <QuestionCard
-          key={i}
-          title={`Branch ${i + 1}`}
-          label={branch.label}
-          question={branch.question}
-          isRoot={false}
-        />
-      ))}
+      {root.branches.map((branch, i) => {
+        const branchKey = `branch_${i + 1}_passed`;
+        return (
+          <QuestionCard
+            key={i}
+            title={`Branch ${i + 1}`}
+            label={branch.label}
+            question={branch.question}
+            isRoot={false}
+            passed={progress?.[`branch_${i + 1}_passed`]}
+          />
+        );
+      })}
     </div>
   );
 }
