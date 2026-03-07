@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ROOTS } from '../components/courseData';
 import ModeSelector from '../components/course/ModeSelector';
@@ -19,26 +18,10 @@ import {
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
-  not_started: {
-    label: 'Not Started',
-    badgeClass: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-    Icon: Circle,
-  },
-  in_progress: {
-    label: 'In Progress',
-    badgeClass: 'bg-blue-950/50 text-blue-400 border-blue-800/50',
-    Icon: Clock,
-  },
-  complete: {
-    label: 'Complete',
-    badgeClass: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50',
-    Icon: CheckCircle2,
-  },
-  mastered: {
-    label: 'Mastered',
-    badgeClass: 'bg-amber-950/50 text-amber-400 border-amber-800/50',
-    Icon: Star,
-  },
+  not_started: { label: 'Not Started', badgeClass: 'bg-zinc-800 text-zinc-400 border-zinc-700', Icon: Circle },
+  in_progress: { label: 'In Progress', badgeClass: 'bg-blue-950/50 text-blue-400 border-blue-800/50', Icon: Clock },
+  complete: { label: 'Complete', badgeClass: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50', Icon: CheckCircle2 },
+  mastered: { label: 'Mastered', badgeClass: 'bg-amber-950/50 text-amber-400 border-amber-800/50', Icon: Star },
 };
 
 function fmtDate(iso) {
@@ -53,17 +36,14 @@ export default function RootDetail() {
   const root = ROOTS.find(r => r.id === rootId) || ROOTS[0];
 
   const [profile, setProfile] = useState(() => getActiveProfile());
-  const [rootData, setRootData] = useState(() => profile ? getRootData(profile.id, rootId) : null);
+  const [rootData, setRootData] = useState(() => {
+    const p = getActiveProfile();
+    return p ? getRootData(p.id, rootId) : null;
+  });
   const [activeMode, setActiveMode] = useState('teach');
   const [selectedQuestion, setSelectedQuestion] = useState('root');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    if (!getActiveProfile()) navigate(createPageUrl('ProfileSelect'), { replace: true });
-  }, []);
-
-  if (!profile) return null;
 
   const refresh = useCallback(() => {
     const p = getActiveProfile();
@@ -72,46 +52,61 @@ export default function RootDetail() {
     setRefreshKey(k => k + 1);
   }, [rootId]);
 
+  useEffect(() => {
+    if (!getActiveProfile()) {
+      navigate(createPageUrl('ProfileSelect'), { replace: true });
+    }
+  }, []);
+
   useEffect(() => { refresh(); }, [rootId]);
 
-  // Mark in_progress on first teach visit
   useEffect(() => {
-    if (activeMode === 'teach' && profile) {
-      markRootInProgress(profile.id, rootId);
+    const p = getActiveProfile();
+    if (activeMode === 'teach' && p) {
+      markRootInProgress(p.id, rootId);
       refresh();
     }
   }, [rootId, activeMode]);
 
   const handlePassColdAttempt = useCallback((questionType) => {
-    markQuestionPassed(profile.id, rootId, questionType);
+    const p = getActiveProfile();
+    if (!p) return;
+    markQuestionPassed(p.id, rootId, questionType);
     refresh();
-  }, [profile.id, rootId]);
+  }, [rootId, refresh]);
 
   const handlePracticeSubmit = useCallback(() => {
-    recordPracticeAttemptStat(profile.id);
-  }, [profile.id]);
+    const p = getActiveProfile();
+    if (p) recordPracticeAttemptStat(p.id);
+  }, []);
 
   const handleMarkRootComplete = () => {
-    markRootComplete(profile.id, rootId);
+    const p = getActiveProfile();
+    if (!p) return;
+    markRootComplete(p.id, rootId);
     refresh();
   };
 
   const handleMarkBranchPassed = (branchKey) => {
-    markBranchPassed(profile.id, rootId, branchKey);
+    const p = getActiveProfile();
+    if (!p) return;
+    markBranchPassed(p.id, rootId, branchKey);
     refresh();
   };
 
   const handleResetRoot = () => {
-    resetRootProgress(profile.id, rootId);
+    const p = getActiveProfile();
+    if (!p) return;
+    resetRootProgress(p.id, rootId);
     refresh();
     setShowResetConfirm(false);
   };
 
+  if (!profile) return null;
+
   const status = rootData?.status || 'not_started';
   const cfg = STATUS_CONFIG[status];
   const StatusIcon = cfg.Icon;
-
-  // Build progress object compatible with existing QuestionSelector / QuestionBank
   const progressCompat = rootData || {};
 
   return (
@@ -142,7 +137,6 @@ export default function RootDetail() {
             </span>
           </div>
 
-          {/* Timestamps */}
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-2">
             {rootData?.startedAt && (
               <span className="text-xs text-zinc-600">Started: {fmtDate(rootData.startedAt)}</span>
