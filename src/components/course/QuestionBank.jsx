@@ -5,7 +5,6 @@ const BRANCH_KEYS = ['branch_1', 'branch_2', 'branch_3'];
 
 function QuestionCard({ title, label, question, isRoot, passed, onMarkPassed }) {
   const [expanded, setExpanded] = useState(false);
-  const Icon = !isRoot ? branchIcons[label] : null;
 
   return (
     <div className={`border rounded-xl overflow-hidden transition-all duration-200
