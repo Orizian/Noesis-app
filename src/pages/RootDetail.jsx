@@ -165,7 +165,7 @@ export default function RootDetail() {
         </div>
 
         {/* Mode Selector */}
-        <div className="mb-5">
+        <div id="tutorial-mode-selector" className="mb-5">
           <ModeSelector activeMode={activeMode} onModeChange={setActiveMode} />
         </div>
 
