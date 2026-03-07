@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Beaker, Link2, Lightbulb, CheckCircle2, CheckSquare, Circle } from 'lucide-react';
-
-const branchIcons = {
-  'Edge Case': Beaker,
-  'Cross-Root Integration': Link2,
-  'Counterintuitive Prediction': Lightbulb,
-};
+import { ChevronDown, CheckCircle2, CheckSquare, Circle } from 'lucide-react';
 
 const BRANCH_KEYS = ['branch_1', 'branch_2', 'branch_3'];
 
