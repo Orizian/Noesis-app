@@ -251,7 +251,28 @@ Rules:
         onPassColdAttempt(questionType);
       }
     } else {
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      // Parse competency signal
+      if (mode === 'teach') {
+        const competencyMatch = response.match(/\[COMPETENCY:([1-5])\]/);
+        if (competencyMatch && onCompetencyChange) {
+          onCompetencyChange(parseInt(competencyMatch[1]));
+        }
+        // Parse term signals
+        const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
+        if (termMatches.length > 0 && activeProfileId) {
+          termMatches.forEach(m => {
+            const term = m[1].trim();
+            addEncounteredTerm(activeProfileId, root.id, term);
+            if (onTermEncountered) onTermEncountered(term);
+          });
+        }
+      }
+      // Strip hidden tags from displayed content
+      const cleanResponse = response
+        .replace(/\[COMPETENCY:[1-5]\]/g, '')
+        .replace(/\[TERM:[^\]]+\]/g, '')
+        .trim();
+      setMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
     }
 
     setLoading(false);
