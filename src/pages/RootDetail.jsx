@@ -59,10 +59,11 @@ export default function RootDetail() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  if (!profile) {
-    navigate(createPageUrl('ProfileSelect'));
-    return null;
-  }
+  useEffect(() => {
+    if (!getActiveProfile()) navigate(createPageUrl('ProfileSelect'), { replace: true });
+  }, []);
+
+  if (!profile) return null;
 
   const refresh = useCallback(() => {
     const p = getActiveProfile();
