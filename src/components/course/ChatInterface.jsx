@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { BRANCH_RUBRICS } from '../courseData';
 import MessageBubble from './MessageBubble';
 
 export default function ChatInterface({ root, mode, questionType, onPassColdAttempt }) {
