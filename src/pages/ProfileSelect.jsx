@@ -6,6 +6,7 @@ import ProgressRing from '../components/profiles/ProgressRing';
 import CreateProfileModal from '../components/profiles/CreateProfileModal';
 import PinEntryOverlay from '../components/profiles/PinEntryOverlay';
 import { useProfile } from '../components/profiles/ProfileContext';
+import { createPageUrl } from '@/utils';
 
 function timeAgo(ts) {
   if (!ts) return 'Not started yet';
