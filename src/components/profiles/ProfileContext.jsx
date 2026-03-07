@@ -33,8 +33,9 @@ export function ProfileProvider({ children }) {
 
   const getRootProgress = useCallback((rootId) => {
     if (!activeProfileId) return null;
+    // profilesVersion in dep array ensures re-reads after setRootProgress
     return getProfileRootProgress(activeProfileId, rootId);
-  }, [activeProfileId, profilesVersion]);
+  }, [activeProfileId, profilesVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setRootProgress = useCallback((rootId, data) => {
     if (!activeProfileId) return;
