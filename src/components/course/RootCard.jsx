@@ -42,7 +42,7 @@ function fmtDate(iso) {
 export default function RootCard({ root, progress }) {
   const status = progress?.status || 'not_started';
   const cfg = STATUS_CONFIG[status];
-  const { Icon } = cfg;
+  const StatusIcon = cfg.Icon;
 
   const passedCount = [
     progress?.root_question_passed,
