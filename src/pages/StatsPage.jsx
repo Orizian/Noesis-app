@@ -36,7 +36,6 @@ export default function StatsPage() {
   const counts = getStatusCounts(profile.id);
   const daysSince = getDaysSinceFirst(profile);
   const strongestRootId = getStrongestRoot(profile.id);
-  // eslint-disable-next-line no-unused-vars
   const strongestRoot = ROOTS.find(r => r.id === strongestRootId);
   const passRate = profile.totalColdAttempts > 0
     ? Math.round((profile.totalColdPasses / profile.totalColdAttempts) * 100)
