@@ -145,9 +145,9 @@ ${rubric}
     const systemPrompt = buildSystemPrompt();
     const conversationContext = newMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n');
     
-    const fullPrompt = `${systemPrompt}\n\nConversation so far:\n${conversationContext}\n\nRespond as the assistant. ${
+    const fullPrompt = `${systemPrompt}\n\nConversation so far:\n${conversationContext}\n\nRespond as the assistant.${
       mode === 'cold' && !coldSubmitted 
-        ? 'The student has just submitted their cold attempt answer. Evaluate it now with PASS or FAIL. Be explicit about which criteria were met and which were not. If this is clearly a PASS, include the exact text "[PASS]" in your response. If FAIL, include "[FAIL]".'
+        ? ' The student has just submitted their cold attempt answer. Evaluate it now following the Cold Attempt Protocol. Remember to include [PASS] or [FAIL] in your response.'
         : ''
     }`;
 
