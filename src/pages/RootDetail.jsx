@@ -75,6 +75,13 @@ export default function RootDetail() {
     }
   }, [rootId, activeMode]);
 
+  // Listen for switchToTeachMe events from ChatInterface
+  useEffect(() => {
+    const handler = () => setActiveMode('teach');
+    window.addEventListener('switchToTeachMe', handler);
+    return () => window.removeEventListener('switchToTeachMe', handler);
+  }, []);
+
   const handlePassColdAttempt = useCallback((questionType) => {
     const p = getActiveProfile();
     if (!p) return;
