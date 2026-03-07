@@ -182,6 +182,17 @@ export default function RootDetail() {
           </div>
         )}
 
+        {/* Cold attempt count display */}
+        {activeMode === 'cold' && (() => {
+          const p = getActiveProfile();
+          const count = p ? getColdAttemptCount(p.id, rootId, selectedQuestion) : 0;
+          return count > 0 ? (
+            <p className="text-xs text-zinc-600 mb-2">
+              Cold attempt: {count} {count === 1 ? 'attempt' : 'attempts'} taken
+            </p>
+          ) : null;
+        })()}
+
         {/* Chat */}
         <div className="mb-6">
           <ChatInterface
@@ -191,6 +202,7 @@ export default function RootDetail() {
             questionType={activeMode === 'teach' ? 'root' : selectedQuestion}
             onPassColdAttempt={handlePassColdAttempt}
             onPracticeSubmit={handlePracticeSubmit}
+            isFirstVisit={activeMode === 'teach' && wasFirstVisit}
           />
         </div>
 
