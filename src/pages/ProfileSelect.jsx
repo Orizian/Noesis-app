@@ -16,8 +16,8 @@ function timeAgo(ts) {
   return `Last studied ${days} days ago`;
 }
 
-export default function ProfileSelect() {
-  const { selectProfile, refresh } = useProfile();
+export default function ProfileSelect({ onNavigate }) {
+  const { selectProfile } = useProfile();
   const [profiles, setProfiles] = useState(() => {
     const p = getProfiles();
     return Array.isArray(p) ? p : [];
@@ -25,11 +25,16 @@ export default function ProfileSelect() {
   const [showCreate, setShowCreate] = useState(false);
   const [pinProfile, setPinProfile] = useState(null);
 
+  const navigate = (id) => {
+    selectProfile(id);
+    if (onNavigate) onNavigate(id);
+  };
+
   const handleProfileClick = (profile) => {
     if (profile.pin) {
       setPinProfile(profile);
     } else {
-      selectProfile(profile.id);
+      navigate(profile.id);
     }
   };
 
@@ -37,11 +42,11 @@ export default function ProfileSelect() {
     const p = getProfiles();
     setProfiles(Array.isArray(p) ? p : []);
     setShowCreate(false);
-    selectProfile(profile.id);
+    navigate(profile.id);
   };
 
   const handlePinSuccess = () => {
-    selectProfile(pinProfile.id);
+    navigate(pinProfile.id);
     setPinProfile(null);
   };
 
