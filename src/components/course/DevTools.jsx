@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Zap, Star, RotateCcw, CheckCircle, Trophy } from 'lucide-react';
+import { X, Zap, Star, RotateCcw, CheckCircle } from 'lucide-react';
 import { ROOTS } from '../courseData';
 import {
   devMarkAllComplete, devMarkAllMastered, resetAllProgress,
