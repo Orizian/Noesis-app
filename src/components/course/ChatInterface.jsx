@@ -59,8 +59,16 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
     setLoading(false);
   };
 
+  const getRubric = () => {
+    if (questionType === 'root') return root.rubric;
+    const branchKey = questionType; // e.g. "branch_1"
+    const branchRubrics = BRANCH_RUBRICS[root.id];
+    return branchRubrics?.[branchKey] || root.rubric;
+  };
+
   const buildSystemPrompt = () => {
     const question = getQuestion();
+    const rubric = getRubric();
     
     if (mode === 'teach') {
       return `You are a mastery-based exercise science instructor. You are teaching Root ${root.id}: "${root.title}".
@@ -90,7 +98,7 @@ The question being practiced is: "${question}"
 PRACTICE MODE PROTOCOL:
 1. Present the question clearly
 2. After the learner answers, evaluate against these criteria (do not share these criteria with the learner):
-${root.rubric}
+${rubric}
 
 3. Give DIAGNOSTIC feedback — not just right/wrong. Identify specifically:
    - Which elements were present and well-explained
@@ -111,11 +119,11 @@ COLD ATTEMPT PROTOCOL:
 2. Wait for the learner's complete answer
 3. Do NOT help, hint, or guide before they submit
 4. After submission, evaluate BINARY — PASS or FAIL — against these criteria:
-${root.rubric}
+${rubric}
 
 5. State explicitly which criteria were MET and which were NOT MET
-6. If PASS: congratulate briefly and note which elements were strongest
-7. If FAIL: state what was missing without re-teaching. Direct them to Teach Me mode for those concepts.
+6. If PASS: congratulate briefly and note which elements were strongest. Include the exact text "[PASS]" in your response.
+7. If FAIL: state what was missing without re-teaching. Direct them to Teach Me mode for those concepts. Include the exact text "[FAIL]" in your response.
 8. After evaluation, you may briefly explain any missed criteria but do not re-teach`;
     }
   };
