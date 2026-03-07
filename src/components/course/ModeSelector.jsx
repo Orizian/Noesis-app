@@ -7,17 +7,18 @@ const modes = [
   { id: 'cold', label: 'Cold Attempt', icon: Shield, description: 'Assessment' }
 ];
 
-export default function ModeSelector({ activeMode, onModeChange }) {
+export default function ModeSelector({ activeMode, onModeChange, showPracticeDot }) {
   return (
     <div className="flex gap-2 p-1 bg-zinc-900 rounded-xl border border-zinc-800">
       {modes.map((mode) => {
         const Icon = mode.icon;
         const isActive = activeMode === mode.id;
+        const showDot = mode.id === 'practice' && showPracticeDot;
         return (
           <button
             key={mode.id}
             onClick={() => onModeChange(mode.id)}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
               ${isActive
                 ? mode.id === 'cold'
                   ? 'bg-red-950/50 text-red-300 border border-red-800/50 shadow-lg shadow-red-950/20'
@@ -30,6 +31,9 @@ export default function ModeSelector({ activeMode, onModeChange }) {
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{mode.label}</span>
             <span className="sm:hidden">{mode.label.split(' ')[0]}</span>
+            {showDot && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+            )}
           </button>
         );
       })}
