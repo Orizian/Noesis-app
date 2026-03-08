@@ -81,7 +81,7 @@ export default function CourseOverview() {
           </p>
 
           {/* Progress section */}
-          <ProgressSection progress={progress} profileId={activeProfileId} />
+          <ProgressSection profileId={activeProfileId} />
         </div>
 
         {/* Root list */}
