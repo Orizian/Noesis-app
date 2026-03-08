@@ -4,79 +4,31 @@ import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getProfileProgress, getProfileById } from '../components/profiles/profileStorage';
+import { getQuestionCriteria, deriveRootStatus, getTotalPoints } from '../components/profiles/profileStorage';
+import { GlobalMasteryBar } from '../components/course/MasteryBars';
 import { BookOpen } from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
 
-const STATUS_POINTS = { not_started: 0, in_progress: 1, complete: 3, mastered: 6 };
-const MAX_POINTS = 48;
-
-function ProgressSection({ progress, profileId }) {
-  const roots = ROOTS;
+function ProgressSection({ profileId }) {
   let totalPoints = 0;
-  let masteredCount = 0, completeCount = 0, inProgressCount = 0, notStartedCount = 0;
+  let completeCount = 0, masteredCount = 0;
 
-  roots.forEach(r => {
-    const p = progress[r.id];
-    const status = p?.status || 'not_started';
-    totalPoints += STATUS_POINTS[status] || 0;
+  ROOTS.forEach(r => {
+    const qc = profileId ? getQuestionCriteria(profileId, r.id) : {};
+    const rPts = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
+    totalPoints += rPts;
+    const status = deriveRootStatus(qc);
     if (status === 'mastered') masteredCount++;
     else if (status === 'complete') completeCount++;
-    else if (status === 'in_progress') inProgressCount++;
-    else notStartedCount++;
   });
-
-  const pct = Math.round((totalPoints / MAX_POINTS) * 100);
-
-  // Welcome back message
-  let welcomeMsg = null;
-  const profile = profileId ? getProfileById(profileId) : null;
-  if (profile?.lastStudied) {
-    const days = differenceInDays(new Date(), new Date(profile.lastStudied));
-    if (days === 0) {
-      welcomeMsg = `Welcome back, ${profile.name}`;
-    } else {
-      welcomeMsg = `Last studied ${days === 1 ? 'yesterday' : `${days} days ago`}`;
-    }
-  }
-
-  // Progress bar segments
-  const masteredPct = (masteredCount * 6 / MAX_POINTS) * 100;
-  const completePct = (completeCount * 3 / MAX_POINTS) * 100;
-  const inProgressPct = (inProgressCount * 1 / MAX_POINTS) * 100;
 
   return (
     <div className="mb-10">
-      {/* Progress bar */}
-      <div className="h-3 bg-zinc-800 rounded-full overflow-hidden flex mb-3">
-        <div className="bg-violet-500 transition-all duration-500" style={{ width: `${masteredPct}%` }} />
-        <div className="bg-emerald-500 transition-all duration-500" style={{ width: `${completePct}%` }} />
-        <div className="bg-blue-500 transition-all duration-500" style={{ width: `${inProgressPct}%` }} />
-      </div>
-
-      {/* Score */}
-      <div className="flex items-baseline gap-2 mb-2">
-        <span className="text-3xl font-bold text-zinc-100">{totalPoints}</span>
-        <span className="text-zinc-500 text-sm">/ {MAX_POINTS}</span>
-      </div>
-
-      {/* Counts */}
-      <p className="text-xs text-zinc-500 mb-1">
-        {masteredCount > 0 && <span className="text-violet-400">{masteredCount} Mastered</span>}
-        {masteredCount > 0 && (completeCount > 0 || inProgressCount > 0 || notStartedCount > 0) && <span className="mx-1">·</span>}
-        {completeCount > 0 && <span className="text-emerald-400">{completeCount} Complete</span>}
-        {completeCount > 0 && (inProgressCount > 0 || notStartedCount > 0) && <span className="mx-1">·</span>}
-        {inProgressCount > 0 && <span className="text-blue-400">{inProgressCount} In Progress</span>}
-        {inProgressCount > 0 && notStartedCount > 0 && <span className="mx-1">·</span>}
-        {notStartedCount > 0 && <span>{notStartedCount} Not Started</span>}
-      </p>
-
-      <p className="text-xs text-zinc-600">{pct}% complete</p>
-
-      {/* Welcome back */}
-      {welcomeMsg && (
-        <p className="text-xs text-zinc-600 mt-3">{welcomeMsg}</p>
-      )}
+      <GlobalMasteryBar
+        totalPoints={totalPoints}
+        completeCount={completeCount}
+        masteredCount={masteredCount}
+        perfectedCount={0}
+      />
     </div>
   );
 }
