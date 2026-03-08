@@ -4,13 +4,13 @@ import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getQuestionCriteria, deriveRootStatus, getTotalPoints } from '../components/profiles/profileStorage';
-import { GlobalMasteryBar } from '../components/course/MasteryBars';
+import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getVocabStats } from '../components/profiles/profileStorage';
+import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/course/MasteryBars';
 import { BookOpen } from 'lucide-react';
 
 function ProgressSection({ profileId }) {
   let totalPoints = 0;
-  let completeCount = 0, masteredCount = 0;
+  let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
   ROOTS.forEach(r => {
     const qc = profileId ? getQuestionCriteria(profileId, r.id) : {};
@@ -19,15 +19,31 @@ function ProgressSection({ profileId }) {
     const status = deriveRootStatus(qc);
     if (status === 'mastered') masteredCount++;
     else if (status === 'complete') completeCount++;
+    if (profileId && isRootPerfected(profileId, r.id)) perfectedCount++;
   });
 
+  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId) : 0;
+  const anyGauntlet = gauntletTotal > 0;
+
+  const vocabStats = profileId ? getVocabStats(profileId) : { attempted: 0, pass: 0, great: 0, excellent: 0 };
+
   return (
-    <div className="mb-10">
+    <div className="mb-10 space-y-3">
       <GlobalMasteryBar
         totalPoints={totalPoints}
         completeCount={completeCount}
         masteredCount={masteredCount}
-        perfectedCount={0}
+        perfectedCount={perfectedCount}
+      />
+      {anyGauntlet && (
+        <GlobalGauntletBar totalPoints={gauntletTotal} />
+      )}
+      <VocabBar
+        attempted={vocabStats.attempted}
+        total={80}
+        pass={vocabStats.pass}
+        great={vocabStats.great}
+        excellent={vocabStats.excellent}
       />
     </div>
   );
