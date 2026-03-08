@@ -26,10 +26,10 @@ import {
 import { format } from 'date-fns';
 
 const statusConfig = {
-  not_started: { icon: Circle, label: 'Not Started', className: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
-  in_progress: { icon: Zap, label: 'In Progress', className: 'bg-blue-950/50 text-blue-400 border-blue-800/50' },
-  complete: { icon: CheckCircle2, label: 'Complete', className: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50' },
-  mastered: { icon: Star, label: 'Mastered', className: 'bg-violet-950/50 text-violet-300 border-violet-800/50' },
+  not_started: { label: 'Not Started', className: 'bg-zinc-800 text-zinc-500 border-zinc-700' },
+  in_progress:  { label: 'In Progress',  className: 'bg-blue-950/50 text-blue-400 border-blue-800/50' },
+  complete:     { label: 'Complete',     className: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50' },
+  mastered:     { label: 'Mastered',     className: 'bg-violet-950/50 text-violet-300 border-violet-800/50' },
 };
 
 function BranchCompletionRing({ progress }) {
