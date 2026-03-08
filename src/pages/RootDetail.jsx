@@ -19,6 +19,8 @@ import {
   recordModeOpened,
   getQuestionCriteria,
   deriveRootStatus,
+  getGauntletRootPoints,
+  isRootPerfected,
 } from '../components/profiles/profileStorage';
 import { format } from 'date-fns';
 
@@ -48,8 +50,12 @@ export default function RootDetail() {
   // Criteria-based data
   const qc = activeProfileId ? getQuestionCriteria(activeProfileId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
+  const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, rootId) : 0;
+  const perfected = activeProfileId ? isRootPerfected(activeProfileId, rootId) : false;
   const status = deriveRootStatus(qc);
-  const cfg = statusConfig[status] || statusConfig.not_started;
+  const cfg = perfected
+    ? { label: 'Perfected', className: 'bg-violet-950/50 text-violet-300 border-violet-700' }
+    : (statusConfig[status] || statusConfig.not_started);
 
   // Determine initial competency stage based on derived status
   useEffect(() => {
@@ -160,8 +166,8 @@ export default function RootDetail() {
           <div className="mt-4 p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl">
             <RootDetailBars
               rootPoints={rootPoints}
-              gauntletPoints={0}
-              hasPerfected={false}
+              gauntletPoints={gauntletPoints}
+              hasPerfected={perfected}
               questionPoints={qc}
             />
           </div>
