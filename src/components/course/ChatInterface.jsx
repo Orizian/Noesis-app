@@ -5,7 +5,7 @@ import { BRANCH_RUBRICS, DICTIONARY } from '../courseData';
 import MessageBubble from './MessageBubble';
 import ColdAttemptPanel from './ColdAttemptPanel';
 import { useProfile } from '../profiles/ProfileContext';
-import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm } from '../profiles/profileStorage';
+import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm, setQuestionCriteria, setBestTier, getQualityTier } from '../profiles/profileStorage';
 
 export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered }) {
   const { activeProfileId } = useProfile();

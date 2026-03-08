@@ -1,8 +1,10 @@
 import React from 'react';
-import { ChevronRight, Circle, Zap, CheckCircle2, Star } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { format } from 'date-fns';
+import DifficultyBars from './DifficultyBars';
+import { RootCardBars } from './MasteryBars';
+import { getQuestionCriteria, deriveRootStatus, getBestTier } from '../profiles/profileStorage';
 
 const statusConfig = {
   not_started: {
