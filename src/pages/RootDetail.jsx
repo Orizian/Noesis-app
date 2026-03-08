@@ -47,14 +47,16 @@ export default function RootDetail() {
   const { activeProfileId, getRootProgress, setRootProgress, refresh } = useProfile();
 
   const progress = getRootProgress(rootId);
-  const status = progress?.status || 'not_started';
-  const cfg = statusConfig[status] || statusConfig.not_started;
-  const StatusIcon = cfg.icon;
 
-  // Determine initial competency stage based on prior status
+  // Criteria-based data
+  const qc = activeProfileId ? getQuestionCriteria(activeProfileId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
+  const status = deriveRootStatus(qc);
+  const cfg = statusConfig[status] || statusConfig.not_started;
+
+  // Determine initial competency stage based on derived status
   useEffect(() => {
-    const s = progress?.status || 'not_started';
-    if (s === 'complete' || s === 'mastered') {
+    if (status === 'complete' || status === 'mastered') {
       setCompetencyStage(4);
     } else {
       setCompetencyStage(1);
