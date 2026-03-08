@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, XCircle, RotateCcw, ArrowRight, BookOpen } from 'lucide-react';
 import { getQualityTier } from '../profiles/profileStorage';
+import { ROOTS, BRANCH_RUBRICS } from '../courseData';
+
+function parseRubricCriteria(rubricStr) {
+  const matches = [...rubricStr.matchAll(/Criterion\s+\d+:\s*(.+?)(?=Criterion\s+\d+:|$)/gi)];
+  return matches.map(m => m[1].trim());
+}
+
+function getRubricForQuestion(root, questionType) {
+  if (questionType === 'root') return root.rubric;
+  return BRANCH_RUBRICS[root.id]?.[questionType] || root.rubric;
+}
 
 const EVAL_STAGES = [
   { text: 'Reading your response...', duration: 1500 },
@@ -8,30 +19,30 @@ const EVAL_STAGES = [
   { text: 'Finalizing evaluation...', duration: 2000 },
 ];
 
-// Parse [RUBRIC_BREAKDOWN] from AI response
-// Expected AI format in response:
-// [CRITERIA:met] criterion text
-// [CRITERIA:unmet] criterion text
-// [NARRATIVE] narrative text
-// [PASS] or [FAIL]
-function parseEvaluation(text) {
+// Parse evaluation, always rendering all rubric criteria rows
+function parseEvaluation(text, rubricCriteria) {
   const passed = text.includes('[PASS]');
   const criteriaMatches = [...text.matchAll(/\[(CRITERIA:(met|unmet))\]\s*(.+)/gi)];
-  const criteria = criteriaMatches.map(m => ({
-    met: m[2].toLowerCase() === 'met',
-    text: m[3].trim(),
-  }));
+  const aiCriteria = criteriaMatches.map(m => ({ met: m[2].toLowerCase() === 'met', text: m[3].trim() }));
+
+  // Always render one row per rubric criterion; fill from AI results, fallback if missing
+  const rows = rubricCriteria.map((criterionText, i) => {
+    if (i < aiCriteria.length) {
+      return { met: aiCriteria[i].met, text: criterionText, evaluated: true };
+    }
+    return { met: false, text: criterionText, evaluated: false };
+  });
+
+  const metCount = rows.filter(r => r.evaluated && r.met).length;
   const narrativeMatch = text.match(/\[NARRATIVE\]\s*([\s\S]+?)(?=\[CRITERIA|$)/i);
   let narrative = narrativeMatch ? narrativeMatch[1].trim() : '';
-  // Fallback: strip all tags and use remainder as narrative
   if (!narrative) {
     narrative = text
       .replace(/\[PASS\]/gi, '').replace(/\[FAIL\]/gi, '')
       .replace(/\[(CRITERIA:(met|unmet))\]\s*.+/gi, '')
-      .replace(/\[NARRATIVE\]/gi, '')
-      .trim();
+      .replace(/\[NARRATIVE\]/gi, '').trim();
   }
-  return { passed, criteria, narrative };
+  return { passed, rows, metCount, narrative };
 }
 
 const TIER_CONFIG = {
