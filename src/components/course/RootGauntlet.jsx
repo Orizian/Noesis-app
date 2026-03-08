@@ -194,23 +194,18 @@ export default function RootGauntlet({ root, profileId, onGauntletComplete }) {
 
     // Stage timers
     let elapsed = 0;
-    const timers = [];
+    const stageTimers = [];
     EVAL_STAGES.forEach((s, i) => {
-      timers.push(setTimeout(() => setEvalStage(i), elapsed));
+      stageTimers.push(setTimeout(() => setEvalStage(i), elapsed));
       elapsed += s.duration;
     });
-    const minTimer = setTimeout(() => {
-      // will be cleared if result arrives first
-    }, 5000);
 
+    // Track min 5s display time
     let timerDone = false;
-    let resultReady = false;
-    let resolveReveal;
-    const revealWhenReady = new Promise(res => { resolveReveal = res; });
-
-    const minDoneTimer = setTimeout(() => {
+    let pendingResult = null;
+    const minTimer = setTimeout(() => {
       timerDone = true;
-      if (resultReady) resolveReveal();
+      if (pendingResult) setRevealResult(true);
     }, 5000);
 
     const strictInstructions = `Evaluate each criterion as a strict binary — met or not met. A criterion is met only if the answer explicitly and specifically demonstrates the required mechanism, prediction, or connection stated in that criterion. General correctness, directional accuracy, and implied understanding do not satisfy a criterion. You must be able to point to a specific sentence or phrase in the answer that satisfies the criterion. If you cannot, the criterion is not met. Do not be generous. Do not infer. Do not reward effort or length. Evaluate only what is explicitly present.`;
@@ -235,24 +230,24 @@ ${rubricStr}
 Student answer: "${answer}"`;
 
     const response = await base44.integrations.Core.InvokeLLM({ prompt });
-    timers.forEach(clearTimeout);
-    clearTimeout(minDoneTimer);
+    stageTimers.forEach(clearTimeout);
 
     const parsed = parseEvaluation(response, rubricCriteria);
     const metCount = parsed.metCount;
-    const isRoot = qMeta.key === 'root';
-    const tier = getQualityTier(metCount, isRoot);
+    const isRootQ = qMeta.key === 'root';
+    const tier = getQualityTier(metCount, isRootQ);
     const passed = response.includes('[PASS]');
 
-    // Store gauntlet criteria (will be committed to best in summary)
     const newResult = { metCount, passed, tier, rows: parsed.rows, narrative: parsed.narrative };
-    const updatedResults = [...questionResults, newResult];
-    setQuestionResults(updatedResults);
+    setQuestionResults(prev => [...prev, newResult]);
     setEvalResult(newResult);
+    pendingResult = newResult;
 
-    // Show after min time
-    await new Promise(res => setTimeout(res, 5000));
-    setRevealResult(true);
+    if (timerDone) {
+      clearTimeout(minTimer);
+      setRevealResult(true);
+    }
+    // else minTimer will trigger reveal
   };
 
   const handleContinue = () => {
