@@ -88,6 +88,9 @@ export default function ColdAttemptPanel({
     ? parsed.criteria.filter(c => c.met).length
     : (parsed?.passed ? totalCriteria : 0);
 
+  const tier = parsed ? getQualityTier(metCount, isRoot) : null;
+  const tierConfig = tier ? TIER_CONFIG[tier] : null;
+
   if (!revealed || !parsed) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[320px] py-12">
