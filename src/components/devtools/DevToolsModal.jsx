@@ -70,12 +70,9 @@ function ColdRow({ root, profileId, onChanged }) {
       {/* Root tier shortcuts */}
       <div className="flex items-center gap-1.5">
         <span className="text-xs text-zinc-600 mr-1">Root Tier:</span>
-        {[[2,'Pass','emerald'],[3,'Great','teal'],[4,'Excellent','violet']].map(([v,label,color]) => (
-          <button key={v} onClick={() => set('root', v)}
-            className={`px-2 py-0.5 rounded bg-${color}-900/30 hover:bg-${color}-900/50 border border-${color}-800/40 text-${color}-400 text-xs`}>
-            {label}
-          </button>
-        ))}
+        <button onClick={() => set('root', 2)} className="px-2 py-0.5 rounded bg-emerald-900/30 hover:bg-emerald-900/50 border border-emerald-800/40 text-emerald-400 text-xs">Pass</button>
+        <button onClick={() => set('root', 3)} className="px-2 py-0.5 rounded bg-teal-900/30 hover:bg-teal-900/50 border border-teal-800/40 text-teal-400 text-xs">Great</button>
+        <button onClick={() => set('root', 4)} className="px-2 py-0.5 rounded bg-violet-900/30 hover:bg-violet-900/50 border border-violet-800/40 text-violet-400 text-xs">Excellent</button>
       </div>
     </div>
   );
