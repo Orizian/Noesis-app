@@ -353,6 +353,7 @@ Rules:
         <div className="p-6">
           <ColdAttemptPanel
             result={coldResult}
+            root={root}
             questionType={questionType}
             attemptNumber={coldAttemptNum}
             onContinue={handleColdContinue}
