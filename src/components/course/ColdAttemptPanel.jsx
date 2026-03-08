@@ -111,7 +111,7 @@ export default function ColdAttemptPanel({
 
   return (
     <div className="py-6 px-1 space-y-6 animate-in fade-in duration-500">
-      {/* Pass/Fail badge */}
+      {/* Pass/Fail badge + Quality Tier */}
       <div className="flex flex-col items-center gap-3">
         <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl border text-lg font-bold
           transition-all duration-500 scale-100
@@ -125,6 +125,12 @@ export default function ColdAttemptPanel({
           }
           {parsed.passed ? 'PASS' : 'FAIL'}
         </div>
+        {/* Quality tier badge */}
+        {tierConfig && (
+          <div className={`px-4 py-1.5 rounded-xl border text-sm font-semibold ${tierConfig.className}`}>
+            {tierConfig.label}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <span className="text-sm text-zinc-400">{metCount} of {totalCriteria} criteria met</span>
           <span className="text-xs text-zinc-600">· Attempt {attemptNumber}</span>
