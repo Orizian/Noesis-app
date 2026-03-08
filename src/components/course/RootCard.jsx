@@ -51,9 +51,9 @@ export default function RootCard({ root, profileId }) {
                   {cfg.label}
                 </span>
                 <DifficultyBars rootId={root.id} showLabel={true} size="sm" />
-                {showTierLabel && (
-                  <span className={`text-xs font-medium ${TIER_CLASS[rootQTier]}`}>
-                    {TIER_LABEL[rootQTier]}
+                {tier && (
+                  <span className={`text-xs font-medium ${tier.className}`}>
+                    {tier.label}
                   </span>
                 )}
               </div>
