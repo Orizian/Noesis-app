@@ -413,8 +413,9 @@ Student answer: "${answer}"`;
 
   // ── SUMMARY
   if (phase === 'summary') {
-    const perfectedNow = totalScore === 13;
+    const perfectedNow = questionResults.length === 4 && questionResults.reduce((s,r) => s + r.metCount, 0) === 13;
     const completedDate = format(new Date(), 'MMM d, yyyy');
+    const totalScore = questionResults.reduce((sum, r) => sum + r.metCount, 0);
     return (
       <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
         <div className="p-5 space-y-5">
