@@ -7,17 +7,21 @@ import ChatInterface from '../components/course/ChatInterface';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import RootDictionary from '../components/course/RootDictionary';
 import CompetencyMeter from '../components/course/CompetencyMeter';
+import DifficultyBars from '../components/course/DifficultyBars';
+import { RootDetailBars } from '../components/course/MasteryBars';
 import { useProfile } from '../components/profiles/ProfileContext';
-import {
-  ArrowLeft, Circle, Zap, CheckCircle2, Star
-} from 'lucide-react';
+import { ArrowLeft, Circle, Zap, CheckCircle2, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   getColdAttemptCount,
   getOpenedModes,
   recordModeOpened,
-  setRootStartedAt,
+  getQuestionCriteria,
+  deriveRootStatus,
+  setQuestionCriteria,
+  setBestTier,
+  getQualityTier,
 } from '../components/profiles/profileStorage';
 import { format } from 'date-fns';
 
