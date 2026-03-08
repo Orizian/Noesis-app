@@ -351,21 +351,18 @@ Student answer: "${answer}"`;
     );
   }
 
-  // ── EVALUATING
-  if (phase === 'evaluating' && !revealResult) {
-    return (
-      <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
-        <GauntletProgressBar current={currentQ} total={4} />
-        <div className="p-6">
-          <EvalLoader stage={evalStage} />
+  // ── EVALUATING / RESULT
+  if (phase === 'evaluating') {
+    if (!revealResult || !evalResult) {
+      return (
+        <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
+          <GauntletProgressBar current={currentQ} total={4} />
+          <div className="p-6">
+            <EvalLoader stage={evalStage} />
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  // ── RESULT — show after eval
-  if ((phase === 'evaluating' && revealResult) || (phase === 'evaluating' && evalResult)) {
-    if (!evalResult) return null;
+      );
+    }
     return (
       <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
         <GauntletProgressBar current={currentQ} total={4} />
