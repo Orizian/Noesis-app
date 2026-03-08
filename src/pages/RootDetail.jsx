@@ -5,7 +5,8 @@ import QuestionBank from '../components/course/QuestionBank';
 import QuestionSelector from '../components/course/QuestionSelector';
 import ChatInterface from '../components/course/ChatInterface';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
-import RootDictionary from '../components/course/RootDictionary';
+import FlashcardDictionary from '../components/course/FlashcardDictionary';
+import RootGauntlet from '../components/course/RootGauntlet';
 import CompetencyMeter from '../components/course/CompetencyMeter';
 import DifficultyBars from '../components/course/DifficultyBars';
 import { RootDetailBars } from '../components/course/MasteryBars';
@@ -216,9 +217,18 @@ export default function RootDetail() {
           </div>
         )}
 
+        {/* Gauntlet */}
+        <div className="mb-6">
+          <RootGauntlet
+            root={root}
+            profileId={activeProfileId}
+            onGauntletComplete={() => refresh()}
+          />
+        </div>
+
         {/* Dictionary */}
         <div className="mb-6">
-          <RootDictionary key={dictKey} rootId={rootId} />
+          <FlashcardDictionary rootId={rootId} onVocabChanged={() => refresh()} />
         </div>
 
         {/* Question Bank */}
