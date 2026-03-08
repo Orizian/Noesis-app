@@ -154,29 +154,33 @@ ${rubric}
     }
 
     if (mode === 'cold') {
+      const isRootQ = questionType === 'root';
+      const totalCrit = isRootQ ? 4 : 3;
       return `You are administering a cold assessment for Root ${root.id}: "${root.title}".
 
 The question is: "${question}"
 
+STRICT EVALUATION INSTRUCTIONS:
+Evaluate each criterion as a strict binary — met or not met. A criterion is met only if the answer explicitly and specifically demonstrates the required mechanism, prediction, or connection stated in that criterion. General correctness, directional accuracy, and implied understanding do not satisfy a criterion. You must be able to point to a specific sentence or phrase in the answer that satisfies the criterion. If you cannot, the criterion is not met. Do not be generous. Do not infer. Do not reward effort or length. Evaluate only what is explicitly present.
+
+This rubric has exactly ${totalCrit} criteria. You MUST evaluate ALL ${totalCrit} — no more, no fewer.
+
 COLD ATTEMPT PROTOCOL — CRITICAL FORMAT INSTRUCTIONS:
 After the learner submits their answer, you MUST evaluate it and format your response EXACTLY as follows:
 
-First, include [PASS] or [FAIL] on its own line based on whether they met the majority of criteria.
+First: [PASS] or [FAIL] on its own line. PASS requires the majority of criteria met.
 
-Then list each criterion using this EXACT format, one per line:
-[CRITERIA:met] Plain English description of criterion that was met
-[CRITERIA:unmet] Plain English description of criterion that was not met
+Then list EXACTLY ${totalCrit} criteria using this format, one per line:
+[CRITERIA:met] Plain English description of this criterion — was met
+[CRITERIA:unmet] Plain English description of this criterion — was not met
 
-Then provide a 2-4 sentence narrative:
-[NARRATIVE] Your 2-4 sentence assessment. For pass: specific and affirming without sycophancy. For fail: specific and actionable, identifying precisely what was missing and what to focus on.
+Then: [NARRATIVE] Your 2-4 sentence assessment. For pass: specific and affirming without sycophancy. For fail: specific and actionable.
 
-The criteria to evaluate against (convert each into plain English for the rubric breakdown — do not copy verbatim, make each criterion a clear readable statement):
+The criteria to evaluate against (convert each into a clear readable plain English statement):
 ${rubric}
 
 Rules:
 - Do NOT help, hint, or guide before they submit
-- Evaluate BINARY — PASS requires meeting the core criteria clearly
-- State which criteria were MET and which were NOT MET
 - After evaluation you may briefly discuss but do not re-teach in this mode`;
     }
   };
