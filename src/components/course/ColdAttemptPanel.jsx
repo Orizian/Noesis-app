@@ -54,6 +54,7 @@ const TIER_CONFIG = {
 
 export default function ColdAttemptPanel({
   result,
+  root,
   questionType,
   attemptNumber,
   onContinue,
@@ -92,12 +93,14 @@ export default function ColdAttemptPanel({
   }, [result]);
 
   const isRoot = questionType === 'root';
+
+  // Build rubric criteria array from courseData
+  const rubricStr = root ? getRubricForQuestion(root, questionType) : '';
+  const rubricCriteria = rubricStr ? parseRubricCriteria(rubricStr) : [];
   const totalCriteria = isRoot ? 4 : 3;
 
-  const parsed = result ? parseEvaluation(result) : null;
-  const metCount = parsed?.criteria?.length
-    ? parsed.criteria.filter(c => c.met).length
-    : (parsed?.passed ? totalCriteria : 0);
+  const parsed = result ? parseEvaluation(result, rubricCriteria.length > 0 ? rubricCriteria : Array(totalCriteria).fill('')) : null;
+  const metCount = parsed?.metCount ?? 0;
 
   const tier = parsed ? getQualityTier(metCount, isRoot) : null;
   const tierConfig = tier ? TIER_CONFIG[tier] : null;
