@@ -17,7 +17,7 @@ export const ROOTS = [
         question: `A muscle biopsy of an elite powerlifter shows that 60 percent of their vastus lateralis fibers are Type I slow-twitch despite their sport demanding maximal force production. Explain why this finding is less surprising than it initially appears, identify the specific training characteristic of powerlifting that selects for this fiber composition, and predict how this powerlifter's performance would compare to a sprinter on a test of maximal force production versus rate of force development.`
       }
     ],
-    rubric: "Identifies Type I vs Type II fiber distinction as the mechanism. Connects fiber type to contractile speed and fatigue resistance mechanistically not just definitionally. Predicts pre-fatigue effect on both athletes using fiber type logic. Addresses power differential as structural not motivational."
+    rubric: "Criterion 1: Identifies Type I versus Type II fiber distinction as the structural mechanism accounting for the power differential — not training history, motivation, or total muscle volume. Criterion 2: Connects fiber type to contractile speed and fatigue resistance mechanistically — explains why the structural difference produces the power difference, not just that it correlates with it. Criterion 3: Predicts the pre-fatigue effect on the sprinter specifically using fiber type logic — Type II depletion reducing peak power output. Criterion 4: Predicts the pre-fatigue effect on the marathon runner specifically using fiber type logic — Type I dominance meaning relatively less power loss from the same protocol."
   },
   {
     id: 2,
@@ -37,7 +37,7 @@ export const ROOTS = [
         question: `An endurance athlete performs 8 weeks of sprint interval training — 6 second maximal sprints with 4 minute recovery — with no changes to their steady-state aerobic training. Their 10km race time improves by 90 seconds despite the interval training never stressing their aerobic system significantly. Explain the specific adaptations from sprint interval training that improve endurance performance through a non-aerobic mechanism.`
       }
     ],
-    rubric: "Correctly identifies the three energy system transitions across the time trial. Identifies PCr depletion as the specific mechanism for the early power drop. Predicts glycogen depletion effects on both the aerobic and anaerobic contributions correctly."
+    rubric: "Criterion 1: Correctly identifies all three energy system transitions across the time trial — PCr system dominant at 30 seconds, glycolytic system dominant at 5 minutes, aerobic system stabilizing at 15 minutes. Criterion 2: Identifies PCr depletion specifically as the metabolic event causing the drop from 420 to 310 watts — not glycogen depletion, not lactate, not general fatigue. Criterion 3: Predicts the glycogen depletion effect on aerobic contribution correctly — reduced glycolytic substrate forces greater reliance on fat oxidation, lowering sustainable power output. Criterion 4: Predicts the glycogen depletion effect on anaerobic contribution correctly — glycolytic system is severely impaired from the start, eliminating the early high-power phase."
   },
   {
     id: 3,
@@ -57,7 +57,7 @@ export const ROOTS = [
         question: `A researcher measures motor unit recruitment during a set of bicep curls taken to failure with a light weight — 30 percent of one rep max. Early in the set only low-threshold motor units are active. By the final repetitions before failure, high-threshold motor units are fully recruited despite the load being only 30 percent of maximum. Explain the specific mechanism that forces high-threshold motor unit recruitment at low loads when taken to failure, and predict the hypertrophy stimulus of this protocol compared to a heavy set at 85 percent of one rep max stopped well short of failure.`
       }
     ],
-    rubric: "Identifies rate coding and motor unit synchronization as what changed between attempts not muscle strength. Addresses the post-activation potentiation mechanism. Predicts cardio effect using the mechanism of neural fatigue rather than muscular fatigue."
+    rubric: "Criterion 1: Identifies rate coding — increased motor unit firing frequency — as a specific mechanism that changed between attempts rather than muscle strength. Criterion 2: Identifies motor unit synchronization or recruitment pattern improvement as a second specific neural mechanism that changed between attempts. Criterion 3: Addresses post-activation potentiation explicitly as the named mechanism responsible for the second attempt success. Criterion 4: Predicts the cardio effect using neural fatigue as the mechanism — light cardio impairs CNS output capacity without fatiguing the muscles themselves, reducing maximal recruitment on the third attempt."
   },
   {
     id: 4,
@@ -77,7 +77,7 @@ export const ROOTS = [
         question: `Two athletes have identical training programs and nutrition. Athlete A sleeps 8 hours per night consistently. Athlete B sleeps 5.5 hours per night. After 12 weeks Athlete B has gained significantly less muscle despite identical training stimulus and caloric intake. A muscle biopsy shows identical rates of muscle protein synthesis in both athletes measured immediately after training sessions. Explain where in the 24-hour recovery cycle the hormonal difference between athletes is producing the divergent outcomes, and predict the specific hormonal measurement that would most clearly explain the difference.`
       }
     ],
-    rubric: "Identifies metabolic stress and hormonal milieu as the driver of hormonal difference. Addresses the distinction between acute hormonal spike and chronic anabolic environment. Predicts sleep deprivation effect at the hormonal synthesis level not just the training level."
+    rubric: "Criterion 1: Identifies metabolic stress — byproduct accumulation from higher training density — as the specific training variable driving Athlete B's higher hormonal response despite identical volume. Criterion 2: Addresses the distinction between acute hormonal spike and chronic anabolic environment — correctly identifies that a larger acute response does not automatically produce greater muscle protein synthesis over 48 hours. Criterion 3: Predicts sleep deprivation effect at the hormonal synthesis level — specifically nocturnal growth hormone secretion loss — not just at the training stimulus level. Criterion 4: Explains why the prediction is less straightforward than it appears — the relationship between acute hormonal peaks and downstream hypertrophy is not linear and depends on receptor sensitivity and chronic hormonal environment."
   },
   {
     id: 5,
@@ -97,7 +97,7 @@ export const ROOTS = [
         question: `A study compares two hypertrophy programs over 6 months. Program A uses traditional progressive overload — adding weight each week. Program B keeps weight constant but increases reps until a set becomes easy then adds a small weight increment. Both programs equate total volume. At 6 months muscle biopsies show identical hypertrophy. However subjects in Program B report significantly lower perceived exertion and better recovery. Explain why identical hypertrophy outcomes are possible through mechanically different loading approaches, identify what the actual driver of the hypertrophic stimulus is in both programs, and predict which program would produce greater strength gains despite identical hypertrophy.`
       }
     ],
-    rubric: "Identifies leucine threshold and mTORC1 activation as the mechanism. Connects protein distribution to pulsatile mTORC1 activation versus sustained low-level activation. Addresses the trained versus untrained leucine threshold difference."
+    rubric: "Criterion 1: Identifies leucine threshold as the specific molecular mechanism — each meal must contain sufficient leucine to cross the activation threshold for mTORC1. Criterion 2: Identifies mTORC1 as the specific signaling pathway that is differentially activated by distributed versus concentrated protein intake. Criterion 3: Connects protein distribution to pulsatile mTORC1 activation — more meals crossing the leucine threshold means more discrete activation pulses versus one large pulse and prolonged sub-threshold levels. Criterion 4: Addresses the trained versus untrained leucine threshold difference — trained individuals require a higher leucine dose per meal to maximally stimulate mTORC1."
   },
   {
     id: 6,
@@ -117,7 +117,7 @@ export const ROOTS = [
         question: `A 50-year-old sedentary individual begins endurance training and after one year achieves a VO2 max of 45 ml/kg/min — above average for their age. An elite 20-year-old endurance athlete has a VO2 max of 78 ml/kg/min. The older trained individual's cardiac output at maximal exercise is actually higher relative to their VO2 max than the elite athlete's. Explain the specific cardiovascular variable that accounts for this — why the older trained individual needs more cardiac output per unit of oxygen consumed than the elite athlete — and predict what peripheral adaptation in the elite athlete explains their superior oxygen extraction efficiency.`
       }
     ],
-    rubric: "Identifies eccentric cardiac hypertrophy and increased end-diastolic volume as the structural basis of stroke volume increase. Derives resting heart rate decrease mathematically from stroke volume increase using the cardiac output equation. Predicts detraining sequence correctly — stroke volume reverses faster than VO2 max."
+    rubric: "Criterion 1: Identifies eccentric cardiac hypertrophy — increased end-diastolic volume — as the specific structural cardiac adaptation accounting for the stroke volume increase. Criterion 2: Derives resting heart rate decrease mathematically from stroke volume increase using the cardiac output equation — cardiac output at rest stays constant so heart rate must fall as stroke volume rises — not as an independent adaptation. Criterion 3: Predicts the detraining sequence for stroke volume correctly — reverses relatively quickly within 1 to 2 weeks as plasma volume decreases. Criterion 4: Predicts the detraining sequence for VO2 max correctly — declines more slowly than stroke volume because peripheral adaptations persist longer than central cardiac changes."
   },
   {
     id: 7,
@@ -137,7 +137,7 @@ export const ROOTS = [
         question: `A researcher compares tendon collagen synthesis rates in athletes performing heavy resistance training versus moderate intensity endurance training matched for total lower limb mechanical loading. The endurance training group shows higher rates of tendon collagen synthesis despite lower peak forces. Explain the specific loading characteristic — not peak force — that most strongly drives tendon collagen synthesis, identify what property of cyclical loading at moderate force is a stronger collagen synthesis stimulus than infrequent loading at high force, and predict the optimal tendon conditioning protocol for an athlete returning from tendon injury.`
       }
     ],
-    rubric: "Identifies tenocyte remodeling rate as the rate-limiting factor. Explains the vascularity deficit of tendon compared to muscle as the mechanistic basis of slower adaptation. Predicts the correct training modification using load management principles not rest."
+    rubric: "Criterion 1: Identifies tenocyte remodeling rate as the rate-limiting factor — tenocytes synthesize and remodel collagen more slowly than muscle cells hypertrophy or cardiovascular adaptations occur. Criterion 2: Explains the vascularity deficit of tendon compared to muscle as the mechanistic basis of slower adaptation — lower blood supply means slower delivery of nutrients and signaling molecules to tenocytes. Criterion 3: Predicts the correct training modification using load management principles — a longer ramp-up timeline with smaller weekly mileage increases rather than rest or complete load avoidance. Criterion 4: Connects the load management prediction to the tenocyte mechanism — slower load increase gives tenocytes sufficient time to synthesize collagen and remodel the tendon matrix between loading sessions."
   },
   {
     id: 8,
@@ -157,7 +157,7 @@ export const ROOTS = [
         question: `A strength athlete reduces their training volume by 40 percent for 3 weeks while maintaining training intensity — same weights, fewer sets. At the end of the taper their performance on a maximal strength test improves by 6 percent compared to their pre-taper baseline. Explain the specific physiological mechanism by which reducing training volume while maintaining intensity produces a performance increase rather than a decrease, identify what was accumulating during the high-volume training phase that was masking true strength capacity, and predict the optimal taper duration and volume reduction percentage for maximizing this effect.`
       }
     ],
-    rubric: "Identifies concurrent training and varied stimulus as the mechanism behind Athlete B's superior improvement through the principle of varied adaptation stimulus. Addresses the specificity-variability tradeoff and how it shifts with training age. Predicts taper effect through the accumulated fatigue masking fitness concept."
+    rubric: "Criterion 1: Identifies varied stimulus as the specific mechanism behind Athlete B's superior improvement — different distances and intensities stress different energy systems and neuromuscular qualities producing broader adaptation. Criterion 2: Addresses the specificity-variability tradeoff explicitly — explains why less specific training produced better results at this stage of training development. Criterion 3: Predicts which athlete has a higher ceiling correctly — Athlete B, because their broader adaptation base leaves more room for specific refinement while Athlete A has already been highly specific and faces diminishing returns. Criterion 4: Explains why the optimal specificity ratio changes as an athlete approaches genetic potential — advanced athletes need broader stimulus for continued adaptation while beginners benefit from almost any specific stimulus."
   }
 ];
 
