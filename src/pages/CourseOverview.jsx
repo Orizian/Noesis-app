@@ -90,7 +90,7 @@ export default function CourseOverview() {
             <RootCard
               key={root.id}
               root={root}
-              progress={progress[root.id]}
+              profileId={activeProfileId}
             />
           ))}
         </div>
