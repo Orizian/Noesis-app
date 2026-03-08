@@ -151,21 +151,28 @@ export default function ColdAttemptPanel({
         </div>
       </div>
 
-      {/* Criteria breakdown */}
-      {parsed.criteria.length > 0 && (
+      {/* Criteria breakdown — always render all rubric rows */}
+      {parsed.rows && parsed.rows.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Rubric Breakdown</p>
-          {parsed.criteria.map((c, i) => (
+          {parsed.rows.map((c, i) => (
             <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border
-              ${c.met
-                ? 'bg-emerald-950/20 border-emerald-900/40'
-                : 'bg-red-950/20 border-red-900/40'
+              ${!c.evaluated
+                ? 'bg-zinc-800/30 border-zinc-700/40'
+                : c.met
+                  ? 'bg-emerald-950/20 border-emerald-900/40'
+                  : 'bg-red-950/20 border-red-900/40'
               }`}>
-              {c.met
-                ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              {!c.evaluated
+                ? <span className="w-4 h-4 flex-shrink-0 mt-0.5 text-zinc-600 text-xs font-bold">?</span>
+                : c.met
+                  ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               }
-              <span className={`text-sm leading-relaxed ${c.met ? 'text-zinc-300' : 'text-zinc-400'}`}>{c.text}</span>
+              <span className={`text-sm leading-relaxed ${!c.evaluated ? 'text-zinc-600' : c.met ? 'text-zinc-300' : 'text-zinc-400'}`}>
+                {c.text}
+                {!c.evaluated && <span className="block text-xs text-zinc-600 mt-0.5">Not evaluated — please resubmit.</span>}
+              </span>
             </div>
           ))}
         </div>
