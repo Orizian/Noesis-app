@@ -34,6 +34,13 @@ function parseEvaluation(text) {
   return { passed, criteria, narrative };
 }
 
+const TIER_CONFIG = {
+  excellent: { label: 'Excellent', className: 'bg-violet-950/60 border-violet-700 text-violet-300' },
+  great:     { label: 'Great',     className: 'bg-teal-950/60 border-teal-700 text-teal-300' },
+  pass:      { label: 'Pass',      className: 'bg-emerald-950/60 border-emerald-700 text-emerald-300' },
+  incomplete:{ label: 'Incomplete',className: 'bg-zinc-800/60 border-zinc-700 text-zinc-500' },
+};
+
 export default function ColdAttemptPanel({
   result,
   questionType,
