@@ -199,6 +199,103 @@ export function recordModeOpened(profileId, rootId, mode) {
   }
 }
 
+// ─── Criteria-based scoring (Patch 1) ─────────────────────────────────────────
+// questionCriteria: { root: 0-4, branch_1: 0-3, branch_2: 0-3, branch_3: 0-3 }
+// Stored as best score (highest ever achieved) per question.
+
+const MAX_CRITERIA = { root: 4, branch_1: 3, branch_2: 3, branch_3: 3 };
+
+export function getQuestionCriteria(profileId, rootId) {
+  const profile = getProfileById(profileId);
+  return profile?.questionCriteria?.[rootId] || { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+}
+
+export function setQuestionCriteria(profileId, rootId, questionType, count) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].questionCriteria) profiles[idx].questionCriteria = {};
+  if (!profiles[idx].questionCriteria[rootId]) profiles[idx].questionCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  const current = profiles[idx].questionCriteria[rootId][questionType] || 0;
+  // Always keep best (highest) score
+  profiles[idx].questionCriteria[rootId][questionType] = Math.max(current, count);
+  profiles[idx].lastStudied = Date.now();
+  saveProfiles(profiles);
+}
+
+export function setQuestionCriteriaExact(profileId, rootId, questionType, count) {
+  // Sets exact value (for dev tools)
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].questionCriteria) profiles[idx].questionCriteria = {};
+  if (!profiles[idx].questionCriteria[rootId]) profiles[idx].questionCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  profiles[idx].questionCriteria[rootId][questionType] = count;
+  profiles[idx].lastStudied = Date.now();
+  saveProfiles(profiles);
+}
+
+export function getRootPoints(profileId, rootId) {
+  const qc = getQuestionCriteria(profileId, rootId);
+  return (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
+}
+
+export function getTotalPoints(profileId) {
+  let total = 0;
+  for (let i = 1; i <= 8; i++) total += getRootPoints(profileId, i);
+  return total;
+}
+
+// Derive status from criteria points (display only)
+export function deriveRootStatus(qc) {
+  const rootPts = qc?.root || 0;
+  const b1 = qc?.branch_1 || 0;
+  const b2 = qc?.branch_2 || 0;
+  const b3 = qc?.branch_3 || 0;
+  const total = rootPts + b1 + b2 + b3;
+  if (total === 0) return 'not_started';
+  if (rootPts >= 2 && b1 >= 1 && b2 >= 1 && b3 >= 1 && rootPts >= 4 && b1 >= 3 && b2 >= 3 && b3 >= 3) return 'mastered';
+  if (rootPts >= 2) return 'complete';
+  return 'in_progress';
+}
+
+// Quality tier for a question result
+export function getQualityTier(metCount, isRoot) {
+  if (isRoot) {
+    if (metCount >= 4) return 'excellent';
+    if (metCount >= 3) return 'great';
+    if (metCount >= 2) return 'pass';
+    return 'incomplete';
+  } else {
+    if (metCount >= 3) return 'excellent';
+    if (metCount >= 2) return 'great';
+    if (metCount >= 1) return 'pass';
+    return 'incomplete';
+  }
+}
+
+// Best tier storage per question
+export function getBestTier(profileId, rootId, questionType) {
+  const profile = getProfileById(profileId);
+  return profile?.bestTiers?.[rootId]?.[questionType] || null;
+}
+
+export function setBestTier(profileId, rootId, questionType, tier) {
+  const TIER_RANK = { incomplete: 0, pass: 1, great: 2, excellent: 3 };
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].bestTiers) profiles[idx].bestTiers = {};
+  if (!profiles[idx].bestTiers[rootId]) profiles[idx].bestTiers[rootId] = {};
+  const current = profiles[idx].bestTiers[rootId][questionType] || 'incomplete';
+  if ((TIER_RANK[tier] || 0) > (TIER_RANK[current] || 0)) {
+    profiles[idx].bestTiers[rootId][questionType] = tier;
+    saveProfiles(profiles);
+  }
+}
+
+// ─── End criteria scoring ──────────────────────────────────────────────────────
+
 // Stats helpers
 export function getProfileStats(profileId) {
   const profile = getProfileById(profileId);
