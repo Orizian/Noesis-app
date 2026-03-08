@@ -89,25 +89,18 @@ export default function RootDetail() {
     }
   };
 
-  const handlePassColdAttempt = (questionType) => {
+  const handlePassColdAttempt = (questionType, earnedCount) => {
+    // Criteria are already stored by ChatInterface before calling this.
+    // Here we just keep the legacy progress store in sync (for timestamps etc.)
     if (!activeProfileId) return;
-    const current = progress || {
-      status: 'in_progress',
-      root_question_passed: false,
-      branch_1_passed: false,
-      branch_2_passed: false,
-      branch_3_passed: false,
-    };
+    const current = progress || { startedAt: Date.now() };
     const updates = { ...current };
-    if (questionType === 'root') updates.root_question_passed = true;
-    if (questionType === 'branch_1') updates.branch_1_passed = true;
-    if (questionType === 'branch_2') updates.branch_2_passed = true;
-    if (questionType === 'branch_3') updates.branch_3_passed = true;
-
-    const willBeComplete = updates.root_question_passed;
-    updates.status = willBeComplete ? 'complete' : 'in_progress';
-    if (willBeComplete && !updates.completedAt) updates.completedAt = Date.now();
-
+    if (questionType === 'root') { updates.root_question_passed = true; }
+    if (questionType === 'branch_1') { updates.branch_1_passed = true; }
+    if (questionType === 'branch_2') { updates.branch_2_passed = true; }
+    if (questionType === 'branch_3') { updates.branch_3_passed = true; }
+    updates.status = updates.root_question_passed ? 'complete' : 'in_progress';
+    if (updates.root_question_passed && !updates.completedAt) updates.completedAt = Date.now();
     setRootProgress(rootId, updates);
   };
 
