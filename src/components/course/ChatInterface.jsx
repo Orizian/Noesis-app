@@ -260,8 +260,19 @@ Rules:
     if (mode === 'cold' && isColdSubmit) {
       // Don't add to messages — show in panel instead
       setColdResult(response);
+      // Count criteria met and store best score
+      const isRootQ = questionType === 'root';
+      const totalCrit = isRootQ ? 4 : 3;
+      const criteriaMatches = [...response.matchAll(/\[CRITERIA:(met|unmet)\]/gi)];
+      const metCount = criteriaMatches.filter(m => m[1].toLowerCase() === 'met').length;
+      const earnedCount = Math.min(metCount, totalCrit);
+      if (activeProfileId) {
+        setQuestionCriteria(activeProfileId, root.id, questionType, earnedCount);
+        const tier = getQualityTier(earnedCount, isRootQ);
+        setBestTier(activeProfileId, root.id, questionType, tier);
+      }
       if (response.includes('[PASS]')) {
-        onPassColdAttempt(questionType);
+        onPassColdAttempt(questionType, earnedCount);
       }
     } else {
       // Parse competency signal
