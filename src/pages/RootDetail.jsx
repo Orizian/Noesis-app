@@ -10,7 +10,7 @@ import CompetencyMeter from '../components/course/CompetencyMeter';
 import DifficultyBars from '../components/course/DifficultyBars';
 import { RootDetailBars } from '../components/course/MasteryBars';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { ArrowLeft, Circle, Zap, CheckCircle2, Star } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
