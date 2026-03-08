@@ -141,23 +141,22 @@ export default function RootDetail() {
 
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <BranchCompletionRing progress={progress} />
-              <div>
-                <div className="text-xs font-mono text-zinc-600 mb-1">ROOT {String(root.id).padStart(2, '0')}</div>
-                <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{root.title}</h1>
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="min-w-0">
+              <div className="text-xs font-mono text-zinc-600 mb-1">ROOT {String(root.id).padStart(2, '0')}</div>
+              <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{root.title}</h1>
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full border transition-all duration-[600ms] ${cfg.className}`}>
+                  {cfg.label}
+                </span>
+                <DifficultyBars rootId={rootId} showLabel={true} size="sm" />
               </div>
             </div>
-            <span className={`flex-shrink-0 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-[600ms] ${cfg.className}`}>
-              <StatusIcon className="w-3.5 h-3.5" />
-              {cfg.label}
-            </span>
           </div>
 
           {/* Timestamps */}
           {(progress?.startedAt || progress?.completedAt || progress?.masteredAt) && (
-            <div className="mt-3 flex flex-wrap gap-3">
+            <div className="mb-3 flex flex-wrap gap-3">
               {progress?.startedAt && (
                 <span className="text-xs text-zinc-600">Started {fmt(progress.startedAt)}</span>
               )}
@@ -170,23 +169,15 @@ export default function RootDetail() {
             </div>
           )}
 
-          {/* Cold attempt counters */}
-          {hasAnyAttempts && (
-            <div className="mt-3 flex flex-wrap gap-3">
-              {attemptCounts.root > 0 && (
-                <span className="text-xs text-zinc-600">Root: {attemptCounts.root} attempt{attemptCounts.root !== 1 ? 's' : ''}</span>
-              )}
-              {attemptCounts.branch_1 > 0 && (
-                <span className="text-xs text-zinc-600">· Branch 1: {attemptCounts.branch_1} attempt{attemptCounts.branch_1 !== 1 ? 's' : ''}</span>
-              )}
-              {attemptCounts.branch_2 > 0 && (
-                <span className="text-xs text-zinc-600">· Branch 2: {attemptCounts.branch_2} attempt{attemptCounts.branch_2 !== 1 ? 's' : ''}</span>
-              )}
-              {attemptCounts.branch_3 > 0 && (
-                <span className="text-xs text-zinc-600">· Branch 3: {attemptCounts.branch_3} attempt{attemptCounts.branch_3 !== 1 ? 's' : ''}</span>
-              )}
-            </div>
-          )}
+          {/* Progress bars */}
+          <div className="mt-4 p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl">
+            <RootDetailBars
+              rootPoints={rootPoints}
+              gauntletPoints={0}
+              hasPerfected={false}
+              questionPoints={qc}
+            />
+          </div>
         </div>
 
         {/* Mode Selector */}
