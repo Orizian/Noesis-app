@@ -79,6 +79,21 @@ function ThinBar({ value, max, ticks = [], color, label, rightLabel, height = 'h
   );
 }
 
+// Gauntlet bar color — pure function of points
+function getGauntletBarColor(value, max) {
+  if (max === 104) {
+    if (value <= 31) return 'bg-zinc-600';
+    if (value <= 71) return 'bg-emerald-500';
+    if (value < 104) return 'bg-teal-500';
+    return 'bg-violet-500';
+  }
+  // per-root (max 13)
+  if (value <= 3) return 'bg-zinc-600';
+  if (value <= 8) return 'bg-emerald-500';
+  if (value <= 12) return 'bg-teal-500';
+  return 'bg-violet-500';
+}
+
 // Global overview bar — 0 to 104
 export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, perfectedCount }) {
   return (
@@ -92,14 +107,54 @@ export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, pe
         height="h-2"
       />
       <p className="text-xs text-zinc-500">
-        {completeCount > 0 && <span>{completeCount} Complete</span>}
-        {completeCount > 0 && masteredCount > 0 && <span className="mx-1">·</span>}
-        {masteredCount > 0 && <span>{masteredCount} Mastered</span>}
-        {(completeCount > 0 || masteredCount > 0) && perfectedCount > 0 && <span className="mx-1">·</span>}
-        {perfectedCount > 0 && <span>{perfectedCount} Perfected</span>}
-        {completeCount === 0 && masteredCount === 0 && perfectedCount === 0 && (
-          <span>0 Complete · 0 Mastered · 0 Perfected</span>
-        )}
+        {completeCount === 0 && masteredCount === 0 && perfectedCount === 0
+          ? <span>0 Complete · 0 Mastered · 0 Perfected</span>
+          : <>
+              <span>{completeCount} Complete</span>
+              <span className="mx-1">·</span>
+              <span>{masteredCount} Mastered</span>
+              <span className="mx-1">·</span>
+              <span>{perfectedCount} Perfected</span>
+            </>
+        }
+      </p>
+    </div>
+  );
+}
+
+// Global gauntlet bar — 0 to 104, only shown if any gauntlet attempted
+export function GlobalGauntletBar({ totalPoints }) {
+  const color = getGauntletBarColor(totalPoints, 104);
+  return (
+    <ThinBar
+      value={totalPoints}
+      max={104}
+      ticks={[32, 72]}
+      color={color}
+      label="Gauntlet"
+      rightLabel={`${totalPoints} / 104`}
+      height="h-2"
+    />
+  );
+}
+
+// Vocabulary progress bar
+export function VocabBar({ attempted, total, pass, great, excellent }) {
+  return (
+    <div className="space-y-1.5">
+      <ThinBar
+        value={attempted}
+        max={total}
+        color="bg-amber-500"
+        label="Vocabulary"
+        rightLabel={`${attempted} / ${total} terms`}
+        height="h-2"
+      />
+      <p className="text-xs text-zinc-500">
+        {excellent > 0 || great > 0 || pass > 0
+          ? <><span className="text-violet-400">{excellent} Excellent</span><span className="mx-1">·</span><span className="text-teal-400">{great} Great</span><span className="mx-1">·</span><span className="text-emerald-400">{pass} Pass</span></>
+          : <span>No flashcard attempts yet</span>
+        }
       </p>
     </div>
   );
