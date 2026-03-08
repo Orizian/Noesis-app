@@ -273,8 +273,6 @@ Student answer: "${answer}"`;
     }
   };
 
-  const totalScore = questionResults.reduce((sum, r) => sum + r.metCount, 0);
-  const barColor = getGauntletBarColor(totalScore);
   const allPassed = questionResults.length === 4 && questionResults.every(r => r.passed);
 
   // ── IDLE — not eligible
