@@ -450,7 +450,7 @@ Student answer: "${answer}"`;
             </div>
             <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
               <div
-                className={`absolute left-0 top-0 h-full rounded-full transition-all duration-500 ${barColor}`}
+                className={`absolute left-0 top-0 h-full rounded-full transition-all duration-500 ${getGauntletBarColor(totalScore)}`}
                 style={{ width: `${(totalScore / 13) * 100}%` }}
               />
               {[4, 9, 13].map(tick => (
