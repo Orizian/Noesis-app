@@ -250,7 +250,8 @@ Student answer: "${answer}"`;
     // else minTimer will trigger reveal
   };
 
-  const handleContinue = () => {
+  const handleContinue = (updatedResults) => {
+    const results = updatedResults || questionResults;
     if (currentQ < QUESTIONS.length - 1) {
       setCurrentQ(q => q + 1);
       setAnswer('');
@@ -260,8 +261,8 @@ Student answer: "${answer}"`;
     } else {
       // Save gauntlet results
       const bulk = {};
-      questionResults.forEach((r, i) => {
-        bulk[QUESTIONS[i].key] = r.metCount;
+      results.forEach((r, i) => {
+        if (QUESTIONS[i]) bulk[QUESTIONS[i].key] = r.metCount;
       });
       if (profileId) {
         setGauntletCriteriaBulk(profileId, root.id, bulk);
