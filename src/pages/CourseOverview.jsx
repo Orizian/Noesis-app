@@ -39,7 +39,7 @@ export default function CourseOverview() {
   const [showDevTools, setShowDevTools] = useState(false);
   const tapTimer = useRef(null);
 
-  const progress = activeProfileId ? getProfileProgress(activeProfileId) : {};
+  // progress variable no longer used directly here (criteria-based)
 
   const handleTitleTap = useCallback(() => {
     setTitleTaps(prev => {
