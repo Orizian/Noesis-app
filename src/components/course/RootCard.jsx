@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import DifficultyBars from './DifficultyBars';
 import { RootCardBars } from './MasteryBars';
-import { getQuestionCriteria, deriveRootStatus, getBestTier } from '../profiles/profileStorage';
+import { getQuestionCriteria, deriveRootStatus } from '../profiles/profileStorage';
 
 const STATUS_CONFIG = {
   not_started: { label: 'Not Started', badgeClass: 'bg-zinc-800 text-zinc-500 border-zinc-700', borderClass: 'border-l-zinc-700' },
@@ -13,23 +13,20 @@ const STATUS_CONFIG = {
   mastered:    { label: 'Mastered',    badgeClass: 'bg-violet-950/50 text-violet-300 border-violet-800/50', borderClass: 'border-l-violet-500' },
 };
 
-const TIER_LABEL = { excellent: 'Excellent', great: 'Great', pass: 'Pass', incomplete: null };
-const TIER_CLASS = {
-  excellent: 'text-violet-400',
-  great:     'text-teal-400',
-  pass:      'text-emerald-400',
-};
+// Derive tier label purely from total root points (0–13)
+function getTierFromPoints(pts) {
+  if (pts <= 1) return null;
+  if (pts <= 5) return { label: 'Pass', className: 'text-emerald-400' };
+  if (pts <= 12) return { label: 'Great', className: 'text-teal-400' };
+  return { label: 'Excellent', className: 'text-violet-400' };
+}
 
 export default function RootCard({ root, profileId }) {
-  // Derive everything from criteria
   const qc = profileId ? getQuestionCriteria(profileId, root.id) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
   const status = deriveRootStatus(qc);
   const cfg = STATUS_CONFIG[status];
-
-  // Best tier for root question (shown on card once passed)
-  const rootQTier = profileId ? getBestTier(profileId, root.id, 'root') : null;
-  const showTierLabel = rootQTier && rootQTier !== 'incomplete' && qc.root >= 2;
+  const tier = getTierFromPoints(rootPoints);
 
   return (
     <Link to={createPageUrl('RootDetail') + `?rootId=${root.id}`}>

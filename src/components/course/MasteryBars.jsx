@@ -1,30 +1,42 @@
 import React from 'react';
 
-// Color interpolation for mastery bars
+// Color — pure function of points earned, never derived from tier labels
 function getMasteryColor(value, max) {
-  if (max === 0) return 'bg-zinc-700';
-  const pct = value / max;
-  if (pct === 0) return 'bg-zinc-700';
   if (max === 104) {
-    if (pct < 0.31) return 'bg-emerald-500';
-    if (pct < 0.65) return 'bg-teal-500';
-    return 'bg-violet-500';
+    if (value <= 15) return 'bg-zinc-600';
+    if (value <= 39) {
+      // green interpolating: emerald-400 approaching emerald-600
+      const t = (value - 16) / (39 - 16);
+      return t < 0.5 ? 'bg-emerald-400' : 'bg-emerald-500';
+    }
+    if (value < 104) {
+      // teal interpolating
+      const t = (value - 40) / (103 - 40);
+      return t < 0.5 ? 'bg-teal-400' : 'bg-teal-500';
+    }
+    return 'bg-violet-500'; // 104
   }
   if (max === 13) {
-    if (value < 2) return 'bg-zinc-500';
-    if (value < 5) return 'bg-emerald-500';
-    if (value < 9) return 'bg-teal-500';
-    return 'bg-violet-500';
+    if (value <= 1) return 'bg-zinc-600';
+    if (value <= 5) {
+      const t = (value - 2) / (5 - 2);
+      return t < 0.5 ? 'bg-emerald-400' : 'bg-emerald-500';
+    }
+    if (value <= 12) {
+      const t = (value - 6) / (12 - 6);
+      return t < 0.5 ? 'bg-teal-400' : 'bg-teal-500';
+    }
+    return 'bg-violet-500'; // 13
   }
   // per-question bars (max 4 or 3)
   if (max === 4) {
-    if (value < 2) return 'bg-zinc-500';
+    if (value < 2) return 'bg-zinc-600';
     if (value < 3) return 'bg-emerald-500';
     if (value < 4) return 'bg-teal-500';
     return 'bg-violet-500';
   }
   if (max === 3) {
-    if (value < 1) return 'bg-zinc-500';
+    if (value < 1) return 'bg-zinc-600';
     if (value < 2) return 'bg-emerald-500';
     if (value < 3) return 'bg-teal-500';
     return 'bg-violet-500';
