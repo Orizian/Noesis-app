@@ -14,14 +14,10 @@ import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
-  getColdAttemptCount,
   getOpenedModes,
   recordModeOpened,
   getQuestionCriteria,
   deriveRootStatus,
-  setQuestionCriteria,
-  setBestTier,
-  getQualityTier,
 } from '../components/profiles/profileStorage';
 import { format } from 'date-fns';
 
