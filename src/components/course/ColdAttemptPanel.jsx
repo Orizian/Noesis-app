@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, XCircle, RotateCcw, ArrowRight, BookOpen } from 'lucide-react';
+import { getQualityTier } from '../profiles/profileStorage';
 
 const EVAL_STAGES = [
   { text: 'Reading your response...', duration: 1500 },
