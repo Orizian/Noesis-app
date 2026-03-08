@@ -32,38 +32,7 @@ const statusConfig = {
   mastered:     { label: 'Mastered',     className: 'bg-violet-950/50 text-violet-300 border-violet-800/50' },
 };
 
-function BranchCompletionRing({ progress }) {
-  const passed = [
-    progress?.root_question_passed,
-    progress?.branch_1_passed,
-    progress?.branch_2_passed,
-    progress?.branch_3_passed,
-  ].filter(Boolean).length;
-  const total = 4;
-  const size = 48;
-  const stroke = 3;
-  const r = (size - stroke) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (passed / total) * circ;
-  const color = passed === 4 ? '#8b5cf6' : passed >= 2 ? '#10b981' : '#3b82f6';
-
-  return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="absolute top-0 left-0 -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#27272a" strokeWidth={stroke} />
-        <circle
-          cx={size / 2} cy={size / 2} r={r} fill="none"
-          stroke={color} strokeWidth={stroke}
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 0.6s ease' }}
-        />
-      </svg>
-      <span className="relative z-10 text-xs font-mono text-zinc-400">{passed}/{total}</span>
-    </div>
-  );
-}
+// Ring removed — replaced by MasteryBars
 
 export default function RootDetail() {
   const urlParams = new URLSearchParams(window.location.search);
