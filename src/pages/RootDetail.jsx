@@ -112,16 +112,6 @@ export default function RootDetail() {
     setDictKey(k => k + 1);
   };
 
-  // Attempt counts
-  const attemptCounts = activeProfileId ? {
-    root: getColdAttemptCount(activeProfileId, rootId, 'root'),
-    branch_1: getColdAttemptCount(activeProfileId, rootId, 'branch_1'),
-    branch_2: getColdAttemptCount(activeProfileId, rootId, 'branch_2'),
-    branch_3: getColdAttemptCount(activeProfileId, rootId, 'branch_3'),
-  } : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
-
-  const hasAnyAttempts = Object.values(attemptCounts).some(c => c > 0);
-
   const fmt = (ts) => ts ? format(new Date(ts), 'MMM d, yyyy') : null;
 
   return (
