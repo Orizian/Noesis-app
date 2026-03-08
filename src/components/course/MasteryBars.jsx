@@ -206,8 +206,8 @@ export function RootDetailBars({ rootPoints, gauntletPoints, hasPerfected, quest
         <ThinBar
           value={gauntletPoints || 0}
           max={13}
-          ticks={[2, 4]}
-          color="bg-cyan-500"
+          ticks={[4, 9]}
+          color={getGauntletBarColor(gauntletPoints || 0, 13)}
           label="Gauntlet"
           rightLabel={`${gauntletPoints || 0} / 13`}
           height="h-2.5"
