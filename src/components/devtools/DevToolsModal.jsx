@@ -9,6 +9,7 @@ import {
   getGauntletCriteria,
   resetGauntletForRoot,
   setGauntletPassedDate,
+  clearGauntletPassedDate,
   setFlashcardTierExact,
   clearAllFlashcardTiers,
   getVocabStats,
