@@ -185,20 +185,19 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
   };
 
   const handleConquerAbsolute = () => {
+    const now = Date.now();
     ROOTS.forEach(root => {
       ['root','branch_1','branch_2','branch_3'].forEach(k =>
         setGauntletCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3)
       );
-      // Also set gauntlet passed date if not set
-      const { setGauntletPassedDate: spd } = require('../profiles/profileStorage');
-      try { spd(profileId, root.id, Date.now()); } catch(e) {}
+      setGauntletPassedDate(profileId, root.id, now);
     });
-    // Mark absolute gauntlet conquered
+    // Mark absolute gauntlet conquered directly in localStorage
     const profiles = JSON.parse(localStorage.getItem('exsci_profiles') || '[]');
     const idx = profiles.findIndex(p => p.id === profileId);
     if (idx !== -1) {
       if (!profiles[idx].absoluteGauntlet) profiles[idx].absoluteGauntlet = {};
-      profiles[idx].absoluteGauntlet.conqueredAt = Date.now();
+      profiles[idx].absoluteGauntlet.conqueredAt = now;
       profiles[idx].absoluteGauntlet.inProgress = false;
       localStorage.setItem('exsci_profiles', JSON.stringify(profiles));
     }
