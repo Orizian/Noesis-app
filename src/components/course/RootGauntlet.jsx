@@ -1,42 +1,43 @@
-import React, { useState } from 'react';
-import { Swords, CheckCircle2, XCircle, ArrowRight, RotateCcw, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { BRANCH_RUBRICS } from '../courseData';
-import { useProfile } from '../profiles/ProfileContext';
+import { ROOTS, BRANCH_RUBRICS } from '../courseData';
 import {
-  isGauntletEligible,
-  setGauntletCriteriaBulk,
-  getGauntletCriteria,
-  getGauntletRootPoints,
-  isRootPerfected,
   getQualityTier,
+  setGauntletCriteriaBulk,
+  setGauntletPassedDate,
+  isRootGauntletPassed,
+  getGauntletPassedDate,
+  getGauntletRootPoints,
+  getGauntletCriteria,
 } from '../profiles/profileStorage';
 import { format } from 'date-fns';
 
-const QUESTIONS = [
-  { key: 'root', label: 'Root Question', maxCriteria: 4 },
-  { key: 'branch_1', label: 'Branch 1', maxCriteria: 3 },
-  { key: 'branch_2', label: 'Branch 2', maxCriteria: 3 },
-  { key: 'branch_3', label: 'Branch 3', maxCriteria: 3 },
+export const GAUNTLET_QUESTIONS = [
+  { key: 'root',     label: 'Root Question', maxCriteria: 4 },
+  { key: 'branch_1', label: 'Branch 1',      maxCriteria: 3 },
+  { key: 'branch_2', label: 'Branch 2',      maxCriteria: 3 },
+  { key: 'branch_3', label: 'Branch 3',      maxCriteria: 3 },
 ];
 
-const EVAL_STAGES = [
-  { text: 'Reading your response...', duration: 1500 },
-  { text: 'Checking against mastery criteria...', duration: 1500 },
-  { text: 'Finalizing evaluation...', duration: 2000 },
+const EVAL_PHASES = [
+  'Reading your response...',
+  'Checking against mastery criteria...',
+  'Finalizing evaluation...',
 ];
 
 const TIER_CONFIG = {
-  excellent: { label: 'Excellent', className: 'bg-violet-950/60 border-violet-700 text-violet-300' },
-  great:     { label: 'Great',     className: 'bg-teal-950/60 border-teal-700 text-teal-300' },
-  pass:      { label: 'Pass',      className: 'bg-emerald-950/60 border-emerald-700 text-emerald-300' },
-  incomplete:{ label: 'Incomplete',className: 'bg-zinc-800/60 border-zinc-700 text-zinc-500' },
+  excellent:  { label: 'Excellent',  className: 'bg-violet-950/60 border-violet-700 text-violet-300' },
+  great:      { label: 'Great',      className: 'bg-teal-950/60 border-teal-700 text-teal-300' },
+  pass:       { label: 'Pass',       className: 'bg-emerald-950/60 border-emerald-700 text-emerald-300' },
+  incomplete: { label: 'Incomplete', className: 'bg-zinc-800/60 border-zinc-700 text-zinc-500' },
 };
 
-function getGauntletBarColor(pts) {
-  if (pts <= 3) return 'bg-zinc-600';
-  if (pts <= 8) return 'bg-emerald-500';
-  if (pts <= 12) return 'bg-teal-500';
+function getBarColor(pts, max) {
+  const pct = pts / max;
+  if (pct < 0.31) return 'bg-zinc-500';
+  if (pct < 0.62) return 'bg-emerald-500';
+  if (pct < 0.93) return 'bg-teal-500';
   return 'bg-violet-500';
 }
 
@@ -46,178 +47,117 @@ function parseRubricCriteria(rubricStr) {
 }
 
 function parseEvaluation(text, rubricCriteria) {
-  const passed = text.includes('[PASS]');
   const criteriaMatches = [...text.matchAll(/\[(CRITERIA:(met|unmet))\]\s*(.+)/gi)];
   const aiCriteria = criteriaMatches.map(m => ({ met: m[2].toLowerCase() === 'met', text: m[3].trim() }));
-
-  // Always render all rubric criteria rows; fill from AI results, fallback if missing
   const rows = rubricCriteria.map((criterionText, i) => {
-    if (i < aiCriteria.length) {
-      return { met: aiCriteria[i].met, text: criterionText, evaluated: true };
-    }
+    if (i < aiCriteria.length) return { met: aiCriteria[i].met, text: criterionText, evaluated: true };
     return { met: false, text: criterionText, evaluated: false };
   });
-
   const metCount = rows.filter(r => r.met).length;
   const narrativeMatch = text.match(/\[NARRATIVE\]\s*([\s\S]+?)(?=\[CRITERIA|$)/i);
-  let narrative = narrativeMatch ? narrativeMatch[1].trim() : '';
-  if (!narrative) {
-    narrative = text
-      .replace(/\[PASS\]/gi, '').replace(/\[FAIL\]/gi, '')
-      .replace(/\[(CRITERIA:(met|unmet))\]\s*.+/gi, '')
-      .replace(/\[NARRATIVE\]/gi, '').trim();
-  }
-  return { passed, rows, metCount, narrative };
+  let narrative = narrativeMatch ? narrativeMatch[1].trim() : text
+    .replace(/\[PASS\]/gi, '').replace(/\[FAIL\]/gi, '')
+    .replace(/\[(CRITERIA:(met|unmet))\]\s*.+/gi, '')
+    .replace(/\[NARRATIVE\]/gi, '').trim();
+  return { rows, metCount, narrative };
 }
 
-function EvalLoader({ stage }) {
+function ProgressBar({ current, total }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 min-h-[240px]">
-      <div className="w-12 h-12 rounded-full border-2 border-zinc-700 flex items-center justify-center mb-8">
-        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+    <div className="border-b border-zinc-800">
+      <div className="flex items-center justify-between px-4 py-2.5">
+        <span className="text-xs font-semibold text-amber-400 tracking-wide">Question {current + 1} of {total}</span>
       </div>
-      <p className="text-zinc-300 text-base font-medium animate-pulse">
-        {EVAL_STAGES[Math.min(stage, EVAL_STAGES.length - 1)].text}
-      </p>
-      <div className="flex gap-1.5 mt-6">
-        {EVAL_STAGES.map((_, i) => (
-          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i <= stage ? 'bg-emerald-600' : 'bg-zinc-700'}`} />
+      <div className="h-1 bg-zinc-800">
+        <div className="h-full bg-amber-600 transition-all duration-500" style={{ width: `${(current / total) * 100}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function EvalLoader({ phaseIdx }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-14 min-h-[220px]">
+      <div className="w-10 h-10 rounded-full border-2 border-zinc-700 flex items-center justify-center mb-6">
+        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+      </div>
+      <p className="text-zinc-300 text-sm font-medium animate-pulse">{EVAL_PHASES[Math.min(phaseIdx, 2)]}</p>
+      <div className="flex gap-1.5 mt-5">
+        {EVAL_PHASES.map((_, i) => (
+          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i <= phaseIdx ? 'bg-amber-600' : 'bg-zinc-700'}`} />
         ))}
       </div>
     </div>
   );
 }
 
-function QuestionResult({ result, questionMeta, onContinue, isLast }) {
-  const { rows, metCount, narrative, passed } = result;
-  const tier = getQualityTier(metCount, questionMeta.key === 'root');
-  const tierConfig = TIER_CONFIG[tier];
-
+function ResultPanel({ result, qMeta, onContinue, continueLabel }) {
+  const tier = getQualityTier(result.metCount, qMeta.key === 'root');
+  const tierCfg = TIER_CONFIG[tier];
+  const passed = result.passed;
   return (
-    <div className="space-y-4 animate-in fade-in duration-500">
+    <div className="space-y-4 animate-in fade-in duration-400">
       <div className="flex flex-col items-center gap-2">
-        <div className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border text-base font-bold
+        <div className={`flex items-center gap-2 px-5 py-2 rounded-2xl border text-sm font-bold
           ${passed ? 'bg-emerald-950/60 border-emerald-700 text-emerald-300' : 'bg-red-950/60 border-red-800 text-red-300'}`}>
-          {passed ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+          {passed ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
           {passed ? 'PASS' : 'FAIL'}
         </div>
-        {tierConfig && (
-          <div className={`px-3 py-1 rounded-xl border text-sm font-semibold ${tierConfig.className}`}>
-            {tierConfig.label}
-          </div>
-        )}
-        <span className="text-sm text-zinc-400">{metCount} of {questionMeta.maxCriteria} criteria met</span>
+        <span className={`text-xs px-3 py-1 rounded-xl border font-semibold ${tierCfg.className}`}>{tierCfg.label}</span>
+        <span className="text-xs text-zinc-500">{result.metCount} of {qMeta.maxCriteria} criteria met</span>
       </div>
-
       <div className="space-y-2">
-        <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Rubric Breakdown</p>
-        {rows.map((r, i) => (
-          <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border
-            ${!r.evaluated ? 'bg-zinc-800/30 border-zinc-700/40' :
-              r.met ? 'bg-emerald-950/20 border-emerald-900/40' : 'bg-red-950/20 border-red-900/40'}`}>
+        <p className="text-xs text-zinc-500 uppercase tracking-wider">Rubric</p>
+        {result.rows.map((r, i) => (
+          <div key={i} className={`flex items-start gap-3 px-3 py-2.5 rounded-xl border text-sm leading-relaxed
+            ${!r.evaluated ? 'bg-zinc-800/30 border-zinc-700/40 text-zinc-600' :
+              r.met ? 'bg-emerald-950/20 border-emerald-900/40 text-zinc-300' : 'bg-red-950/20 border-red-900/40 text-zinc-400'}`}>
             {!r.evaluated
-              ? <span className="w-4 h-4 flex-shrink-0 mt-0.5 text-zinc-600 text-xs">?</span>
+              ? <span className="flex-shrink-0 text-zinc-600 text-xs mt-0.5">?</span>
               : r.met
                 ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-            }
-            <span className={`text-sm leading-relaxed ${!r.evaluated ? 'text-zinc-600' : r.met ? 'text-zinc-300' : 'text-zinc-400'}`}>
-              {r.text}
-              {!r.evaluated && <span className="block text-xs text-zinc-600 mt-0.5">Not evaluated — please resubmit.</span>}
-            </span>
+                : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />}
+            {r.text}
           </div>
         ))}
       </div>
-
-      {narrative && (
+      {result.narrative && (
         <div className="px-4 py-3 rounded-xl border bg-zinc-800/40 border-zinc-700/50 text-sm text-zinc-400 leading-relaxed">
-          {narrative}
+          {result.narrative}
         </div>
       )}
-
-      <button
-        onClick={onContinue}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
-      >
-        {isLast ? 'See Gauntlet Results' : 'Next Question'} <ArrowRight className="w-4 h-4" />
+      <button onClick={onContinue}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-medium text-sm transition-colors">
+        {continueLabel} <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   );
 }
 
-export default function RootGauntlet({ root, profileId, onGauntletComplete }) {
-  const { refresh } = useProfile();
-  const [phase, setPhase] = useState('idle'); // idle | caution | active | evaluating | results | summary
-  const [currentQ, setCurrentQ] = useState(0);
-  const [answer, setAnswer] = useState('');
-  const [evalStage, setEvalStage] = useState(0);
-  const [evalResult, setEvalResult] = useState(null);
-  const [revealResult, setRevealResult] = useState(false);
-  const [questionResults, setQuestionResults] = useState([]); // [{metCount, passed, tier}]
-
-  const eligible = profileId ? isGauntletEligible(profileId, root.id) : false;
-  const perfected = profileId ? isRootPerfected(profileId, root.id) : false;
-  const gc = profileId ? getGauntletCriteria(profileId, root.id) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
-  const gauntletPoints = (gc.root || 0) + (gc.branch_1 || 0) + (gc.branch_2 || 0) + (gc.branch_3 || 0);
-
-  const getQuestion = (qKey) => {
-    if (qKey === 'root') return root.rootQuestion;
-    const idx = parseInt(qKey.split('_')[1]) - 1;
+// ── Main exported hook-based evaluator ────────────────────────────────────────
+// Exported so AbsoluteGauntlet can reuse evaluation logic
+export async function evaluateAnswer({ root, qMeta, answer }) {
+  const getRubric = (key) => key === 'root' ? root.rubric : (BRANCH_RUBRICS[root.id]?.[key] || root.rubric);
+  const getQuestion = (key) => {
+    if (key === 'root') return root.rootQuestion;
+    const idx = parseInt(key.split('_')[1]) - 1;
     return root.branches[idx]?.question || root.rootQuestion;
   };
 
-  const getRubric = (qKey) => {
-    if (qKey === 'root') return root.rubric;
-    return BRANCH_RUBRICS[root.id]?.[qKey] || root.rubric;
-  };
+  const rubricStr = getRubric(qMeta.key);
+  const rubricCriteria = parseRubricCriteria(rubricStr);
+  const totalCrit = qMeta.maxCriteria;
 
-  const startGauntlet = () => {
-    setPhase('active');
-    setCurrentQ(0);
-    setAnswer('');
-    setQuestionResults([]);
-    setEvalResult(null);
-    setRevealResult(false);
-  };
+  const strictInstructions = `Evaluate each criterion as a strict binary — met or not met. A criterion is met only if the answer explicitly and specifically demonstrates the required mechanism, prediction, or connection stated in that criterion. General correctness, directional accuracy, and implied understanding do not satisfy a criterion. You must be able to point to a specific sentence or phrase in the answer that satisfies the criterion. If you cannot, the criterion is not met. Do not be generous. Do not infer. Do not reward effort or length. Evaluate only what is explicitly present.`;
 
-  const submitAnswer = async () => {
-    if (!answer.trim()) return;
-    const qMeta = QUESTIONS[currentQ];
-    const rubricStr = getRubric(qMeta.key);
-    const rubricCriteria = parseRubricCriteria(rubricStr);
-    const totalCrit = qMeta.maxCriteria;
-
-    setPhase('evaluating');
-    setEvalStage(0);
-    setEvalResult(null);
-    setRevealResult(false);
-
-    // Stage timers
-    let elapsed = 0;
-    const stageTimers = [];
-    EVAL_STAGES.forEach((s, i) => {
-      stageTimers.push(setTimeout(() => setEvalStage(i), elapsed));
-      elapsed += s.duration;
-    });
-
-    // Track min 5s display time
-    let timerDone = false;
-    let pendingResult = null;
-    const minTimer = setTimeout(() => {
-      timerDone = true;
-      if (pendingResult) setRevealResult(true);
-    }, 5000);
-
-    const strictInstructions = `Evaluate each criterion as a strict binary — met or not met. A criterion is met only if the answer explicitly and specifically demonstrates the required mechanism, prediction, or connection stated in that criterion. General correctness, directional accuracy, and implied understanding do not satisfy a criterion. You must be able to point to a specific sentence or phrase in the answer that satisfies the criterion. If you cannot, the criterion is not met. Do not be generous. Do not infer. Do not reward effort or length. Evaluate only what is explicitly present.`;
-
-    const prompt = `You are evaluating a cold assessment answer for Root ${root.id}: "${root.title}".
+  const prompt = `You are evaluating a gauntlet answer for Root ${root.id}: "${root.title}".
 Question (${qMeta.label}): "${getQuestion(qMeta.key)}"
 
 ${strictInstructions}
 
 This rubric has exactly ${totalCrit} criteria. Evaluate ALL ${totalCrit} — no more, no fewer.
 
-COLD ATTEMPT PROTOCOL — CRITICAL FORMAT:
+GAUNTLET PROTOCOL — CRITICAL FORMAT:
 First: [PASS] or [FAIL] based on whether the majority of criteria are met.
 Then list EXACTLY ${totalCrit} criteria using this format, one per line:
 [CRITERIA:met] Plain English criterion description
@@ -229,118 +169,91 @@ ${rubricStr}
 
 Student answer: "${answer}"`;
 
-    const response = await base44.integrations.Core.InvokeLLM({ prompt });
-    stageTimers.forEach(clearTimeout);
+  const response = await base44.integrations.Core.InvokeLLM({ prompt });
+  const parsed = parseEvaluation(response, rubricCriteria);
+  const passed = response.includes('[PASS]');
+  return { ...parsed, passed };
+}
 
-    const parsed = parseEvaluation(response, rubricCriteria);
-    const metCount = parsed.metCount;
-    const isRootQ = qMeta.key === 'root';
-    const tier = getQualityTier(metCount, isRootQ);
-    const passed = response.includes('[PASS]');
+// ── Root Gauntlet Flow component ───────────────────────────────────────────────
+// Used inside RootGauntletPage
+export default function RootGauntletFlow({ root, profileId, onComplete, onCancel }) {
+  const [phase, setPhase] = useState('caution'); // caution | active | evaluating | result | summary
+  const [currentQ, setCurrentQ] = useState(0);
+  const [answer, setAnswer] = useState('');
+  const [phaseIdx, setPhaseIdx] = useState(0);
+  const [currentResult, setCurrentResult] = useState(null);
+  const [allResults, setAllResults] = useState([]);
+  const evalTimers = useRef([]);
 
-    const newResult = { metCount, passed, tier, rows: parsed.rows, narrative: parsed.narrative };
-    setQuestionResults(prev => [...prev, newResult]);
-    setEvalResult(newResult);
-    pendingResult = newResult;
+  const clearTimers = () => { evalTimers.current.forEach(clearTimeout); evalTimers.current = []; };
 
-    if (timerDone) {
-      clearTimeout(minTimer);
-      setRevealResult(true);
-    }
-    // else minTimer will trigger reveal
+  const startGauntlet = () => {
+    setCurrentQ(0);
+    setAnswer('');
+    setAllResults([]);
+    setCurrentResult(null);
+    setPhase('active');
   };
 
-  const handleContinue = (updatedResults) => {
-    const results = updatedResults || questionResults;
-    if (currentQ < QUESTIONS.length - 1) {
+  const submitAnswer = async () => {
+    if (!answer.trim()) return;
+    const qMeta = GAUNTLET_QUESTIONS[currentQ];
+    clearTimers();
+    setPhase('evaluating');
+    setPhaseIdx(0);
+    setCurrentResult(null);
+
+    // Phase animation timers
+    evalTimers.current.push(setTimeout(() => setPhaseIdx(1), 1500));
+    evalTimers.current.push(setTimeout(() => setPhaseIdx(2), 3000));
+
+    // Run AI + enforce min 5s wait via Promise.all
+    const minWait = new Promise(res => setTimeout(res, 5000));
+    const evalPromise = evaluateAnswer({ root, qMeta, answer });
+    const [result] = await Promise.all([evalPromise, minWait]);
+
+    clearTimers();
+    const newResults = [...allResults, result];
+    setAllResults(newResults);
+    setCurrentResult(result);
+    setPhase('result');
+  };
+
+  const handleContinue = () => {
+    if (currentQ < GAUNTLET_QUESTIONS.length - 1) {
       setCurrentQ(q => q + 1);
       setAnswer('');
-      setEvalResult(null);
-      setRevealResult(false);
+      setCurrentResult(null);
       setPhase('active');
     } else {
-      // Save gauntlet results
+      // Save results
       const bulk = {};
-      results.forEach((r, i) => {
-        if (QUESTIONS[i]) bulk[QUESTIONS[i].key] = r.metCount;
-      });
+      allResults.forEach((r, i) => { bulk[GAUNTLET_QUESTIONS[i].key] = r.metCount; });
       if (profileId) {
         setGauntletCriteriaBulk(profileId, root.id, bulk);
-        refresh();
+        const allPassed = allResults.every(r => r.passed);
+        if (allPassed) setGauntletPassedDate(profileId, root.id, Date.now());
       }
       setPhase('summary');
-      if (onGauntletComplete) onGauntletComplete();
     }
   };
 
-  const allPassed = questionResults.length === 4 && questionResults.every(r => r.passed);
-
-  // ── IDLE — not eligible
-  if (!eligible) {
-    return (
-      <div className="mt-4 px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-900/40 text-center">
-        <p className="text-xs text-zinc-600">
-          <Swords className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-          Root Gauntlet — Complete all 4 cold attempts first
-        </p>
-      </div>
-    );
-  }
-
-  // ── IDLE — eligible
-  if (phase === 'idle') {
-    return (
-      <div className="mt-4">
-        <button
-          onClick={() => setPhase('caution')}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl 
-            bg-amber-950/30 hover:bg-amber-950/50 border border-amber-800/50 
-            text-amber-400 font-medium text-sm transition-colors"
-        >
-          <Swords className="w-4 h-4" />
-          Root Gauntlet — Take the full root in one sitting
-          {perfected && <span className="ml-2 text-violet-400 text-xs font-semibold">Perfected</span>}
-        </button>
-        {gauntletPoints > 0 && (
-          <div className="mt-2 px-4 py-2 bg-zinc-900/60 border border-zinc-800 rounded-xl">
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-xs text-zinc-500">Best Gauntlet Score</span>
-              <span className="text-xs font-mono text-zinc-400">{gauntletPoints} / 13</span>
-            </div>
-            <div className="relative h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className={`absolute left-0 top-0 h-full rounded-full transition-all ${getGauntletBarColor(gauntletPoints)}`}
-                style={{ width: `${(gauntletPoints / 13) * 100}%` }}
-              />
-              {[4, 9].map(tick => (
-                <div key={tick} className="absolute top-[-2px] bottom-[-2px] w-px bg-zinc-600 z-10"
-                  style={{ left: `${(tick / 13) * 100}%` }} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // ── CAUTION SCREEN
   if (phase === 'caution') {
     return (
-      <div className="mt-4 border border-amber-800/40 rounded-xl bg-amber-950/10 p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <Swords className="w-5 h-5 text-amber-400" />
-          <h3 className="text-base font-semibold text-amber-300">Root Gauntlet: {root.title}</h3>
-        </div>
-        <div className="space-y-2 text-sm text-zinc-400">
-          <p>Answer all 4 questions back to back.</p>
-          <p>No assistance. No skipping. No returning to a previous answer once submitted.</p>
+      <div className="border border-amber-800/40 rounded-2xl bg-amber-950/10 p-6 space-y-5">
+        <div>
+          <h2 className="text-lg font-bold text-amber-300 mb-1">Root Gauntlet — {root.title}</h2>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            Answer all 4 questions back to back. No assistance. No skipping. No returning to a previous answer once submitted.
+          </p>
         </div>
         <div className="flex gap-3">
           <button onClick={startGauntlet}
-            className="flex-1 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-medium text-sm transition-colors">
+            className="flex-1 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-semibold text-sm transition-colors">
             Begin
           </button>
-          <button onClick={() => setPhase('idle')}
+          <button onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm transition-colors">
             Cancel
           </button>
@@ -349,44 +262,20 @@ Student answer: "${answer}"`;
     );
   }
 
-  // ── EVALUATING / RESULT
-  if (phase === 'evaluating') {
-    if (!revealResult || !evalResult) {
-      return (
-        <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
-          <GauntletProgressBar current={currentQ} total={4} />
-          <div className="p-6">
-            <EvalLoader stage={evalStage} />
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
-        <GauntletProgressBar current={currentQ} total={4} />
-        <div className="p-6">
-          <QuestionResult
-            result={evalResult}
-            questionMeta={QUESTIONS[currentQ]}
-            onContinue={handleContinue}
-            isLast={currentQ === QUESTIONS.length - 1}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // ── ACTIVE — answer input
   if (phase === 'active') {
-    const qMeta = QUESTIONS[currentQ];
-    const question = getQuestion(qMeta.key);
+    const qMeta = GAUNTLET_QUESTIONS[currentQ];
+    const getRootQuestion = (key) => {
+      if (key === 'root') return root.rootQuestion;
+      const idx = parseInt(key.split('_')[1]) - 1;
+      return root.branches[idx]?.question || root.rootQuestion;
+    };
     return (
-      <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
-        <GauntletProgressBar current={currentQ} total={4} />
+      <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 overflow-hidden">
+        <ProgressBar current={currentQ} total={4} />
         <div className="p-5 space-y-4">
           <div>
-            <p className="text-xs font-semibold text-amber-400 mb-1">{qMeta.label}</p>
-            <p className="text-sm text-zinc-300 leading-relaxed">{question}</p>
+            <p className="text-xs font-semibold text-amber-400 mb-1.5">{qMeta.label}</p>
+            <p className="text-sm text-zinc-300 leading-relaxed">{getRootQuestion(qMeta.key)}</p>
           </div>
           <textarea
             value={answer}
@@ -399,9 +288,9 @@ Student answer: "${answer}"`;
           <button
             onClick={submitAnswer}
             disabled={!answer.trim()}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-800/60 hover:bg-red-800/80
-              disabled:bg-zinc-700 disabled:text-zinc-500 text-red-200 font-medium text-sm transition-colors"
-          >
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
+              bg-red-900/60 hover:bg-red-800/70 disabled:bg-zinc-700 disabled:text-zinc-500
+              text-red-200 font-medium text-sm transition-colors">
             Submit Answer
           </button>
         </div>
@@ -409,100 +298,90 @@ Student answer: "${answer}"`;
     );
   }
 
-  // ── SUMMARY
-  if (phase === 'summary') {
-    const perfectedNow = questionResults.length === 4 && questionResults.reduce((s,r) => s + r.metCount, 0) === 13;
-    const completedDate = format(new Date(), 'MMM d, yyyy');
-    const totalScore = questionResults.reduce((sum, r) => sum + r.metCount, 0);
+  if (phase === 'evaluating') {
     return (
-      <div className="mt-4 border border-zinc-800 rounded-xl bg-zinc-900/60 overflow-hidden">
-        <div className="p-5 space-y-5">
-          <div className="flex items-center gap-2">
-            <Swords className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-semibold text-zinc-200">Gauntlet Summary</h3>
-          </div>
+      <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 overflow-hidden">
+        <ProgressBar current={currentQ} total={4} />
+        <div className="p-6"><EvalLoader phaseIdx={phaseIdx} /></div>
+      </div>
+    );
+  }
 
-          {/* Per-question results */}
-          <div className="space-y-2">
-            {questionResults.map((r, i) => {
-              const tier = getQualityTier(r.metCount, QUESTIONS[i].key === 'root');
-              const cfg = TIER_CONFIG[tier] || TIER_CONFIG.incomplete;
-              return (
-                <div key={i} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-zinc-800/50">
-                  <div className="flex items-center gap-2">
-                    {r.passed
-                      ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                      : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    }
-                    <span className="text-sm text-zinc-400">{QUESTIONS[i].label}</span>
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${cfg.className}`}>{cfg.label}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Total score bar */}
-          <div>
-            <div className="flex justify-between items-baseline mb-1.5">
-              <span className="text-xs text-zinc-500">Total Score</span>
-              <span className="text-xs font-mono text-zinc-400">{totalScore} / 13</span>
-            </div>
-            <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
-              <div
-                className={`absolute left-0 top-0 h-full rounded-full transition-all duration-500 ${getGauntletBarColor(totalScore)}`}
-                style={{ width: `${(totalScore / 13) * 100}%` }}
-              />
-              {[4, 9, 13].map(tick => (
-                <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10"
-                  style={{ left: `${(tick / 13) * 100}%` }} />
-              ))}
-            </div>
-          </div>
-
-          {/* Pass / fail summary */}
-          <div className="text-center">
-            {perfectedNow ? (
-              <p className="text-violet-300 font-bold text-base">✦ Perfected — {completedDate}</p>
-            ) : allPassed ? (
-              <p className="text-amber-400 font-semibold">Root Gauntlet Passed — {completedDate}</p>
-            ) : (
-              <div>
-                <p className="text-zinc-400 text-sm mb-1">Failed questions:</p>
-                {questionResults.map((r, i) => !r.passed && (
-                  <p key={i} className="text-red-400 text-sm">{QUESTIONS[i].label}</p>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={() => { setPhase('idle'); }}
-            className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm transition-colors"
-          >
-            Done
-          </button>
+  if (phase === 'result' && currentResult) {
+    return (
+      <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 overflow-hidden">
+        <ProgressBar current={currentQ} total={4} />
+        <div className="p-5">
+          <ResultPanel
+            result={currentResult}
+            qMeta={GAUNTLET_QUESTIONS[currentQ]}
+            onContinue={handleContinue}
+            continueLabel={currentQ < 3 ? 'Next Question' : 'See Results'}
+          />
         </div>
       </div>
     );
   }
 
-  return null;
-}
+  if (phase === 'summary') {
+    const totalScore = allResults.reduce((s, r) => s + r.metCount, 0);
+    const allPassed = allResults.every(r => r.passed);
+    const completedDate = format(new Date(), 'MMM d, yyyy');
+    return (
+      <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 p-5 space-y-5">
+        <h3 className="text-base font-bold text-zinc-200">Gauntlet Summary</h3>
 
-function GauntletProgressBar({ current, total }) {
-  const pct = ((current) / total) * 100;
-  return (
-    <div className="border-b border-zinc-800">
-      <div className="flex items-center justify-between px-4 py-2">
-        <span className="text-xs font-medium text-amber-400">Question {current + 1} of {total}</span>
+        <div className="space-y-2">
+          {allResults.map((r, i) => {
+            const tier = getQualityTier(r.metCount, GAUNTLET_QUESTIONS[i].key === 'root');
+            const cfg = TIER_CONFIG[tier];
+            return (
+              <div key={i} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-zinc-800/50">
+                <div className="flex items-center gap-2">
+                  {r.passed ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-red-500" />}
+                  <span className="text-sm text-zinc-400">{GAUNTLET_QUESTIONS[i].label}</span>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${cfg.className}`}>{cfg.label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Score bar */}
+        <div>
+          <div className="flex justify-between items-baseline mb-1.5">
+            <span className="text-xs text-zinc-500">Total Score</span>
+            <span className="text-xs font-mono text-zinc-400">{totalScore} / 13</span>
+          </div>
+          <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
+            <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor(totalScore, 13)}`}
+              style={{ width: `${(totalScore / 13) * 100}%` }} />
+            {[4, 9, 13].map(tick => (
+              <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10"
+                style={{ left: `${(tick / 13) * 100}%` }} />
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center py-1">
+          {allPassed
+            ? <p className="text-amber-400 font-semibold text-base">Root Gauntlet Passed — {completedDate}</p>
+            : <div className="space-y-1">
+                <p className="text-zinc-400 text-sm">Failed questions:</p>
+                {allResults.map((r, i) => !r.passed && (
+                  <p key={i} className="text-red-400 text-sm">{GAUNTLET_QUESTIONS[i].label}</p>
+                ))}
+              </div>
+          }
+        </div>
+
+        <button onClick={() => onComplete(allResults)}
+          className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors">
+          Return to Course Overview
+        </button>
       </div>
-      <div className="h-1 bg-zinc-800">
-        <div
-          className="h-full bg-amber-600 transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }

@@ -51,6 +51,8 @@ import CourseOverview from './pages/CourseOverview';
 import ProfileSelect from './pages/ProfileSelect';
 import RootDetail from './pages/RootDetail';
 import Stats from './pages/Stats';
+import RootGauntletPage from './pages/RootGauntletPage';
+import AbsoluteGauntletPage from './pages/AbsoluteGauntletPage';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +61,8 @@ export const PAGES = {
     "ProfileSelect": ProfileSelect,
     "RootDetail": RootDetail,
     "Stats": Stats,
+    "RootGauntletPage": RootGauntletPage,
+    "AbsoluteGauntletPage": AbsoluteGauntletPage,
 }
 
 export const pagesConfig = {
