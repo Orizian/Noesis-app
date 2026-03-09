@@ -364,46 +364,16 @@ function FlashcardGauntlet({ rootId, rootTitle, profileId, terms, onExit, onTier
     );
   }
 
-  // Result screen
+  // Result screen — extracted to avoid hooks-in-conditionals
   if (phase === 'result' && currentResult) {
-    const [showExcellent, setShowExcellent] = useState(false);
-    const [animate, setAnimate] = useState(false);
-    useEffect(() => { requestAnimationFrame(() => setAnimate(true)); }, []);
-    const tierCfg = TIER_CONFIG[currentResult.tier] || TIER_CONFIG.attempted;
-    const isLast = termIndex === terms.length - 1;
     return (
-      <div className="flex flex-col px-5 py-5 min-h-[360px]">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-zinc-500">Flashcard Gauntlet</span>
-          <span className="text-xs text-zinc-600 font-mono">Term {termIndex + 1} of {terms.length}</span>
-        </div>
-        <p className="text-lg font-semibold text-zinc-100 mb-5 leading-snug">{currentTerm.term}</p>
-        <div className="flex justify-center mb-5">
-          <span className={`px-6 py-2 rounded-full border text-sm font-semibold transition-all duration-500 ${tierCfg.bigClass} ${animate ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}
-            style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-            {tierCfg.label}
-          </span>
-        </div>
-        <p className="text-sm text-zinc-400 leading-relaxed mb-5 text-center">{currentResult.feedback}</p>
-        {currentResult.excellent_standard && currentResult.tier !== 'excellent' && (
-          <div className="mb-5">
-            <button onClick={() => setShowExcellent(v => !v)} className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400 transition-colors">
-              <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${showExcellent ? 'rotate-90' : ''}`} />
-              What Excellent looks like
-            </button>
-            {showExcellent && (
-              <div className="mt-2 px-3 py-2.5 rounded-lg bg-violet-950/20 border border-violet-900/30">
-                <p className="text-xs text-zinc-400 leading-relaxed">{currentResult.excellent_standard}</p>
-              </div>
-            )}
-          </div>
-        )}
-        <div className="mt-auto">
-          <button onClick={handleContinue} className="w-full py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-sm font-semibold transition-colors">
-            {isLast ? 'See Results' : 'Continue'}
-          </button>
-        </div>
-      </div>
+      <GauntletResultScreen
+        term={currentTerm}
+        termIndex={termIndex}
+        totalTerms={terms.length}
+        result={currentResult}
+        onContinue={handleContinue}
+      />
     );
   }
 
