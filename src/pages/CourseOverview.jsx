@@ -26,7 +26,7 @@ function ProgressSection({ profileId }) {
   const gauntletTotal = profileId ? getTotalGauntletPoints(profileId) : 0;
   const anyGauntlet = gauntletTotal > 0;
 
-  const vocabStats = profileId ? getVocabStats(profileId) : { attempted: 0, pass: 0, great: 0, excellent: 0 };
+  const vocabScore = profileId ? getTotalVocabScore(profileId) : 0;
 
   return (
     <div className="mb-10 space-y-3">
@@ -39,13 +39,7 @@ function ProgressSection({ profileId }) {
       {anyGauntlet && (
         <GlobalGauntletBar totalPoints={gauntletTotal} />
       )}
-      <VocabBar
-        attempted={vocabStats.attempted}
-        total={80}
-        pass={vocabStats.pass}
-        great={vocabStats.great}
-        excellent={vocabStats.excellent}
-      />
+      <VocabBar excellentScore={vocabScore} />
     </div>
   );
 }
