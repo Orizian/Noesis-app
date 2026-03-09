@@ -196,6 +196,17 @@ export default function RootDetail() {
           </div>
         </div>
 
+        {/* Vocabulary — top of page, above mode tabs */}
+        <div className="mb-6">
+          <FlashcardDictionary
+            key={dictKey}
+            rootId={rootId}
+            onVocabChanged={() => refresh()}
+            onLearnInTeachMe={handleLearnInTeachMe}
+            initialFlashcardIndex={dictFocusedFlashcardIndex}
+          />
+        </div>
+
         {/* Mode Selector */}
         <div className="mb-6">
           <ModeSelector
@@ -205,10 +216,10 @@ export default function RootDetail() {
           />
         </div>
 
-        {/* Empty state — no mode selected yet and root not started */}
+        {/* Empty state — no mode selected yet */}
         {!activeMode && (
-          <div className="mb-10 py-12 text-center">
-            <p className="text-zinc-500 text-sm">Start with Teach Me to build your understanding of this concept.</p>
+          <div className="mb-10 py-10 text-center">
+            <p className="text-zinc-500 text-sm">Select a mode above to begin.</p>
           </div>
         )}
 
@@ -250,16 +261,6 @@ export default function RootDetail() {
         {/* Gauntlet notice */}
         <div className="mb-6">
           <p className="text-xs text-zinc-600 text-center">Gauntlet available from course overview.</p>
-        </div>
-
-        {/* Vocabulary */}
-        <div className="mb-6">
-          <FlashcardDictionary
-            rootId={rootId}
-            onVocabChanged={() => refresh()}
-            onLearnInTeachMe={handleLearnInTeachMe}
-            initialFlashcardIndex={dictFocusedFlashcardIndex}
-          />
         </div>
 
         {/* Question Bank */}
