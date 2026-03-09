@@ -50,8 +50,6 @@ export default function CourseOverview() {
   const [showDevTools, setShowDevTools] = useState(false);
   const tapTimer = useRef(null);
 
-
-
   const handleTitleTap = useCallback(() => {
     setTitleTaps(prev => {
       const next = prev + 1;
@@ -80,15 +78,14 @@ export default function CourseOverview() {
                 className="text-2xl md:text-3xl font-semibold tracking-tight cursor-default select-none"
                 onClick={handleTitleTap}
               >
-                Principles of Exercise Science
+                Human Performance Physiology
               </h1>
             </div>
             <ProfileDropdown />
           </div>
 
           <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-6">
-            Eight foundational concepts. Mastery-based progression. Understanding mechanism over memorizing facts.
-            Complete each root by passing the cold attempt.
+            Eight foundational mechanisms. Mastery-based progression. This course builds a causal model of how the body produces force, generates energy, adapts to stress, and recovers from exercise — so you can explain and predict performance, not just follow training rules.
           </p>
 
           {/* Progress section */}
