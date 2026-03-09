@@ -91,17 +91,20 @@ function GauntletRow({ root, profileId, onChanged }) {
   };
   const setMax = () => {
     ['root','branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3));
+    setGauntletPassedDate(profileId, root.id, Date.now());
     setVals({ root: 4, branch_1: 3, branch_2: 3, branch_3: 3 });
     onChanged();
   };
   const setMinPass = () => {
     setGauntletCriteriaExact(profileId, root.id, 'root', 2);
     ['branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, root.id, k, 1));
+    setGauntletPassedDate(profileId, root.id, Date.now());
     setVals({ root: 2, branch_1: 1, branch_2: 1, branch_3: 1 });
     onChanged();
   };
   const reset = () => {
     resetGauntletForRoot(profileId, root.id);
+    clearGauntletPassedDate(profileId, root.id);
     setVals({ root: 0, branch_1: 0, branch_2: 0, branch_3: 0 });
     onChanged();
   };
