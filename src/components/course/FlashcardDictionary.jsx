@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BookMarked, ChevronDown, HelpCircle, X, ChevronRight, ArrowLeft, GraduationCap } from 'lucide-react';
+import { BookMarked, ChevronDown, HelpCircle, X, ChevronRight, ArrowLeft, GraduationCap, Star } from 'lucide-react';
 import { DICTIONARY } from '../courseData';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '../profiles/ProfileContext';
@@ -56,10 +56,62 @@ function TierBadge({ tier, big }) {
   );
 }
 
-// ── Flashcard input screen (one term, full width) ────────────────────────────
+// ── Recommended tag + tooltip ────────────────────────────────────────────────
+function RecommendedTag() {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipRef = useRef(null);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    const handler = (e) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target)) setShowTooltip(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showTooltip]);
+
+  return (
+    <div className="flex items-center gap-2 mt-2.5 mb-1">
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/40 border border-amber-800/50 text-amber-400 text-xs font-medium">
+        <Star className="w-3 h-3 fill-amber-400" />
+        Recommended before questions
+      </div>
+      <div className="relative" ref={tooltipRef}>
+        <button
+          onClick={() => setShowTooltip(v => !v)}
+          className="w-5 h-5 rounded-full border border-zinc-700 bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors flex-shrink-0"
+          aria-label="Why recommended?"
+        >
+          <span className="text-xs font-semibold leading-none">?</span>
+        </button>
+        {showTooltip && (
+          <div className="absolute left-0 top-7 z-40 w-72 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl p-4">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <span className="text-xs font-semibold text-zinc-300">Why complete vocabulary first?</span>
+              <button onClick={() => setShowTooltip(false)} className="text-zinc-600 hover:text-zinc-400 flex-shrink-0 mt-0.5">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Completing vocabulary first builds the foundation for the questions. Each term in this section appears directly in the root question and branch questions. Students who complete vocabulary before attempting questions score significantly higher on their first cold attempt.
+            </p>
+            <button
+              onClick={() => setShowTooltip(false)}
+              className="mt-3 w-full py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs font-medium transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Flashcard input screen ────────────────────────────────────────────────────
 function FlashcardInputScreen({ term, termIndex, totalTerms, rootId, profileId, onResult, onBack }) {
   const [answer, setAnswer] = useState('');
-  const [phase, setPhase] = useState('input'); // 'input' | 'evaluating'
+  const [phase, setPhase] = useState('input');
   const [evalPhraseIndex, setEvalPhraseIndex] = useState(0);
   const phraseTimer = useRef(null);
 
@@ -68,7 +120,6 @@ function FlashcardInputScreen({ term, termIndex, totalTerms, rootId, profileId, 
     setPhase('evaluating');
     setEvalPhraseIndex(0);
 
-    // Phrase cycling
     let idx = 0;
     phraseTimer.current = setInterval(() => {
       idx = Math.min(idx + 1, EVAL_PHRASES.length - 1);
@@ -87,12 +138,18 @@ The learner's response: "${answer}"
 
 Evaluate ONLY against this term. No cross-concept knowledge expected.
 
+Evaluate only against the three tier criteria as written. Do not add requirements that are not explicitly stated in the rubric. Do not require specific terminology if the concept is demonstrated clearly in plain language. Do not penalize for omitting mechanisms that are not explicitly required by the rubric criteria.
+
+For Excellent tier specifically — the requirement is a correct definition plus a mechanistic causal chain that includes the direction of causation AND either downstream consequences OR what would change if the mechanism were absent or impaired. Both downstream consequences AND the absent condition are not required simultaneously — either one alongside direction of causation satisfies Excellent.
+
+A response that clearly demonstrates genuine mechanistic understanding in plain language satisfies Excellent even if it does not use technical terminology. Evaluate the understanding demonstrated not the vocabulary used.
+
 Award exactly one tier based solely on what is explicitly present:
 - pass: Correct definition in own words. Basic understanding.
 - great: Correct definition AND functional explanation of practical use.
-- excellent: Correct definition AND full mechanistic causal chain — direction of causation, downstream consequences, what would change if absent or impaired. Naming the mechanism without causal direction does NOT reach excellent.
+- excellent: Correct definition AND mechanistic causal chain with direction of causation AND either downstream consequences OR what would change if absent/impaired.
 
-Be strict. Do not reward length or effort. Evaluate only what is explicitly present.
+Be strict about pass vs great. Be fair about excellent — plain language mechanistic understanding counts.
 
 Return JSON with:
 - tier: "pass" | "great" | "excellent"
@@ -129,46 +186,49 @@ Return JSON with:
   }, []);
 
   return (
-    <div className="flex flex-col min-h-[320px]">
+    <div className="flex flex-col min-h-[360px]">
       {/* Progress bar */}
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-center justify-between mb-2">
-          <button onClick={onBack} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+          <button onClick={onBack} className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Vocabulary
           </button>
           <span className="text-xs text-zinc-600 font-mono">Term {termIndex + 1} of {totalTerms}</span>
         </div>
         <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-zinc-600 rounded-full transition-all duration-300"
+            className="h-full bg-zinc-500 rounded-full transition-all duration-300"
             style={{ width: `${((termIndex + 1) / totalTerms) * 100}%` }}
           />
         </div>
       </div>
 
       {phase === 'evaluating' ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-3 px-5 py-10">
-          <div className="flex gap-1.5 mb-2">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 px-5 py-12">
+          <div className="flex gap-2 mb-1">
             {[0,1,2].map(i => (
-              <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i <= evalPhraseIndex ? 'bg-zinc-300 scale-110' : 'bg-zinc-700'}`} />
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${i <= evalPhraseIndex ? 'bg-zinc-300 scale-110' : 'bg-zinc-700'}`}
+              />
             ))}
           </div>
           <p className="text-sm text-zinc-400 animate-pulse text-center">{EVAL_PHRASES[evalPhraseIndex]}</p>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col px-5 pb-5">
-          <p className="text-base font-semibold text-zinc-100 mb-1">{term.term}</p>
-          <p className="text-xs text-zinc-500 italic mb-4 leading-relaxed">
-            <span className="text-zinc-500 not-italic font-medium">Why it matters — </span>{term.why}
-          </p>
+        <div className="flex-1 flex flex-col px-5 pb-6">
+          {/* Term name — same weight as cold attempt question */}
+          <p className="text-lg font-semibold text-zinc-100 mb-1 leading-snug">{term.term}</p>
+          {/* Subtle label */}
+          <p className="text-xs text-zinc-500 mb-3 mt-0.5">Define and explain:</p>
           <textarea
             value={answer}
             onChange={e => setAnswer(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Write your definition and explanation..."
-            rows={4}
-            className="w-full flex-1 resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200
-              placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors mb-3"
+            rows={5}
+            className="w-full resize-none bg-zinc-900/80 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200
+              placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors mb-4 leading-relaxed"
             autoFocus
           />
           <div className="flex items-center justify-between">
@@ -176,8 +236,8 @@ Return JSON with:
             <button
               onClick={handleSubmit}
               disabled={!answer.trim()}
-              className="px-5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 disabled:bg-zinc-700 disabled:text-zinc-500
-                text-white text-sm font-medium transition-colors"
+              className="px-6 py-2.5 rounded-xl bg-zinc-100 hover:bg-white disabled:bg-zinc-800 disabled:text-zinc-600
+                text-zinc-950 text-sm font-semibold transition-colors"
             >
               Submit
             </button>
@@ -188,7 +248,7 @@ Return JSON with:
   );
 }
 
-// ── Flashcard result screen ──────────────────────────────────────────────────
+// ── Flashcard result screen ───────────────────────────────────────────────────
 function FlashcardResultScreen({ term, termIndex, totalTerms, result, onTryAgain, onNext, onBack }) {
   const [showExcellent, setShowExcellent] = useState(false);
   const [animate, setAnimate] = useState(false);
@@ -201,22 +261,22 @@ function FlashcardResultScreen({ term, termIndex, totalTerms, result, onTryAgain
   const tierCfg = TIER_CONFIG[result.tier];
 
   return (
-    <div className="flex flex-col px-5 py-5 min-h-[320px]">
+    <div className="flex flex-col px-5 py-5 min-h-[360px]">
       {/* Top progress / back */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+      <div className="flex items-center justify-between mb-5">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Vocabulary
         </button>
         <span className="text-xs text-zinc-600 font-mono">Term {termIndex + 1} of {totalTerms}</span>
       </div>
 
       {/* Term name */}
-      <p className="text-base font-semibold text-zinc-100 mb-5">{term.term}</p>
+      <p className="text-lg font-semibold text-zinc-100 mb-5 leading-snug">{term.term}</p>
 
-      {/* Big tier badge — centerpiece */}
+      {/* Big tier badge */}
       <div className="flex justify-center mb-5">
         <span
-          className={`px-5 py-2 rounded-full border text-sm font-semibold transition-all duration-500
+          className={`px-6 py-2 rounded-full border text-sm font-semibold transition-all duration-500
             ${tierCfg.bigClass}
             ${animate ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}
           style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
@@ -226,7 +286,7 @@ function FlashcardResultScreen({ term, termIndex, totalTerms, result, onTryAgain
       </div>
 
       {/* Feedback */}
-      <p className="text-sm text-zinc-400 leading-relaxed mb-4 text-center">{result.feedback}</p>
+      <p className="text-sm text-zinc-400 leading-relaxed mb-5 text-center">{result.feedback}</p>
 
       {/* Expandable excellent standard */}
       {result.excellent_standard && result.tier !== 'excellent' && (
@@ -246,17 +306,17 @@ function FlashcardResultScreen({ term, termIndex, totalTerms, result, onTryAgain
         </div>
       )}
 
-      {/* Buttons */}
-      <div className="mt-auto flex gap-2.5">
+      {/* Buttons — match cold attempt style */}
+      <div className="mt-auto flex gap-3">
         <button
           onClick={onTryAgain}
-          className="flex-1 py-2.5 rounded-lg border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-800 transition-colors"
+          className="flex-1 py-2.5 rounded-xl border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-800 transition-colors"
         >
           Try Again
         </button>
         <button
           onClick={onNext}
-          className="flex-1 py-2.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-100 text-sm font-medium transition-colors"
+          className="flex-1 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-sm font-semibold transition-colors"
         >
           {isLast ? 'Back to Vocabulary' : 'Next Term'}
         </button>
@@ -265,17 +325,15 @@ function FlashcardResultScreen({ term, termIndex, totalTerms, result, onTryAgain
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main component ─────────────────────────────────────────────────────────────
 export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInTeachMe, initialFlashcardIndex }) {
-  const [open, setOpen] = useState(false);
-  const [dictionaryMode, setDictionaryMode] = useState('reference'); // 'reference' | 'flashcard'
+  const [open, setOpen] = useState(true); // starts open — vocab is prominent
+  const [dictionaryMode, setDictionaryMode] = useState('reference');
   const [showHeaderLegend, setShowHeaderLegend] = useState(false);
   const [vocabVersion, setVocabVersion] = useState(0);
-  // Flashcard navigation state
   const [flashcardIndex, setFlashcardIndex] = useState(0);
-  const [flashcardPhase, setFlashcardPhase] = useState('input'); // 'input' | 'result'
+  const [flashcardPhase, setFlashcardPhase] = useState('input');
   const [flashcardResult, setFlashcardResult] = useState(null);
-  // Pending tier update (only show on row after result dismissed)
   const [pendingTiers, setPendingTiers] = useState({});
 
   const headerLegendRef = useRef(null);
@@ -283,7 +341,6 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
 
   const terms = DICTIONARY[rootId] || [];
 
-  // Open in flashcard mode at a specific index (from "Learn in Teach Me" via parent)
   useEffect(() => {
     if (initialFlashcardIndex !== undefined && initialFlashcardIndex !== null) {
       setOpen(true);
@@ -302,11 +359,17 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Attempted count for this root's progress bar
+  // Count how many terms have been attempted at pass tier or above
+  const getRowTier = (termName) =>
+    pendingTiers[termName] ?? (activeProfileId ? getFlashcardTier(activeProfileId, rootId, termName) : null);
+
   const attemptedCount = terms.filter(t => {
-    const tier = pendingTiers[t.term] ?? (activeProfileId ? getFlashcardTier(activeProfileId, rootId, t.term) : null);
+    const tier = getRowTier(t.term);
     return tier && tier !== 'incomplete';
   }).length;
+
+  // Show recommended tag if any terms are below pass
+  const allAttemptedAtPass = attemptedCount === terms.length;
 
   const handleTierUpdated = (termName, tier) => {
     setPendingTiers(prev => ({ ...prev, [termName]: tier }));
@@ -317,7 +380,6 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
   const handleResult = (result) => {
     setFlashcardResult(result);
     setFlashcardPhase('result');
-    // Update tier badge on row only after result screen is dismissed
   };
 
   const handleTryAgain = () => {
@@ -326,16 +388,12 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
   };
 
   const handleNext = () => {
-    // Now update tier badge for this term
-    if (flashcardResult) {
-      handleTierUpdated(terms[flashcardIndex].term, flashcardResult.tier);
-    }
+    if (flashcardResult) handleTierUpdated(terms[flashcardIndex].term, flashcardResult.tier);
     if (flashcardIndex < terms.length - 1) {
       setFlashcardIndex(i => i + 1);
       setFlashcardPhase('input');
       setFlashcardResult(null);
     } else {
-      // Last term — back to vocabulary list
       setDictionaryMode('reference');
       setFlashcardPhase('input');
       setFlashcardResult(null);
@@ -343,9 +401,7 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
   };
 
   const handleBackToVocab = () => {
-    if (flashcardResult) {
-      handleTierUpdated(terms[flashcardIndex].term, flashcardResult.tier);
-    }
+    if (flashcardResult) handleTierUpdated(terms[flashcardIndex].term, flashcardResult.tier);
     setDictionaryMode('reference');
     setFlashcardPhase('input');
     setFlashcardResult(null);
@@ -358,38 +414,26 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
     setDictionaryMode('flashcard');
   };
 
-  const getRowTier = (termName) => {
-    return pendingTiers[termName] ?? (activeProfileId ? getFlashcardTier(activeProfileId, rootId, termName) : null);
-  };
-
   return (
     <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/40">
       {/* Header row */}
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-zinc-800/50">
-        <button
-          onClick={() => setOpen(o => !o)}
-          className="flex items-center gap-2 flex-1 text-left hover:opacity-80 transition-opacity"
-        >
-          <BookMarked className="w-4 h-4 text-zinc-500" />
-          <span className="text-sm font-medium text-zinc-300">Vocabulary</span>
-          <span className="text-xs text-zinc-600">({terms.length} terms)</span>
-          <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
-        </button>
+      <div className="px-4 pt-3.5 pb-3 border-b border-zinc-800/50">
+        <div className="flex items-center justify-between gap-2">
+          {/* Left: title (bold, not a collapse button) */}
+          <span className="text-sm font-bold text-zinc-200">Vocabulary</span>
 
-        {open && (
+          {/* Right: flashcard toggle */}
           <div className="flex items-center gap-1.5">
-            {/* Mode toggle */}
             <div className="flex rounded-lg border border-zinc-700 overflow-hidden text-xs">
               <button
-                onClick={() => { setDictionaryMode('reference'); setFlashcardPhase('input'); setFlashcardResult(null); }}
+                onClick={() => { setDictionaryMode('reference'); setFlashcardPhase('input'); setFlashcardResult(null); setOpen(true); }}
                 className={`px-2.5 py-1 transition-colors ${dictionaryMode === 'reference' ? 'bg-zinc-700 text-zinc-200' : 'text-zinc-500 hover:text-zinc-400'}`}
               >Reference</button>
               <button
-                onClick={() => { setDictionaryMode('flashcard'); setFlashcardIndex(0); setFlashcardPhase('input'); setFlashcardResult(null); }}
+                onClick={() => { setDictionaryMode('flashcard'); setFlashcardIndex(0); setFlashcardPhase('input'); setFlashcardResult(null); setOpen(true); }}
                 className={`px-2.5 py-1 transition-colors ${dictionaryMode === 'flashcard' ? 'bg-zinc-700 text-zinc-200' : 'text-zinc-500 hover:text-zinc-400'}`}
               >Flashcard</button>
             </div>
-            {/* Legend icon (reference mode only) */}
             {dictionaryMode === 'reference' && (
               <div className="relative" ref={headerLegendRef}>
                 <button
@@ -403,93 +447,96 @@ export default function FlashcardDictionary({ rootId, onVocabChanged, onLearnInT
               </div>
             )}
           </div>
-        )}
+        </div>
+
+        {/* Vocab progress bar — always visible */}
+        <div className="mt-2.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-zinc-500">{attemptedCount} of {terms.length} terms attempted</span>
+          </div>
+          <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-emerald-700 rounded-full transition-all duration-500"
+              style={{ width: terms.length > 0 ? `${(attemptedCount / terms.length) * 100}%` : '0%' }}
+            />
+          </div>
+        </div>
+
+        {/* Recommended tag */}
+        {!allAttemptedAtPass && <RecommendedTag />}
       </div>
 
-      {open && (
-        <>
-          {/* Vocab progress bar */}
-          <div className="px-4 py-2.5 border-b border-zinc-800/30 bg-zinc-900/30">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-zinc-500">Vocabulary</span>
-              <span className="text-xs text-zinc-600">{attemptedCount} of {terms.length} terms attempted</span>
-            </div>
-            <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-700 rounded-full transition-all duration-500"
-                style={{ width: terms.length > 0 ? `${(attemptedCount / terms.length) * 100}%` : '0%' }}
-              />
-            </div>
-          </div>
-
-          {/* Reference mode */}
-          {dictionaryMode === 'reference' && (
-            <div className="divide-y divide-zinc-800/40">
-              {terms.map((term, i) => {
-                const rowTier = getRowTier(term.term);
-                return (
-                  <div key={`${i}-${vocabVersion}-${profilesVersion}`} className="px-4 py-3.5">
-                    {/* Desktop: single row. Mobile: stacked */}
-                    <div className="flex gap-2">
-                      {/* Left: term info — 60% */}
-                      <div className="flex-1 min-w-0" style={{ flex: '0 0 60%', maxWidth: '60%' }}>
-                        <p className="text-sm font-semibold text-zinc-200 mb-1">{term.term}</p>
-                        <p className="text-xs text-zinc-600 italic leading-relaxed">
-                          <span className="text-zinc-500 not-italic font-medium">Why it matters — </span>
-                          {term.why}
-                        </p>
-                      </div>
-                      {/* Right: badge + button — 40% */}
-                      <div className="flex flex-col items-end justify-center gap-2" style={{ flex: '0 0 40%', maxWidth: '40%' }}>
-                        <TierBadge tier={rowTier} />
-                        {onLearnInTeachMe && (
-                          <button
-                            onClick={() => onLearnInTeachMe(term, i)}
-                            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors text-xs whitespace-nowrap"
-                            title="Learn in Teach Me"
-                          >
-                            <GraduationCap className="w-3 h-3 flex-shrink-0" />
-                            <span className="hidden sm:inline">Learn in Teach Me</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
+      {/* Reference mode */}
+      {dictionaryMode === 'reference' && (
+        <div className="divide-y divide-zinc-800/40">
+          {terms.map((term, i) => {
+            const rowTier = getRowTier(term.term);
+            return (
+              <div key={`${i}-${vocabVersion}-${profilesVersion}`} className="px-4 py-3.5">
+                <div className="flex gap-2">
+                  <div className="flex-1 min-w-0" style={{ flex: '0 0 60%', maxWidth: '60%' }}>
+                    <p className="text-sm font-semibold text-zinc-200 mb-1">{term.term}</p>
+                    <p className="text-xs text-zinc-600 italic leading-relaxed">
+                      <span className="text-zinc-500 not-italic font-medium">Why it matters — </span>
+                      {term.why}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  <div className="flex flex-col items-end justify-center gap-2" style={{ flex: '0 0 40%', maxWidth: '40%' }}>
+                    <TierBadge tier={rowTier} />
+                    {onLearnInTeachMe && (
+                      <button
+                        onClick={() => onLearnInTeachMe(term, i)}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors text-xs whitespace-nowrap"
+                        title="Learn in Teach Me"
+                      >
+                        <GraduationCap className="w-3 h-3 flex-shrink-0" />
+                        <span className="hidden sm:inline">Learn in Teach Me</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleStartFlashcard(i)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors text-xs whitespace-nowrap"
+                      title="Flashcard this term"
+                    >
+                      <BookMarked className="w-3 h-3 flex-shrink-0" />
+                      <span className="hidden sm:inline">Flashcard</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-          {/* Flashcard mode */}
-          {dictionaryMode === 'flashcard' && (
-            <div>
-              {flashcardPhase === 'input' && (
-                <FlashcardInputScreen
-                  key={`input-${flashcardIndex}-${vocabVersion}`}
-                  term={terms[flashcardIndex]}
-                  termIndex={flashcardIndex}
-                  totalTerms={terms.length}
-                  rootId={rootId}
-                  profileId={activeProfileId}
-                  onResult={handleResult}
-                  onBack={handleBackToVocab}
-                />
-              )}
-              {flashcardPhase === 'result' && flashcardResult && (
-                <FlashcardResultScreen
-                  key={`result-${flashcardIndex}`}
-                  term={terms[flashcardIndex]}
-                  termIndex={flashcardIndex}
-                  totalTerms={terms.length}
-                  result={flashcardResult}
-                  onTryAgain={handleTryAgain}
-                  onNext={handleNext}
-                  onBack={handleBackToVocab}
-                />
-              )}
-            </div>
+      {/* Flashcard mode */}
+      {dictionaryMode === 'flashcard' && (
+        <div className="bg-zinc-900/60">
+          {flashcardPhase === 'input' && (
+            <FlashcardInputScreen
+              key={`input-${flashcardIndex}-${vocabVersion}`}
+              term={terms[flashcardIndex]}
+              termIndex={flashcardIndex}
+              totalTerms={terms.length}
+              rootId={rootId}
+              profileId={activeProfileId}
+              onResult={handleResult}
+              onBack={handleBackToVocab}
+            />
           )}
-        </>
+          {flashcardPhase === 'result' && flashcardResult && (
+            <FlashcardResultScreen
+              key={`result-${flashcardIndex}`}
+              term={terms[flashcardIndex]}
+              termIndex={flashcardIndex}
+              totalTerms={terms.length}
+              result={flashcardResult}
+              onTryAgain={handleTryAgain}
+              onNext={handleNext}
+              onBack={handleBackToVocab}
+            />
+          )}
+        </div>
       )}
     </div>
   );
