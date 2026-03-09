@@ -259,6 +259,7 @@ export default function RootDetail() {
             onVocabChanged={() => refresh()}
             onLearnInTeachMe={handleLearnInTeachMe}
             initialFlashcardIndex={dictFocusedFlashcardIndex}
+            isLocked={activeMode === 'cold'}
           />
         </div>
 
