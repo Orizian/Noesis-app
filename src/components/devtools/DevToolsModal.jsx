@@ -209,12 +209,14 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
   };
 
   const handleResetAllGauntlets = () => {
-    ROOTS.forEach(root => resetGauntletForRoot(profileId, root.id));
-    // Clear gauntlet passed dates and absolute
+    ROOTS.forEach(root => {
+      resetGauntletForRoot(profileId, root.id);
+      clearGauntletPassedDate(profileId, root.id);
+    });
+    // Clear absolute gauntlet session
     const profiles = JSON.parse(localStorage.getItem('exsci_profiles') || '[]');
     const idx = profiles.findIndex(p => p.id === profileId);
     if (idx !== -1) {
-      profiles[idx].gauntletPassedDates = {};
       profiles[idx].absoluteGauntlet = null;
       localStorage.setItem('exsci_profiles', JSON.stringify(profiles));
     }
