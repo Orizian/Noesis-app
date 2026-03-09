@@ -4,8 +4,7 @@ import { DICTIONARY } from '../courseData';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '../profiles/ProfileContext';
 import { getFlashcardTier, setFlashcardTier } from '../profiles/profileStorage';
-import FlashcardGauntletComponent from './FlashcardGauntlet';
-const FlashcardGauntlet = FlashcardGauntletComponent;
+import FlashcardGauntlet from './FlashcardGauntlet';
 
 export const TIER_CONFIG = {
   attempted: { label: 'Attempted', badgeClass: 'bg-zinc-800 border-zinc-700 text-zinc-500',       bigClass: 'bg-zinc-800 border-zinc-600 text-zinc-400' },
