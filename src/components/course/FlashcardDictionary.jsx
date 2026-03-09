@@ -603,14 +603,24 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
           )}
         </div>
 
-        {/* Progress bar — always visible */}
+        {/* Dual-layer vocab progress bar — always visible */}
         <div className="mt-2.5">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-zinc-500">{attemptedCount} of {terms.length} terms attempted</span>
-          </div>
-          <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-700 rounded-full transition-all duration-500" style={{ width: terms.length > 0 ? `${(attemptedCount / terms.length) * 100}%` : '0%' }} />
-          </div>
+          {(() => {
+            const excellentCount = terms.filter(t => getRowTier(t.term) === 'excellent').length;
+            const attemptedPct = terms.length > 0 ? (attemptedCount / terms.length) * 100 : 0;
+            const excellentPct = terms.length > 0 ? (excellentCount / terms.length) * 100 : 0;
+            return (
+              <>
+                <div className="relative h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  {/* Bottom layer — amber — attempted */}
+                  <div className="absolute left-0 top-0 h-full bg-amber-700/60 rounded-full transition-all duration-500" style={{ width: `${attemptedPct}%` }} />
+                  {/* Top layer — violet — excellent */}
+                  <div className="absolute left-0 top-0 h-full bg-violet-600 rounded-full transition-all duration-500" style={{ width: `${excellentPct}%` }} />
+                </div>
+                <p className="text-xs text-zinc-600 mt-1">{attemptedCount} attempted · {excellentCount} mastered</p>
+              </>
+            );
+          })()}
         </div>
 
         {/* Locked notice */}
