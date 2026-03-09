@@ -259,7 +259,6 @@ export default function RootDetail() {
         {/* Vocabulary — above question bank */}
         <div className="mb-6">
           <FlashcardDictionary
-            key={dictKey}
             rootId={rootId}
             onVocabChanged={() => refresh()}
             onLearnInTeachMe={handleLearnInTeachMe}
