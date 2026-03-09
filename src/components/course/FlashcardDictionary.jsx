@@ -436,8 +436,6 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
               />
             </div>
           )}
-          {/* NOTE: The FlashcardGauntlet component is now imported from FlashcardGauntlet.jsx */}
-
           {/* Reference mode */}
           {dictionaryMode === 'reference' && (
             <div className="divide-y divide-zinc-800/40">
