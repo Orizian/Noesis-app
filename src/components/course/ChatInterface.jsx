@@ -7,7 +7,7 @@ import ColdAttemptPanel from './ColdAttemptPanel';
 import { useProfile } from '../profiles/ProfileContext';
 import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm, setQuestionCriteria, setBestTier, getQualityTier } from '../profiles/profileStorage';
 
-export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered }) {
+export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered, dictFocusedTerm }) {
   const { activeProfileId } = useProfile();
 
   const [messages, setMessages] = useState([]);
