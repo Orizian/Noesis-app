@@ -200,9 +200,11 @@ export default function RootDetail() {
         <div className="mb-8">
           <FlashcardDictionary
             rootId={rootId}
+            rootTitle={root.title}
             onVocabChanged={() => refresh()}
             onLearnInTeachMe={handleLearnInTeachMe}
             initialFlashcardIndex={dictFocusedFlashcardIndex}
+            lockedForColdAttempt={activeMode === 'cold'}
           />
         </div>
 
