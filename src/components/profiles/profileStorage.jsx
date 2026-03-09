@@ -435,6 +435,78 @@ export function isGauntletEligible(profileId, rootId) {
 }
 // ─── End Gauntlet storage ──────────────────────────────────────────────────────
 
+// ─── Gauntlet passed dates ─────────────────────────────────────────────────────
+// gauntletPassedDates: { [rootId]: timestamp } — set when all 4 questions passed
+
+export function getGauntletPassedDate(profileId, rootId) {
+  const profile = getProfileById(profileId);
+  return profile?.gauntletPassedDates?.[rootId] || null;
+}
+
+export function setGauntletPassedDate(profileId, rootId, ts) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].gauntletPassedDates) profiles[idx].gauntletPassedDates = {};
+  if (!profiles[idx].gauntletPassedDates[rootId]) {
+    profiles[idx].gauntletPassedDates[rootId] = ts;
+    saveProfiles(profiles);
+  }
+}
+
+export function clearGauntletPassedDate(profileId, rootId) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].gauntletPassedDates) return;
+  delete profiles[idx].gauntletPassedDates[rootId];
+  saveProfiles(profiles);
+}
+
+export function isRootGauntletPassed(profileId, rootId) {
+  return !!getGauntletPassedDate(profileId, rootId);
+}
+
+export function isAllGauntletsPassed(profileId) {
+  for (let i = 1; i <= 8; i++) {
+    if (!isRootGauntletPassed(profileId, i)) return false;
+  }
+  return true;
+}
+
+// ─── Absolute Gauntlet storage ────────────────────────────────────────────────
+// absoluteGauntlet: { inProgress: bool, completedRoots: { [rootId]: {results, score} }, conqueredAt: timestamp }
+
+export function getAbsoluteGauntlet(profileId) {
+  const profile = getProfileById(profileId);
+  return profile?.absoluteGauntlet || null;
+}
+
+export function setAbsoluteGauntletSession(profileId, data) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  profiles[idx].absoluteGauntlet = { ...(profiles[idx].absoluteGauntlet || {}), ...data };
+  saveProfiles(profiles);
+}
+
+export function clearAbsoluteGauntletSession(profileId) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  // Preserve conqueredAt if set
+  const existing = profiles[idx].absoluteGauntlet || {};
+  profiles[idx].absoluteGauntlet = existing.conqueredAt ? { conqueredAt: existing.conqueredAt } : null;
+  saveProfiles(profiles);
+}
+
+export function isAbsoluteGauntletConquered(profileId) {
+  const profile = getProfileById(profileId);
+  return !!(profile?.absoluteGauntlet?.conqueredAt);
+}
+
+// ─── End Absolute Gauntlet storage ────────────────────────────────────────────
+
 // Stats helpers
 export function getProfileStats(profileId) {
   const profile = getProfileById(profileId);
