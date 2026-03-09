@@ -8,6 +8,7 @@ import {
   setGauntletCriteriaExact,
   getGauntletCriteria,
   resetGauntletForRoot,
+  setGauntletPassedDate,
   setFlashcardTierExact,
   clearAllFlashcardTiers,
   getVocabStats,
@@ -183,6 +184,40 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
     onChanged();
   };
 
+  const handleConquerAbsolute = () => {
+    ROOTS.forEach(root => {
+      ['root','branch_1','branch_2','branch_3'].forEach(k =>
+        setGauntletCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3)
+      );
+      // Also set gauntlet passed date if not set
+      const { setGauntletPassedDate: spd } = require('../profiles/profileStorage');
+      try { spd(profileId, root.id, Date.now()); } catch(e) {}
+    });
+    // Mark absolute gauntlet conquered
+    const profiles = JSON.parse(localStorage.getItem('exsci_profiles') || '[]');
+    const idx = profiles.findIndex(p => p.id === profileId);
+    if (idx !== -1) {
+      if (!profiles[idx].absoluteGauntlet) profiles[idx].absoluteGauntlet = {};
+      profiles[idx].absoluteGauntlet.conqueredAt = Date.now();
+      profiles[idx].absoluteGauntlet.inProgress = false;
+      localStorage.setItem('exsci_profiles', JSON.stringify(profiles));
+    }
+    onChanged();
+  };
+
+  const handleResetAllGauntlets = () => {
+    ROOTS.forEach(root => resetGauntletForRoot(profileId, root.id));
+    // Clear gauntlet passed dates and absolute
+    const profiles = JSON.parse(localStorage.getItem('exsci_profiles') || '[]');
+    const idx = profiles.findIndex(p => p.id === profileId);
+    if (idx !== -1) {
+      profiles[idx].gauntletPassedDates = {};
+      profiles[idx].absoluteGauntlet = null;
+      localStorage.setItem('exsci_profiles', JSON.stringify(profiles));
+    }
+    onChanged();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-zinc-900 border-2 border-orange-600/60 rounded-2xl w-full max-w-lg my-4">
@@ -196,10 +231,18 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
         </div>
 
         {/* Global reset */}
-        <div className="px-6 py-3 border-b border-zinc-800">
+        <div className="px-6 py-3 border-b border-zinc-800 space-y-2">
           <button onClick={handleResetAll}
             className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-950/40 hover:bg-red-950/60 border border-red-900/50 text-red-400 text-sm transition-colors">
             <RotateCcw className="w-4 h-4" />Reset All Progress
+          </button>
+          <button onClick={handleConquerAbsolute}
+            className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl bg-yellow-950/40 hover:bg-yellow-950/60 border border-yellow-800/50 text-yellow-400 text-sm transition-colors">
+            ★ Conquer Absolute Gauntlet
+          </button>
+          <button onClick={handleResetAllGauntlets}
+            className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-sm transition-colors">
+            Reset All Gauntlets
           </button>
         </div>
 
