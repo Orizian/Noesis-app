@@ -12,6 +12,8 @@ import {
   getGauntletCriteria,
 } from '../profiles/profileStorage';
 import { format } from 'date-fns';
+// Re-export new flow and questions for backward compat
+export { default, GAUNTLET_QUESTIONS } from './RootGauntletFlow';
 
 export const GAUNTLET_QUESTIONS = [
   { key: 'root',     label: 'Root Question', maxCriteria: 4 },
