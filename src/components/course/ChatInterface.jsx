@@ -58,8 +58,12 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
 
   useEffect(() => {
     if (initialized) return;
-    if (mode === 'teach') initTeachMode();
-    else if (mode === 'practice' || mode === 'cold') startPracticeOrCold();
+    if (mode === 'teach') {
+      if (dictFocusedTerm) initDictFocusedMode();
+      else initTeachMode();
+    } else if (mode === 'practice' || mode === 'cold') {
+      startPracticeOrCold();
+    }
     setInitialized(true);
   }, [initialized]);
 
