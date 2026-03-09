@@ -74,7 +74,28 @@ export default function RootDetail() {
   const hasOpenedPractice = openedModes.includes('practice');
   const showPracticeDot = hasOpenedTeach && !hasOpenedPractice;
 
+  const handleLearnInTeachMe = (term, termIndex) => {
+    setDictFocusedTerm(term);
+    setDictFocusedFlashcardIndex(null); // don't auto-open flashcard
+    setActiveMode('teach');
+    if (activeProfileId) recordModeOpened(activeProfileId, rootId, 'teach');
+    if (activeProfileId && !progress) {
+      setRootProgress(rootId, {
+        status: 'in_progress',
+        root_question_passed: false,
+        branch_1_passed: false,
+        branch_2_passed: false,
+        branch_3_passed: false,
+        startedAt: Date.now(),
+      });
+    }
+    // Scroll to top of chat
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleModeChange = (newMode) => {
+    // Switching mode manually clears dict focus
+    setDictFocusedTerm(null);
     setActiveMode(newMode);
     if (activeProfileId) {
       recordModeOpened(activeProfileId, rootId, newMode);
