@@ -338,13 +338,16 @@ export function clearAllFlashcardTiers(profileId) {
 }
 
 // Count how many terms have been attempted (any tier) across all roots
+// "attempted" = any tier including 'attempted' tier
+// "excellentScore" = count of 'excellent' tiers (1 point each toward vocab score)
 export function getVocabStats(profileId) {
   const profile = getProfileById(profileId);
   const allTiers = profile?.flashcardTiers || {};
   let attempted = 0, pass = 0, great = 0, excellent = 0;
   Object.values(allTiers).forEach(rootTerms => {
     Object.values(rootTerms).forEach(tier => {
-      if (tier && tier !== 'incomplete') {
+      if (tier && tier !== null) {
+        // 'attempted' tier still counts toward attempted count
         attempted++;
         if (tier === 'pass') pass++;
         if (tier === 'great') great++;
@@ -352,7 +355,20 @@ export function getVocabStats(profileId) {
       }
     });
   });
-  return { attempted, pass, great, excellent };
+  return { attempted, pass, great, excellent, excellentScore: excellent };
+}
+
+// Vocabulary score = count of 'excellent' tiers across all roots (max 80)
+export function getTotalVocabScore(profileId) {
+  const { excellent } = getVocabStats(profileId);
+  return excellent;
+}
+
+// Per-root vocab score (max 10)
+export function getRootVocabScore(profileId, rootId) {
+  const profile = getProfileById(profileId);
+  const rootTiers = profile?.flashcardTiers?.[rootId] || {};
+  return Object.values(rootTiers).filter(t => t === 'excellent').length;
 }
 
 // ─── Gauntlet storage ─────────────────────────────────────────────────────────
