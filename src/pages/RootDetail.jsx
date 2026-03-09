@@ -234,7 +234,7 @@ export default function RootDetail() {
         {activeMode && (
           <div className="mb-10">
             <ChatInterface
-              key={`${root.id}-${activeMode}-${selectedQuestion}`}
+              key={`${root.id}-${activeMode}-${selectedQuestion}-${dictFocusedTerm?.term || 'none'}`}
               root={root}
               mode={activeMode}
               questionType={activeMode === 'teach' ? 'root' : selectedQuestion}
@@ -242,6 +242,7 @@ export default function RootDetail() {
               onSwitchMode={handleModeChange}
               onCompetencyChange={handleCompetencyChange}
               onTermEncountered={handleTermEncountered}
+              dictFocusedTerm={activeMode === 'teach' ? dictFocusedTerm : null}
             />
           </div>
         )}
