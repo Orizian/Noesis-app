@@ -42,6 +42,8 @@ export default function RootDetail() {
   const [selectedQuestion, setSelectedQuestion] = useState('root');
   const [competencyStage, setCompetencyStage] = useState(1);
   const [dictKey, setDictKey] = useState(0); // force re-render of dictionary on term encountered
+  const [dictFocusedTerm, setDictFocusedTerm] = useState(null); // for "Learn in Teach Me"
+  const [dictFocusedFlashcardIndex, setDictFocusedFlashcardIndex] = useState(null);
 
   const { activeProfileId, getRootProgress, setRootProgress, refresh } = useProfile();
 
