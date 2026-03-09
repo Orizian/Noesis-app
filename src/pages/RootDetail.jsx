@@ -6,7 +6,7 @@ import QuestionSelector from '../components/course/QuestionSelector';
 import ChatInterface from '../components/course/ChatInterface';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import FlashcardDictionary from '../components/course/FlashcardDictionary';
-import RootGauntlet from '../components/course/RootGauntlet';
+// RootGauntlet removed — Gauntlet accessible from Course Overview
 import CompetencyMeter from '../components/course/CompetencyMeter';
 import DifficultyBars from '../components/course/DifficultyBars';
 import { RootDetailBars } from '../components/course/MasteryBars';
@@ -247,13 +247,9 @@ export default function RootDetail() {
           </div>
         )}
 
-        {/* Gauntlet */}
+        {/* Gauntlet notice */}
         <div className="mb-6">
-          <RootGauntlet
-            root={root}
-            profileId={activeProfileId}
-            onGauntletComplete={() => refresh()}
-          />
+          <p className="text-xs text-zinc-600 text-center">Gauntlet available from course overview.</p>
         </div>
 
         {/* Vocabulary */}

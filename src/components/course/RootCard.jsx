@@ -1,10 +1,14 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import DifficultyBars from './DifficultyBars';
 import { RootCardBars } from './MasteryBars';
-import { getQuestionCriteria, deriveRootStatus, getGauntletRootPoints, isRootPerfected } from '../profiles/profileStorage';
+import {
+  getQuestionCriteria, deriveRootStatus, getGauntletRootPoints, isRootPerfected,
+  isGauntletEligible, isRootGauntletPassed, getGauntletPassedDate,
+} from '../profiles/profileStorage';
+import { format } from 'date-fns';
 
 const STATUS_CONFIG = {
   not_started: { label: 'Not Started', badgeClass: 'bg-zinc-800 text-zinc-500 border-zinc-700', borderClass: 'border-l-zinc-700' },
@@ -32,12 +36,56 @@ export default function RootCard({ root, profileId }) {
     : STATUS_CONFIG[status];
   const tier = getTierFromPoints(rootPoints);
 
+  const gauntletEligible = profileId ? isGauntletEligible(profileId, root.id) : false;
+  const gauntletPassed = profileId ? isRootGauntletPassed(profileId, root.id) : false;
+  const gauntletPassedDate = gauntletPassed ? getGauntletPassedDate(profileId, root.id) : null;
+  const gauntletPerfected = gauntletPoints === 13;
+
+  // Gauntlet status element
+  let gauntletEl = null;
+  if (gauntletPerfected && gauntletPassed) {
+    gauntletEl = (
+      <div className="mt-3 flex items-center gap-1.5">
+        <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+        <span className="text-xs text-yellow-400 font-semibold">Perfected</span>
+      </div>
+    );
+  } else if (gauntletPassed) {
+    gauntletEl = (
+      <div className="mt-3">
+        <span className="text-xs text-yellow-400 font-medium">
+          Gauntlet Passed {gauntletPassedDate ? '· ' + format(new Date(gauntletPassedDate), 'MMM d, yyyy') : ''}
+        </span>
+      </div>
+    );
+  } else if (gauntletEligible) {
+    gauntletEl = (
+      <Link
+        to={createPageUrl('RootGauntletPage') + `?rootId=${root.id}`}
+        onClick={e => e.stopPropagation()}
+        className="mt-3 block w-full py-2 rounded-xl border text-xs font-semibold text-center
+          border-amber-700/60 text-amber-400 bg-transparent gauntlet-glow transition-colors hover:bg-amber-950/20"
+      >
+        Enter Gauntlet
+      </Link>
+    );
+  } else {
+    gauntletEl = (
+      <p className="mt-3 text-xs text-zinc-600">Complete all cold attempts to unlock Gauntlet.</p>
+    );
+  }
+
+  // Perfected card gets gold border accent
+  const cardBorder = (gauntletPerfected && gauntletPassed)
+    ? 'border-l-[3px] border-l-yellow-700/60 border-yellow-800/30'
+    : `border-l-[3px] ${cfg.borderClass}`;
+
   return (
     <Link to={createPageUrl('RootDetail') + `?rootId=${root.id}`}>
       <div
         className={`group relative border border-zinc-800 rounded-xl p-5 md:p-5 
           hover:border-zinc-700 transition-all duration-[600ms] cursor-pointer
-          border-l-[3px] ${cfg.borderClass} bg-zinc-900/80 hover:bg-zinc-900`}
+          ${cardBorder} bg-zinc-900/80 hover:bg-zinc-900`}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -65,6 +113,8 @@ export default function RootCard({ root, profileId }) {
               <div className="mt-3">
                 <RootCardBars rootPoints={rootPoints} gauntletPoints={gauntletPoints} hasPerfected={perfected} />
               </div>
+              {/* Gauntlet status */}
+              {gauntletEl}
             </div>
           </div>
           <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0 mt-1" />

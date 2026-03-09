@@ -3,6 +3,7 @@ import { ROOTS } from '../components/courseData';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
+import GauntletBoard from '../components/course/GauntletBoard';
 import { useProfile } from '../components/profiles/ProfileContext';
 import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getVocabStats } from '../components/profiles/profileStorage';
 import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/course/MasteryBars';
@@ -110,6 +111,9 @@ export default function CourseOverview() {
             />
           ))}
         </div>
+
+        {/* Gauntlet Board */}
+        <GauntletBoard profileId={activeProfileId} />
 
         {/* Footer */}
         <div className="mt-12 pt-8 border-t border-zinc-800/50">
