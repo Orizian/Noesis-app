@@ -54,7 +54,7 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
       const count = getColdAttemptCount(activeProfileId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
-  }, [root.id, mode, questionType]);
+  }, [root.id, mode, questionType, dictFocusedTerm?.term]);
 
   useEffect(() => {
     if (initialized) return;
