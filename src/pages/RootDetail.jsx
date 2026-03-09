@@ -256,7 +256,7 @@ export default function RootDetail() {
           />
         </div>
 
-        {/* Vocabulary — above question bank */}
+        {/* Vocabulary */}
         <div className="mb-6">
           <FlashcardDictionary
             rootId={rootId}
