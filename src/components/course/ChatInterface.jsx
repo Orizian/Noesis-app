@@ -247,6 +247,21 @@ Rules:
     setLoading(false);
   };
 
+  const initDictFocusedMode = async () => {
+    setLoading(true);
+    const systemPrompt = buildSystemPrompt();
+    const initPrompt = `Begin the session. Acknowledge the term "${dictFocusedTerm.term}" by name and ask the student what they currently understand about it. Keep it to 2-3 sentences and one question.`;
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: `${systemPrompt}\n\nUser: ${initPrompt}`
+    });
+    const cleanResponse = response
+      .replace(/\[COMPETENCY:[1-5]\]/g, '')
+      .replace(/\[TERM:[^\]]+\]/g, '')
+      .trim();
+    setMessages([{ role: 'assistant', content: cleanResponse }]);
+    setLoading(false);
+  };
+
   const startPracticeOrCold = () => {
     const question = getQuestion();
     if (mode === 'practice') {
