@@ -2,7 +2,7 @@ import React from 'react';
 import { ROOTS } from '../components/courseData';
 import { useProfile } from '../components/profiles/ProfileContext';
 import { isGauntletEligible } from '../components/profiles/profileStorage';
-import RootGauntletFlow from '../components/course/RootGauntlet';
+import RootGauntletFlow from '../components/course/RootGauntletFlow';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft } from 'lucide-react';
