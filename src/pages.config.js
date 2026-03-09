@@ -47,22 +47,22 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AbsoluteGauntletPage from './pages/AbsoluteGauntletPage';
 import CourseOverview from './pages/CourseOverview';
 import ProfileSelect from './pages/ProfileSelect';
 import RootDetail from './pages/RootDetail';
-import Stats from './pages/Stats';
 import RootGauntletPage from './pages/RootGauntletPage';
-import AbsoluteGauntletPage from './pages/AbsoluteGauntletPage';
+import Stats from './pages/Stats';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AbsoluteGauntletPage": AbsoluteGauntletPage,
     "CourseOverview": CourseOverview,
     "ProfileSelect": ProfileSelect,
     "RootDetail": RootDetail,
-    "Stats": Stats,
     "RootGauntletPage": RootGauntletPage,
-    "AbsoluteGauntletPage": AbsoluteGauntletPage,
+    "Stats": Stats,
 }
 
 export const pagesConfig = {

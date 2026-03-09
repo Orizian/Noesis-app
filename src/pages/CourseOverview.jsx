@@ -39,13 +39,7 @@ function ProgressSection({ profileId }) {
       {anyGauntlet && (
         <GlobalGauntletBar totalPoints={gauntletTotal} />
       )}
-      <VocabBar
-        attempted={vocabStats.attempted}
-        total={80}
-        pass={vocabStats.pass}
-        great={vocabStats.great}
-        excellent={vocabStats.excellent}
-      />
+      <VocabBar excellent={vocabStats.excellent} total={80} />
     </div>
   );
 }
