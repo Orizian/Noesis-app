@@ -338,23 +338,21 @@ export function clearAllFlashcardTiers(profileId) {
 }
 
 // Count how many terms have been attempted (any tier) across all roots
-// 'attempted' tier = submitted but no correct definition; still counts as "attempted" for progress bar
 export function getVocabStats(profileId) {
   const profile = getProfileById(profileId);
   const allTiers = profile?.flashcardTiers || {};
-  let attempted = 0, pass = 0, great = 0, excellent = 0, attemptedTier = 0;
+  let attempted = 0, pass = 0, great = 0, excellent = 0;
   Object.values(allTiers).forEach(rootTerms => {
     Object.values(rootTerms).forEach(tier => {
       if (tier && tier !== 'incomplete') {
         attempted++;
-        if (tier === 'attempted') attemptedTier++;
         if (tier === 'pass') pass++;
         if (tier === 'great') great++;
         if (tier === 'excellent') excellent++;
       }
     });
   });
-  return { attempted, attemptedTier, pass, great, excellent };
+  return { attempted, pass, great, excellent };
 }
 
 // ─── Gauntlet storage ─────────────────────────────────────────────────────────
