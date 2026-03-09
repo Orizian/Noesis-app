@@ -138,25 +138,34 @@ export function GlobalGauntletBar({ totalPoints }) {
   );
 }
 
-// Vocabulary progress bar
-export function VocabBar({ attempted, total, pass, great, excellent }) {
+// Vocab bar color — based on Excellent count (0–80)
+function getVocabBarColor(excellent, max) {
+  if (max === 80) {
+    if (excellent < 20) return 'bg-zinc-600';
+    if (excellent < 50) return 'bg-emerald-500';
+    if (excellent < 80) return 'bg-teal-500';
+    return 'bg-violet-500';
+  }
+  // per-root (max 10)
+  if (excellent < 3) return 'bg-zinc-600';
+  if (excellent < 7) return 'bg-emerald-500';
+  if (excellent < 10) return 'bg-teal-500';
+  return 'bg-violet-500';
+}
+
+// Global vocabulary bar — 0 to 80, filled by Excellent count
+export function VocabBar({ excellent, total = 80 }) {
+  const color = getVocabBarColor(excellent, total);
   return (
-    <div className="space-y-1.5">
-      <ThinBar
-        value={attempted}
-        max={total}
-        color="bg-amber-500"
-        label="Vocabulary"
-        rightLabel={`${attempted} / ${total} terms`}
-        height="h-2"
-      />
-      <p className="text-xs text-zinc-500">
-        {excellent > 0 || great > 0 || pass > 0
-          ? <><span className="text-violet-400">{excellent} Excellent</span><span className="mx-1">·</span><span className="text-teal-400">{great} Great</span><span className="mx-1">·</span><span className="text-emerald-400">{pass} Pass</span></>
-          : <span>No flashcard attempts yet</span>
-        }
-      </p>
-    </div>
+    <ThinBar
+      value={excellent}
+      max={total}
+      ticks={[20, 50, total]}
+      color={color}
+      label="Vocabulary"
+      rightLabel={`${excellent} / ${total} Excellent`}
+      height="h-2"
+    />
   );
 }
 
