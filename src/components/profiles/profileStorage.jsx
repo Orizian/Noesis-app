@@ -297,9 +297,9 @@ export function setBestTier(profileId, rootId, questionType, tier) {
 // ─── End criteria scoring ──────────────────────────────────────────────────────
 
 // ─── Vocabulary / Flashcard storage ───────────────────────────────────────────
-// flashcardTiers: { [rootId]: { [termName]: 'pass' | 'great' | 'excellent' } }
+// flashcardTiers: { [rootId]: { [termName]: 'attempted' | 'pass' | 'great' | 'excellent' } }
 
-const TIER_RANK = { incomplete: 0, pass: 1, great: 2, excellent: 3 };
+const TIER_RANK = { incomplete: 0, attempted: 1, pass: 2, great: 3, excellent: 4 };
 
 export function getFlashcardTier(profileId, rootId, termName) {
   const profile = getProfileById(profileId);
