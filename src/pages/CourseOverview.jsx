@@ -5,7 +5,7 @@ import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
 import GauntletBoard from '../components/course/GauntletBoard';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getVocabStats } from '../components/profiles/profileStorage';
+import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
 import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/course/MasteryBars';
 import { BookOpen } from 'lucide-react';
 
