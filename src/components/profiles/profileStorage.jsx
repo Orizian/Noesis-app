@@ -297,9 +297,9 @@ export function setBestTier(profileId, rootId, questionType, tier) {
 // ─── End criteria scoring ──────────────────────────────────────────────────────
 
 // ─── Vocabulary / Flashcard storage ───────────────────────────────────────────
-// flashcardTiers: { [rootId]: { [termName]: 'pass' | 'great' | 'excellent' } }
+// flashcardTiers: { [rootId]: { [termName]: 'attempted' | 'pass' | 'great' | 'excellent' } }
 
-const TIER_RANK = { incomplete: 0, pass: 1, great: 2, excellent: 3 };
+const TIER_RANK = { incomplete: 0, attempted: 0.5, pass: 1, great: 2, excellent: 3 };
 
 export function getFlashcardTier(profileId, rootId, termName) {
   const profile = getProfileById(profileId);
@@ -353,6 +353,36 @@ export function getVocabStats(profileId) {
     });
   });
   return { attempted, pass, great, excellent };
+}
+
+// Total Excellent count across all roots (vocabulary score, max 80)
+export function getTotalVocabScore(profileId) {
+  const profile = getProfileById(profileId);
+  const allTiers = profile?.flashcardTiers || {};
+  let score = 0;
+  Object.values(allTiers).forEach(rootTerms => {
+    Object.values(rootTerms).forEach(tier => {
+      if (tier === 'excellent') score++;
+    });
+  });
+  return score;
+}
+
+// Vocab score for a single root (max 10)
+export function getRootVocabScore(profileId, rootId) {
+  const profile = getProfileById(profileId);
+  const rootTiers = profile?.flashcardTiers?.[rootId] || {};
+  return Object.values(rootTiers).filter(t => t === 'excellent').length;
+}
+
+// Clear vocab for a single root
+export function clearRootFlashcardTiers(profileId, rootId) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  if (!profiles[idx].flashcardTiers) profiles[idx].flashcardTiers = {};
+  profiles[idx].flashcardTiers[rootId] = {};
+  saveProfiles(profiles);
 }
 
 // ─── Gauntlet storage ─────────────────────────────────────────────────────────
