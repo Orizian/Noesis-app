@@ -365,7 +365,7 @@ export default function AbsoluteGauntletPage() {
         if (activeProfileId) {
           ROOTS.forEach((r, ri) => {
             const bulk = {};
-            GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
+            GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * questionsPerRoot + qi]?.score || 0; });
             setGauntletCriteriaBulk(activeProfileId, r.id, bulk);
           });
           const allPassed = results.every(r => r.passed);
