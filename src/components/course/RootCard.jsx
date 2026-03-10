@@ -39,9 +39,9 @@ export default function RootCard({ root, profileId }) {
     : STATUS_CONFIG[status];
   const tier = getTierFromPoints(rootPoints);
 
-  const gauntletEligible = profileId ? isGauntletEligible(profileId, root.id) : false;
-  const gauntletPassed = profileId ? isRootGauntletPassed(profileId, root.id) : false;
-  const gauntletPassedDate = gauntletPassed ? getGauntletPassedDate(profileId, root.id) : null;
+  const gauntletEligible = (profileId && courseId) ? isGauntletEligible(profileId, courseId, root.id) : false;
+  const gauntletPassed = (profileId && courseId) ? isRootGauntletPassed(profileId, courseId, root.id) : false;
+  const gauntletPassedDate = gauntletPassed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
   const gauntletPerfected = gauntletPoints === 13;
 
   // Gauntlet status element
