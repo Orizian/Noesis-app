@@ -167,7 +167,7 @@ export default function GauntletBoard({ profileId }) {
         </div>
 
         {/* Absolute Gauntlet button */}
-        <AbsoluteGauntletButton profileId={profileId} />
+        <AbsoluteGauntletButton profileId={profileId} roots={roots} />
       </div>
     </div>
   );
