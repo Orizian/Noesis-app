@@ -264,9 +264,10 @@ export default function AbsoluteGauntletPage() {
     return 0;
   });
   // All answers: flat array of 32 (rootIdx*4 + qIdx)
+  const totalQuestions = roots.length * 4;
   const [allAnswers, setAllAnswers] = useState(() => {
     if (hasSession && saved?.answers) return saved.answers;
-    return Array(32).fill('');
+    return Array(roots.length * 4).fill('');
   });
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
@@ -313,7 +314,7 @@ export default function AbsoluteGauntletPage() {
   const root = roots[rootIdx];
 
   const startFresh = () => {
-    const newAnswers = Array(32).fill('');
+    const newAnswers = Array(roots.length * 4).fill('');
     setAllAnswers(newAnswers);
     setRootIdx(0); setQIdx(0); setCurrentAnswer('');
     if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
@@ -357,7 +358,7 @@ export default function AbsoluteGauntletPage() {
             allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * 4 + qi], rootIndex: ri });
           });
         });
-        const results = await batchEvaluateAll(allQ);
+        const results = await batchEvaluateAll(allQ, branchRubrics);
         // Save to storage
         if (activeProfileId) {
           roots.forEach((r, ri) => {
