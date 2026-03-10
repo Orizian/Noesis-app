@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCourse } from './CourseContext';
+import { useCourse, getRootGauntletMaxPoints, getCourseGauntletMaxPoints } from './CourseContext';
 import { createPageUrl } from '@/utils';
 import {
   isGauntletEligible,
