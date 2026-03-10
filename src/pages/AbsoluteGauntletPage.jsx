@@ -448,7 +448,7 @@ export default function AbsoluteGauntletPage() {
   // ── Run ──
   if (phase === 'run') {
     const qMeta = GAUNTLET_QUESTIONS[qIdx];
-    const isLastQ = rootIdx === 7 && qIdx === 3;
+    const isLastQ = rootIdx === ROOTS.length - 1 && qIdx === questionsPerRoot - 1;
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <div className="max-w-2xl mx-auto px-4 py-6">
