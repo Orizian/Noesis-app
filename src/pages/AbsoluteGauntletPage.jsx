@@ -270,6 +270,7 @@ export default function AbsoluteGauntletPage() {
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
   const [finalResults, setFinalResults] = useState(null); // flat array of 32 results
+  const [evalError, setEvalError] = useState(null);
   const [checkpointPrompt, setCheckpointPrompt] = useState(() => {
     if (!activeProfileId) return false;
     const cp = loadGauntletCheckpoint(activeProfileId, meta.id);
@@ -277,6 +278,24 @@ export default function AbsoluteGauntletPage() {
   });
 
   const textareaRef = useRef(null);
+
+  // Save state on page unload
+  useEffect(() => {
+    const handleUnload = () => {
+      if (phase === 'run' || phase === 'root_transition') {
+        if (activeProfileId) {
+          setAbsoluteGauntletSession(activeProfileId, courseId, {
+            inProgress: true,
+            rootIdx,
+            qIdx,
+            answers: allAnswers,
+          });
+        }
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [phase, rootIdx, qIdx, allAnswers, activeProfileId, courseId]);
 
   if (!eligible && !conquered) {
     return (
@@ -372,26 +391,33 @@ export default function AbsoluteGauntletPage() {
             allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * 4 + qi], rootIndex: ri });
           });
         });
-        const results = await batchEvaluateAll(allQ, branchRubrics);
-        // Save to storage
-        if (activeProfileId) {
-          roots.forEach((r, ri) => {
-            const bulk = {};
-            GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
-            setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
-          });
-          const allPassed = results.every(r => r.passed);
-          if (allPassed) {
-            const ts = Date.now();
-            setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
-          } else {
-            setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
+        try {
+          const results = await batchEvaluateAll(allQ, branchRubrics);
+          console.log('Raw evaluation response:', JSON.stringify(results));
+          // Save to storage
+          if (activeProfileId) {
+            roots.forEach((r, ri) => {
+              const bulk = {};
+              GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
+              setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
+            });
+            const allPassed = results.every(r => r.passed);
+            if (allPassed) {
+              const ts = Date.now();
+              setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
+            } else {
+              setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
+            }
+            clearGauntletCheckpoint(activeProfileId, courseId);
+            refresh();
           }
-          clearGauntletCheckpoint(activeProfileId, courseId);
-          refresh();
+          setFinalResults(results);
+          setPhase('grading');
+        } catch (err) {
+          console.error('Gauntlet evaluation failed:', err);
+          setEvalError(err.message || 'Unknown error');
+          setPhase('eval_error');
         }
-        setFinalResults(results);
-        setPhase('grading');
       }
     }
   };
@@ -593,6 +619,82 @@ export default function AbsoluteGauntletPage() {
           <p className="text-zinc-300 font-medium animate-pulse">Evaluating your complete performance...</p>
           <p className="text-xs text-zinc-600">All {roots.length * 4} questions. This takes a moment.</p>
           <p className="text-xs text-zinc-700 italic">Uses an advanced model for accuracy.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Evaluation Error ──
+  if (phase === 'eval_error') {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100">
+        <div className="max-w-2xl mx-auto px-4 py-10">
+          <Link to={createPageUrl('CourseOverview')} className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 mb-8">
+            <ArrowLeft className="w-4 h-4" /> Course Overview
+          </Link>
+          <div className="border border-red-800/40 rounded-2xl bg-red-950/10 p-8 space-y-5">
+            <h1 className="text-xl font-bold text-red-300">Evaluation Failed</h1>
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              This is usually a temporary issue. Your answers have been saved — tap Retry to try again.
+            </p>
+            {evalError && (
+              <p className="text-xs text-zinc-600 font-mono bg-zinc-900/50 p-3 rounded border border-zinc-800">
+                {evalError}
+              </p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setEvalError(null);
+                  setPhase('evaluating');
+                  // Re-trigger evaluation
+                  (async () => {
+                    try {
+                      const allQ = [];
+                      roots.forEach((r, ri) => {
+                        GAUNTLET_QUESTIONS.forEach((q, qi) => {
+                          allQ.push({ root: r, qMeta: q, answer: allAnswers[ri * 4 + qi], rootIndex: ri });
+                        });
+                      });
+                      const results = await batchEvaluateAll(allQ, branchRubrics);
+                      console.log('Raw evaluation response (retry):', JSON.stringify(results));
+                      if (activeProfileId) {
+                        roots.forEach((r, ri) => {
+                          const bulk = {};
+                          GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
+                          setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
+                        });
+                        const allPassed = results.every(r => r.passed);
+                        if (allPassed) {
+                          const ts = Date.now();
+                          setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
+                        } else {
+                          setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
+                        }
+                        clearGauntletCheckpoint(activeProfileId, courseId);
+                        refresh();
+                      }
+                      setFinalResults(results);
+                      setPhase('grading');
+                    } catch (retryErr) {
+                      console.error('Gauntlet evaluation retry failed:', retryErr);
+                      setEvalError(retryErr.message || 'Unknown error');
+                      setPhase('eval_error');
+                    }
+                  })();
+                }}
+                className="flex-1 py-3 rounded-xl bg-red-800/70 hover:bg-red-700/80 text-white font-bold text-sm transition-colors"
+              >
+                Retry
+              </button>
+              <button
+                onClick={handleSaveAndExit}
+                className="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm transition-colors"
+              >
+                Save & Exit
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
