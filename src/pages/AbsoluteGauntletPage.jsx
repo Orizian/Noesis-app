@@ -31,17 +31,11 @@ const TIER_CONFIG = {
   incomplete: { label: 'Incomplete', className: 'bg-zinc-800/60 border-zinc-700 text-zinc-500' },
 };
 
-function getBarColor104(pts) {
-  if (pts < 32) return 'bg-zinc-500';
-  if (pts < 72) return 'bg-emerald-500';
-  if (pts < 104) return 'bg-teal-500';
-  return 'bg-violet-500';
-}
-
-function getBarColor13(pts) {
-  if (pts <= 3) return 'bg-zinc-500';
-  if (pts <= 8) return 'bg-emerald-500';
-  if (pts <= 12) return 'bg-teal-500';
+function getBarColorDynamic(pts, max) {
+  const pct = max > 0 ? pts / max : 0;
+  if (pct < 0.31) return 'bg-zinc-500';
+  if (pct < 0.69) return 'bg-emerald-500';
+  if (pct < 1) return 'bg-teal-500';
   return 'bg-violet-500';
 }
 
