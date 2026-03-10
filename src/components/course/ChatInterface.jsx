@@ -341,10 +341,10 @@ Rules:
         }
         // Parse term signals
         const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
-        if (termMatches.length > 0 && activeProfileId) {
+        if (termMatches.length > 0 && activeProfileId && courseId) {
           termMatches.forEach(m => {
             const term = m[1].trim();
-            addEncounteredTerm(activeProfileId, root.id, term);
+            addEncounteredTerm(activeProfileId, courseId, root.id, term);
             if (onTermEncountered) onTermEncountered(term);
           });
         }
