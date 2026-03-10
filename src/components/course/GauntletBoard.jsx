@@ -97,8 +97,8 @@ function AbsoluteGauntletButton({ profileId, roots }) {
     return (
       <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/40 px-6 py-5 text-center">
         <p className="text-zinc-200 font-bold text-lg">The Absolute Gauntlet</p>
-        <p className="text-zinc-500 text-sm mt-1">All 8 roots. 32 questions. One sitting.</p>
-        <p className="text-zinc-600 text-xs mt-3">{8 - passedCount} of 8 Gauntlets remaining</p>
+        <p className="text-zinc-500 text-sm mt-1">All {rootCount} roots. {totalQuestions} questions. One sitting.</p>
+        <p className="text-zinc-600 text-xs mt-3">{rootCount - passedCount} of {rootCount} Gauntlets remaining</p>
       </div>
     );
   }
@@ -112,14 +112,14 @@ function AbsoluteGauntletButton({ profileId, roots }) {
         border-red-700/60 bg-red-950/20 hover:bg-red-950/30 absolute-glow cursor-pointer"
     >
       <p className="text-red-200 font-bold text-xl">
-        {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of 8` : 'The Absolute Gauntlet'}
+        {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of ${rootCount}` : 'The Absolute Gauntlet'}
       </p>
-      <p className="text-zinc-500 text-sm mt-1">All 8 roots. 32 questions. One sitting.</p>
+      <p className="text-zinc-500 text-sm mt-1">All {rootCount} roots. {totalQuestions} questions. One sitting.</p>
       {inProgress && (
         <div className="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-red-700 transition-all"
-            style={{ width: `${(Object.keys(saved?.completedRoots || {}).length / 8) * 100}%` }}
+            style={{ width: `${(Object.keys(saved?.completedRoots || {}).length / rootCount) * 100}%` }}
           />
         </div>
       )}
