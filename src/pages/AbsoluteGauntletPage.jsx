@@ -240,6 +240,9 @@ function AbsoluteProgressBar({ rootIdx, qIdx }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AbsoluteGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
+  const { activeCourse } = useCourse();
+  const ROOTS = activeCourse.roots;
+  const BRANCH_RUBRICS = activeCourse.branchRubrics;
   const navigate = useNavigate();
 
   const conquered = activeProfileId ? isAbsoluteGauntletConquered(activeProfileId) : false;
@@ -261,9 +264,12 @@ export default function AbsoluteGauntletPage() {
     return 0;
   });
   // All answers: flat array of 32 (rootIdx*4 + qIdx)
+  const totalQuestions = ROOTS.reduce((sum, r) => sum + 1 + r.branches.length, 0);
+  const questionsPerRoot = GAUNTLET_QUESTIONS.length;
+
   const [allAnswers, setAllAnswers] = useState(() => {
     if (hasSession && saved?.answers) return saved.answers;
-    return Array(32).fill('');
+    return Array(totalQuestions).fill('');
   });
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
