@@ -83,7 +83,7 @@ export default function CourseOverview() {
                 className="text-2xl md:text-3xl font-semibold tracking-tight cursor-default select-none"
                 onClick={handleTitleTap}
               >
-                Human Performance Physiology
+                {meta.title}
               </h1>
             </div>
             <ProfileDropdown />
