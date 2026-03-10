@@ -410,6 +410,56 @@ export default function AbsoluteGauntletPage() {
     navigate(createPageUrl('CourseOverview'));
   };
 
+  // ── Checkpoint resume prompt ──
+  if (checkpointPrompt && phase === 'caution') {
+    const answeredCount = checkpointPrompt.answeredQuestions.filter(a => a !== '').length;
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100">
+        <div className="max-w-2xl mx-auto px-4 py-10">
+          <div className="flex items-center justify-between mb-8">
+            <Link to={createPageUrl('CourseOverview')} className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300">
+              <ArrowLeft className="w-4 h-4" /> Course Overview
+            </Link>
+            <ProfileDropdown />
+          </div>
+          <div className="border border-amber-800/40 rounded-2xl bg-amber-950/10 p-8 space-y-4">
+            <h1 className="text-xl font-bold text-amber-300">Saved Attempt Detected</h1>
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              You have a checkpoint from earlier with {answeredCount} of {totalQuestions} questions answered. Resume where you left off?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  const cp = checkpointPrompt;
+                  setAllAnswers(cp.answeredQuestions);
+                  // Find the first unanswered question position
+                  const firstEmpty = cp.answeredQuestions.findIndex(a => a === '');
+                  const idx = firstEmpty === -1 ? totalQuestions - 1 : firstEmpty;
+                  const ri = Math.floor(idx / 4);
+                  const qi = idx % 4;
+                  setRootIdx(ri);
+                  setQIdx(qi);
+                  setCheckpointPrompt(false);
+                  setPhase('run');
+                  setTimeout(() => textareaRef.current?.focus(), 100);
+                }}
+                className="flex-1 py-3 rounded-xl bg-amber-800/60 hover:bg-amber-700/70 text-amber-200 font-bold text-sm transition-colors"
+              >
+                Resume
+              </button>
+              <button
+                onClick={() => { clearGauntletCheckpoint(activeProfileId, courseId); setCheckpointPrompt(false); }}
+                className="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm transition-colors"
+              >
+                Start Fresh
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Caution ──
   if (phase === 'caution' || phase === 'caution_retake') {
     return (
