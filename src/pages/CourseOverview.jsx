@@ -37,14 +37,14 @@ function ProgressSection({ profileId }) {
   return (
     <div className="mb-10 space-y-3">
       <GlobalMasteryBar
+        roots={roots}
         totalPoints={totalPoints}
         completeCount={completeCount}
         masteredCount={masteredCount}
         perfectedCount={perfectedCount}
-        rootCount={roots.length}
       />
       {anyGauntlet && (
-        <GlobalGauntletBar totalPoints={gauntletTotal} rootCount={roots.length} />
+        <GlobalGauntletBar roots={roots} totalPoints={gauntletTotal} />
       )}
       <VocabBar excellentScore={vocabScore} courseMaxVocabScore={courseMaxVocabScore} />
     </div>
