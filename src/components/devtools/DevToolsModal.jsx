@@ -18,8 +18,8 @@ import {
 const VOCAB_TIERS = ['unattempted', 'attempted', 'pass', 'great', 'excellent'];
 const TIER_LABELS = { unattempted: '—', attempted: 'Attempted', pass: 'Pass', great: 'Great', excellent: 'Excellent' };
 
-function masterAllRoots(profileId) {
-  ROOTS.forEach(root => {
+function masterAllRoots(profileId, roots) {
+  roots.forEach(root => {
     ['root','branch_1','branch_2','branch_3'].forEach(k =>
       setQuestionCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3)
     );
@@ -30,9 +30,9 @@ function resetAllProgress(profileId) {
   resetProfileProgress(profileId);
 }
 
-function conquerAllGauntlets(profileId) {
+function conquerAllGauntlets(profileId, roots) {
   const now = Date.now();
-  ROOTS.forEach(root => {
+  roots.forEach(root => {
     ['root','branch_1','branch_2','branch_3'].forEach(k =>
       setGauntletCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3)
     );
@@ -70,8 +70,8 @@ function setAbsoluteGauntletInProgress(profileId, rootId) {
   }
 }
 
-function maxAllVocabulary(profileId) {
-  Object.entries(DICTIONARY).forEach(([rootId, terms]) => {
+function maxAllVocabulary(profileId, dictionary) {
+  Object.entries(dictionary).forEach(([rootId, terms]) => {
     terms.forEach(term => setFlashcardTierExact(profileId, parseInt(rootId), term.term, 'excellent'));
   });
 }
