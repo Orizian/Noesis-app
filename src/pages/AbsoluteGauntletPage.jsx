@@ -270,6 +270,11 @@ export default function AbsoluteGauntletPage() {
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
   const [finalResults, setFinalResults] = useState(null); // flat array of 32 results
+  const [checkpointPrompt, setCheckpointPrompt] = useState(() => {
+    if (!activeProfileId) return false;
+    const cp = loadGauntletCheckpoint(activeProfileId, meta.id);
+    return cp && (Date.now() - cp.savedAt < 86400000) ? cp : false;
+  });
 
   const textareaRef = useRef(null);
 
