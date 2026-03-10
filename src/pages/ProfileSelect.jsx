@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Lock, Pencil, BookOpen, Trash2, X } from 'lucide-react';
+import { Plus, Lock, Pencil, BookOpen, Trash2, X, Settings } from 'lucide-react';
 import {
   getProfiles,
   createProfile,
