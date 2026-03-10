@@ -9,9 +9,10 @@ import { ArrowLeft } from 'lucide-react';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 
 export default function RootGauntletPage() {
+  const { roots } = useCourse();
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
-  const root = ROOTS.find(r => r.id === rootId) || ROOTS[0];
+  const root = roots.find(r => r.id === rootId) || roots[0];
 
   const { activeProfileId, refresh } = useProfile();
   const navigate = useNavigate();

@@ -34,9 +34,10 @@ const statusConfig = {
 // Ring removed — replaced by MasteryBars
 
 export default function RootDetail() {
+  const { roots } = useCourse();
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
-  const root = ROOTS.find(r => r.id === rootId) || ROOTS[0];
+  const root = roots.find(r => r.id === rootId) || roots[0];
 
   const [activeMode, setActiveMode] = useState(null); // null = no mode selected yet
   const [selectedQuestion, setSelectedQuestion] = useState('root');
