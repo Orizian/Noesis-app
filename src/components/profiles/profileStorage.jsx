@@ -4,6 +4,43 @@
 const PROFILES_KEY = 'exsci_profiles';
 const ACTIVE_PROFILE_KEY = 'exsci_active_profile';
 
+// ─── Account / Tier ───────────────────────────────────────────────────────────
+
+const ACCOUNT_KEY = 'noesis_account';
+
+const TIER_DEFAULTS = {
+  free:        { tierName: 'free',        maxProfiles: 1 },
+  scholar:     { tierName: 'scholar',     maxProfiles: 3 },
+  institution: { tierName: 'institution', maxProfiles: 10 },
+};
+
+export function getAccount() {
+  try {
+    const raw = localStorage.getItem(ACCOUNT_KEY);
+    if (raw) return JSON.parse(raw);
+    const account = { tierName: 'free', maxProfiles: 1 };
+    localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+    return account;
+  } catch {
+    return { tierName: 'free', maxProfiles: 1 };
+  }
+}
+
+export function setAccountTier(tierName) {
+  const defaults = TIER_DEFAULTS[tierName];
+  if (!defaults) return;
+  const account = getAccount();
+  const updated = { ...account, tierName: defaults.tierName, maxProfiles: defaults.maxProfiles };
+  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+export function canAddProfile() {
+  const account = getAccount();
+  const profiles = getProfiles();
+  return profiles.length < account.maxProfiles;
+}
+
 export function getProfiles() {
   try {
     return JSON.parse(localStorage.getItem(PROFILES_KEY) || '[]');
