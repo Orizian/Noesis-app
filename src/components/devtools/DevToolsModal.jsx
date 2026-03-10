@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ChevronDown } from 'lucide-react';
+import { useCourse } from '../course/CourseContext';
 import {
   setQuestionCriteriaExact,
   getQuestionCriteria,
