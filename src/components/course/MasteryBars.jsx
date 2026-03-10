@@ -75,10 +75,12 @@ function ThinBar({ value, max, ticks = [], color, label, rightLabel, height = 'h
 
 // Gauntlet bar color — pure function of points
 function getGauntletBarColor(value, max) {
-  if (max === 104) {
-    if (value <= 31) return 'bg-zinc-600';
-    if (value <= 71) return 'bg-emerald-500';
-    if (value < 104) return 'bg-teal-500';
+  if (max > 13) {
+    // Global bar: proportional thresholds
+    const pct = max > 0 ? value / max : 0;
+    if (pct <= 0.3) return 'bg-zinc-600';
+    if (pct < 0.7) return 'bg-emerald-500';
+    if (pct < 1) return 'bg-teal-500';
     return 'bg-violet-500';
   }
   // per-root (max 13)
