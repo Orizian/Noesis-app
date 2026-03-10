@@ -156,6 +156,7 @@ export function RootCardBars({ root, rootPoints, gauntletPoints, hasPerfected })
 // Per-root detail page bars (larger + per-question mini bars)
 export function RootDetailBars({ root, rootPoints, gauntletPoints, hasPerfected, questionPoints }) {
   const rootMax = getRootGauntletMaxPoints(root);
+
   return (
     <div className="space-y-3">
       {/* Main mastery bar */}
@@ -166,6 +167,7 @@ export function RootDetailBars({ root, rootPoints, gauntletPoints, hasPerfected,
         rightLabel={`${rootPoints} / ${rootMax}`}
         height="h-2.5"
       />
+
       {/* Gauntlet bar — only if attempted */}
       {(gauntletPoints > 0 || hasPerfected) && (
         <ThinBar
@@ -177,6 +179,7 @@ export function RootDetailBars({ root, rootPoints, gauntletPoints, hasPerfected,
           height="h-2.5"
         />
       )}
+
       {/* Per-question mini bars */}
       <div className="space-y-2 pt-1 border-t border-zinc-800/60">
         <ThinBar
@@ -187,30 +190,23 @@ export function RootDetailBars({ root, rootPoints, gauntletPoints, hasPerfected,
           rightLabel={`${questionPoints?.root || 0} / 4`}
           height="h-1.5"
         />
-        <ThinBar
-          value={questionPoints?.branch_1 || 0}
-          max={3}
-          ticks={[1]}
-          label="Branch 1"
-          rightLabel={`${questionPoints?.branch_1 || 0} / 3`}
-          height="h-1.5"
-        />
-        <ThinBar
-          value={questionPoints?.branch_2 || 0}
-          max={3}
-          ticks={[1]}
-          label="Branch 2"
-          rightLabel={`${questionPoints?.branch_2 || 0} / 3`}
-          height="h-1.5"
-        />
-        <ThinBar
-          value={questionPoints?.branch_3 || 0}
-          max={3}
-          ticks={[1]}
-          label="Branch 3"
-          rightLabel={`${questionPoints?.branch_3 || 0} / 3`}
-          height="h-1.5"
-        />
+
+        {root.branches.map((branch, index) => {
+          const key = `branch_${index + 1}`;
+          const value = questionPoints?.[key] || 0;
+
+          return (
+            <ThinBar
+              key={key}
+              value={value}
+              max={3}
+              ticks={[1]}
+              label={branch.label || `Branch ${index + 1}`}
+              rightLabel={`${value} / 3`}
+              height="h-1.5"
+            />
+          );
+        })}
       </div>
     </div>
   );
