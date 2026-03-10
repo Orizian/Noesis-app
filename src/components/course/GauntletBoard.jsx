@@ -95,7 +95,7 @@ function AbsoluteGauntletButton({ profileId, roots }) {
     return (
       <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/40 px-6 py-5 text-center">
         <p className="text-zinc-200 font-bold text-lg">The Absolute Gauntlet</p>
-        <p className="text-zinc-500 text-sm mt-1">All 8 roots. 32 questions. One sitting.</p>
+        <p className="text-zinc-500 text-sm mt-1">All {roots.length} roots. {roots.length * 4} questions. One sitting.</p>
         <p className="text-zinc-600 text-xs mt-3">{roots.length - passedCount} of {roots.length} Gauntlets remaining</p>
       </div>
     );
