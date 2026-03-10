@@ -77,7 +77,7 @@ function AbsoluteGauntletButton({ profileId, roots }) {
   const inProgress = !conquered && saved?.inProgress;
 
   const passedCount = profileId
-    ? ROOTS.filter(r => isRootGauntletPassed(profileId, r.id)).length
+    ? roots.filter(r => isRootGauntletPassed(profileId, r.id)).length
     : 0;
 
   if (conquered) {
