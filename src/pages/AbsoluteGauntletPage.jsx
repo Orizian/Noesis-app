@@ -432,14 +432,18 @@ export default function AbsoluteGauntletPage() {
               <button
                 onClick={() => {
                   const cp = checkpointPrompt;
-                  setAllAnswers(cp.answeredQuestions);
-                  // Find the first unanswered question position
-                  const firstEmpty = cp.answeredQuestions.findIndex(a => a === '');
-                  const idx = firstEmpty === -1 ? totalQuestions - 1 : firstEmpty;
-                  const ri = Math.floor(idx / 4);
-                  const qi = idx % 4;
-                  setRootIdx(ri);
-                  setQIdx(qi);
+                  // Restore answers — pad to full length
+                  const restored = [...cp.answeredQuestions, ...Array(totalQuestions - cp.answeredQuestions.length).fill('')];
+                  setAllAnswers(restored);
+                  // Next index is always answeredQuestions.length — points to first unanswered slot
+                  const nextIdx = cp.answeredQuestions.length;
+                  // If nextIdx lands exactly on a root boundary (i.e. qIdx would be 0 but we just finished
+                  // the previous root), that's fine — rootIdx * 4 + 0 is the first question of the next root.
+                  const ri = Math.floor(nextIdx / 4);
+                  const qi = nextIdx % 4;
+                  // Guard: if somehow nextIdx >= totalQuestions we're done — shouldn't happen
+                  setRootIdx(Math.min(ri, roots.length - 1));
+                  setQIdx(qi < 4 ? qi : 0);
                   setCheckpointPrompt(false);
                   setPhase('run');
                   setTimeout(() => textareaRef.current?.focus(), 100);
