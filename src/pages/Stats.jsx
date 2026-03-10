@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useProfile } from '../components/profiles/ProfileContext';
 import { getProfileStats } from '../components/profiles/profileStorage';
-import { ROOTS } from '../components/courseData';
+import { useCourse } from '../components/course/CourseContext';
 
 const STATUS_COLORS = {
   mastered: 'bg-violet-500',

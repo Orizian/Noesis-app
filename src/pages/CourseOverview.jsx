@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { ROOTS } from '../components/courseData';
+import { useCourse } from '../components/course/CourseContext';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
