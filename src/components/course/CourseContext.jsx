@@ -67,9 +67,13 @@ function buildCourseHelpers(course) {
 }
 
 export function CourseProvider({ children, courseId }) {
-  const id = courseId || DEFAULT_COURSE_ID;
-  const course = COURSES.find(c => c.id === id) || COURSES[0];
-  const value = buildCourseHelpers(course);
+  const [activeCourseId, setActiveCourseId] = useState(courseId || DEFAULT_COURSE_ID);
+  const course = COURSES.find(c => c.id === activeCourseId) || COURSES[0];
+  const value = {
+    ...buildCourseHelpers(course),
+    courses: COURSES,
+    setActiveCourse: (id) => setActiveCourseId(id),
+  };
 
   return (
     <CourseContext.Provider value={value}>
