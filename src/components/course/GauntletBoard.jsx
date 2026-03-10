@@ -71,11 +71,11 @@ function GauntletTile({ root, profileId, courseId }) {
   return content;
 }
 
-function AbsoluteGauntletButton({ profileId, roots }) {
+function AbsoluteGauntletButton({ profileId, courseId, roots }) {
   const navigate = useNavigate();
-  const eligible = profileId ? isAllGauntletsPassed(profileId, roots.length) : false;
-  const conquered = profileId ? isAbsoluteGauntletConquered(profileId) : false;
-  const saved = profileId ? getAbsoluteGauntlet(profileId) : null;
+  const eligible = (profileId && courseId) ? isAllGauntletsPassed(profileId, courseId, roots.length) : false;
+  const conquered = (profileId && courseId) ? isAbsoluteGauntletConquered(profileId, courseId) : false;
+  const saved = (profileId && courseId) ? getAbsoluteGauntlet(profileId, courseId) : null;
   const inProgress = !conquered && saved?.inProgress;
 
   const passedCount = profileId
