@@ -53,6 +53,9 @@ function buildCourseHelpers(course) {
     // Per-root helpers
     getRootTermCount,
 
+    // Per-root difficulty map (keyed by root id)
+    rootDifficultyMap: course.rootDifficultyMap || {},
+
     // Course metadata
     meta: {
       id: course.id,
