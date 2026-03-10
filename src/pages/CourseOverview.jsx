@@ -90,12 +90,12 @@ export default function CourseOverview() {
           </p>
 
           {/* Progress section */}
-          <ProgressSection profileId={activeProfileId} />
+          <ProgressSection profileId={activeProfileId} roots={activeCourse.roots} />
         </div>
 
         {/* Root list */}
         <div className="space-y-3">
-          {ROOTS.map((root) => (
+          {activeCourse.roots.map((root) => (
             <RootCard
               key={root.id}
               root={root}
