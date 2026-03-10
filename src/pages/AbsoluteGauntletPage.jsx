@@ -241,10 +241,11 @@ function AbsoluteProgressBar({ rootIdx, qIdx }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AbsoluteGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
+  const { roots } = useCourse();
   const navigate = useNavigate();
 
   const conquered = activeProfileId ? isAbsoluteGauntletConquered(activeProfileId) : false;
-  const eligible = activeProfileId ? isAllGauntletsPassed(activeProfileId) : false;
+  const eligible = activeProfileId ? isAllGauntletsPassed(activeProfileId, roots.length) : false;
   const saved = activeProfileId ? getAbsoluteGauntlet(activeProfileId) : null;
   const hasSession = saved?.inProgress && saved?.answers;
 
