@@ -12,6 +12,7 @@ import {
   getAbsoluteGauntlet,
   getGauntletRootPoints,
 } from '../profiles/profileStorage';
+
 import { Star, Trophy, Swords } from 'lucide-react';
 import { format } from 'date-fns';
 

@@ -22,6 +22,7 @@ import {
   getGauntletRootPoints,
   isRootPerfected,
 } from '../components/profiles/profileStorage';
+
 import { format } from 'date-fns';
 
 const statusConfig = {
