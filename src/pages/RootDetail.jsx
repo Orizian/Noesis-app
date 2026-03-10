@@ -35,7 +35,8 @@ const statusConfig = {
 // Ring removed — replaced by MasteryBars
 
 export default function RootDetail() {
-  const { roots } = useCourse();
+  const { roots, meta } = useCourse();
+  const courseId = meta.id;
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = roots.find(r => r.id === rootId) || roots[0];
@@ -52,10 +53,10 @@ export default function RootDetail() {
   const progress = getRootProgress(rootId);
 
   // Criteria-based data
-  const qc = activeProfileId ? getQuestionCriteria(activeProfileId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  const qc = activeProfileId ? getQuestionCriteria(activeProfileId, courseId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
-  const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, rootId) : 0;
-  const perfected = activeProfileId ? isRootPerfected(activeProfileId, rootId) : false;
+  const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, courseId, rootId) : 0;
+  const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, rootId) : false;
   const status = deriveRootStatus(qc);
   const cfg = perfected
     ? { label: 'Perfected', className: 'bg-violet-950/50 text-violet-300 border-violet-700' }
@@ -71,7 +72,7 @@ export default function RootDetail() {
   }, [rootId]);
 
   // Mode open tracking for practice dot
-  const openedModes = activeProfileId ? getOpenedModes(activeProfileId, rootId) : [];
+  const openedModes = activeProfileId ? getOpenedModes(activeProfileId, courseId, rootId) : [];
   const hasOpenedTeach = openedModes.includes('teach');
   const hasOpenedPractice = openedModes.includes('practice');
   const showPracticeDot = hasOpenedTeach && !hasOpenedPractice;
@@ -80,7 +81,7 @@ export default function RootDetail() {
     setDictFocusedTerm(term);
     setDictFocusedFlashcardIndex(null); // don't auto-open flashcard
     setActiveMode('teach');
-    if (activeProfileId) recordModeOpened(activeProfileId, rootId, 'teach');
+    if (activeProfileId) recordModeOpened(activeProfileId, courseId, rootId, 'teach');
     if (activeProfileId && !progress) {
       setRootProgress(rootId, {
         status: 'in_progress',
@@ -100,7 +101,7 @@ export default function RootDetail() {
     setDictFocusedTerm(null);
     setActiveMode(newMode);
     if (activeProfileId) {
-      recordModeOpened(activeProfileId, rootId, newMode);
+      recordModeOpened(activeProfileId, courseId, rootId, newMode);
     }
     // Mark in_progress when teach mode first opened
     if (newMode === 'teach' && activeProfileId && !progress) {
