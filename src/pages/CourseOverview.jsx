@@ -10,10 +10,11 @@ import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/cou
 import { BookOpen } from 'lucide-react';
 
 function ProgressSection({ profileId }) {
+  const { roots } = useCourse();
   let totalPoints = 0;
   let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
-  ROOTS.forEach(r => {
+  roots.forEach(r => {
     const qc = profileId ? getQuestionCriteria(profileId, r.id) : {};
     const rPts = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
     totalPoints += rPts;
