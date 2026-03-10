@@ -379,8 +379,8 @@ Rules:
       role: 'assistant',
       content: `**Cold Attempt — ${getQuestionLabel()}** (Attempt ${coldAttemptNum + 1})\n\n> ${getQuestion()}\n\nTry again. Answer from memory — no assistance until you submit.`
     }]);
-    if (activeProfileId) {
-      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
+    if (activeProfileId && courseId) {
+      const count = getColdAttemptCount(activeProfileId, courseId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
   };
