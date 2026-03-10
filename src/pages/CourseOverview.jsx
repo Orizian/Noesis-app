@@ -49,7 +49,7 @@ function ProgressSection({ profileId }) {
 }
 
 export default function CourseOverview() {
-  const { roots, dictionary } = useCourse();
+  const { roots, dictionary, meta } = useCourse();
   const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
