@@ -609,14 +609,20 @@ export default function AbsoluteGauntletPage() {
 
   // ── Evaluating ──
   if (phase === 'evaluating') {
+    const progressPct = roots.length > 0 ? (evalProgress / roots.length) * 100 : 0;
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
-        <div className="text-center space-y-5">
+        <div className="text-center space-y-6 max-w-md">
           <div className="w-12 h-12 rounded-full border-2 border-zinc-700 flex items-center justify-center mx-auto">
             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
           </div>
-          <p className="text-zinc-300 font-medium animate-pulse">Evaluating your complete performance...</p>
-          <p className="text-xs text-zinc-600">All {roots.length * 4} questions. This takes a moment.</p>
+          <p className="text-zinc-300 font-medium">Evaluating Root {evalProgress} of {roots.length}...</p>
+          <div className="space-y-2">
+            <div className="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="absolute left-0 top-0 h-full bg-red-600 transition-all duration-500" style={{ width: `${progressPct}%` }} />
+            </div>
+            <p className="text-xs text-zinc-600">{evalProgress} of {roots.length} roots evaluated</p>
+          </div>
           <p className="text-xs text-zinc-700 italic">Uses an advanced model for accuracy.</p>
         </div>
       </div>
