@@ -523,6 +523,47 @@ export function isAbsoluteGauntletConquered(profileId) {
 
 // ─── End Absolute Gauntlet storage ────────────────────────────────────────────
 
+// ─── Dynamic Dimension Helpers ────────────────────────────────────────────────
+
+// Returns the number of roots in a course
+export const getCourseRootCount = (course) => course.roots.length;
+
+// Returns the number of branches for a specific root
+export const getRootBranchCount = (root) => root.branches.length;
+
+// Returns the number of dictionary terms for a specific root in a course
+export const getRootTermCount = (course, rootId) => {
+  const terms = course.dictionary[rootId];
+  return terms ? terms.length : 0;
+};
+
+// Returns max points for a single root question — always 4, one root question per root
+export const getRootQuestionMaxPoints = () => 4;
+
+// Returns max points for a single branch given its criteria count
+export const getBranchMaxPoints = (root, branchIndex) => {
+  return root.branchCriteriaCounts?.[branchIndex] ?? 3;
+};
+
+// Returns max cold attempt points for a single root dynamically
+export const getRootMaxPoints = (root) => {
+  const branchPoints = root.branches.reduce((sum, _, i) => sum + getBranchMaxPoints(root, i), 0);
+  return getRootQuestionMaxPoints() + branchPoints;
+};
+
+// Returns max cold attempt points for entire course dynamically
+export const getCourseMaxPoints = (course) =>
+  course.roots.reduce((sum, root) => sum + getRootMaxPoints(root), 0);
+
+// Returns max gauntlet points for entire course dynamically
+export const getCourseMaxGauntletPoints = (course) => getCourseMaxPoints(course);
+
+// Returns max vocabulary score for entire course dynamically
+export const getCourseMaxVocabScore = (course) =>
+  course.roots.reduce((sum, root) => sum + getRootTermCount(course, root.id), 0);
+
+// ─── End Dynamic Dimension Helpers ────────────────────────────────────────────
+
 // Stats helpers
 export function getProfileStats(profileId) {
   const profile = getProfileById(profileId);
