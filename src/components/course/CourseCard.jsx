@@ -35,7 +35,7 @@ export default function CourseCard({ course, onEnter }) {
   const masteryPoints = isActive && activeProfileId
     ? getTotalPoints(activeProfileId, course.id, roots.length) : 0;
   const gauntletPoints = isActive && activeProfileId && roots.length > 0
-    ? roots.reduce((sum, r) => sum + (require('../profiles/profileStorage').getGauntletRootPoints(activeProfileId, course.id, r.id, r.branches.length)), 0) : 0;
+    ? roots.reduce((sum, r) => sum + getGauntletRootPoints(activeProfileId, course.id, r.id, r.branches.length), 0) : 0;
   const vocabScore = isActive && activeProfileId
     ? getTotalVocabScore(activeProfileId, course.id) : 0;
 
