@@ -154,28 +154,26 @@ export function RootCardBars({ root, rootPoints, gauntletPoints, hasPerfected })
 }
 
 // Per-root detail page bars (larger + per-question mini bars)
-export function RootDetailBars({ rootPoints, gauntletPoints, hasPerfected, questionPoints }) {
-  // questionPoints: { root: 0-4, branch_1: 0-3, branch_2: 0-3, branch_3: 0-3 }
+export function RootDetailBars({ root, rootPoints, gauntletPoints, hasPerfected, questionPoints }) {
+  const rootMax = getRootGauntletMaxPoints(root);
   return (
     <div className="space-y-3">
       {/* Main mastery bar */}
       <ThinBar
         value={rootPoints}
-        max={13}
-        ticks={[2, 4]}
+        max={rootMax}
         label="Mastery"
-        rightLabel={`${rootPoints} / 13`}
+        rightLabel={`${rootPoints} / ${rootMax}`}
         height="h-2.5"
       />
       {/* Gauntlet bar — only if attempted */}
       {(gauntletPoints > 0 || hasPerfected) && (
         <ThinBar
           value={gauntletPoints || 0}
-          max={13}
-          ticks={[4, 9]}
-          color={getGauntletBarColor(gauntletPoints || 0, 13)}
+          max={rootMax}
+          color={getGauntletBarColor(gauntletPoints || 0, rootMax)}
           label="Gauntlet"
-          rightLabel={`${gauntletPoints || 0} / 13`}
+          rightLabel={`${gauntletPoints || 0} / ${rootMax}`}
           height="h-2.5"
         />
       )}
