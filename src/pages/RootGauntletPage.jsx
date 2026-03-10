@@ -60,6 +60,7 @@ export default function RootGauntletPage() {
           <RootGauntletFlow
             root={root}
             profileId={activeProfileId}
+            courseId={courseId}
             onComplete={handleComplete}
             onCancel={handleCancel}
           />
