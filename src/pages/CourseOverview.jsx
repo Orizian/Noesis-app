@@ -90,7 +90,7 @@ export default function CourseOverview() {
           </div>
 
           <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-6">
-            Eight foundational mechanisms. Mastery-based progression. This course builds a causal model of how the body produces force, generates energy, adapts to stress, and recovers from exercise — so you can explain and predict performance, not just follow training rules.
+            {meta.description}
           </p>
 
           {/* Progress section */}
