@@ -17,13 +17,51 @@ const TIER_DEFAULTS = {
 export function getAccount() {
   try {
     const raw = localStorage.getItem(ACCOUNT_KEY);
-    if (raw) return JSON.parse(raw);
-    const account = { tierName: 'free', maxProfiles: 1 };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Backfill displayName for accounts that predate this field
+      if (parsed.displayName === undefined) parsed.displayName = '';
+      return parsed;
+    }
+    const account = { tierName: 'free', maxProfiles: 1, displayName: '' };
     localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
     return account;
   } catch {
-    return { tierName: 'free', maxProfiles: 1 };
+    return { tierName: 'free', maxProfiles: 1, displayName: '' };
   }
+}
+
+export function getAccountDisplayName() {
+  return getAccount().displayName || '';
+}
+
+export function setAccountDisplayName(name) {
+  const account = getAccount();
+  const updated = { ...account, displayName: name.trim() };
+  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+export function exportAccountData() {
+  const data = {
+    account: getAccount(),
+    profiles: getProfiles(),
+    activeProfileId: getActiveProfileId(),
+    exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `noesis_backup_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function clearAllAccountData() {
+  localStorage.removeItem(ACCOUNT_KEY);
+  localStorage.removeItem(PROFILES_KEY);
+  localStorage.removeItem(ACTIVE_PROFILE_KEY);
 }
 
 export function setAccountTier(tierName) {
