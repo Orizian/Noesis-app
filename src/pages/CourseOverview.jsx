@@ -97,8 +97,14 @@ export default function CourseOverview() {
               >
                 {meta.title}
               </h1>
-            </div>
-            <ProfileDropdown />
+              </div>
+              <button
+              onClick={() => setShowCourseInfo(true)}
+              className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-700 flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors flex-shrink-0"
+              >
+              <Info className="w-3.5 h-3.5" />
+              </button>
+              <ProfileDropdown />
           </div>
 
           <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-6">
