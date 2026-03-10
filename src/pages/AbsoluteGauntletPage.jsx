@@ -571,14 +571,18 @@ export default function AbsoluteGauntletPage() {
                   {savedFlash ? <span className="text-zinc-500">Answer saved</span> : '⌘↵ to submit'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <button onClick={handleSaveAndExit} className="px-3 py-2 rounded-xl border border-zinc-700 text-zinc-500 text-xs hover:bg-zinc-800 transition-colors">
-                    Save & Exit
-                  </button>
-                  <button onClick={handleSubmitQ} disabled={!currentAnswer.trim() || savedFlash}
-                    className="px-6 py-2.5 rounded-xl bg-red-900/60 hover:bg-red-800/70 disabled:bg-zinc-700 disabled:text-zinc-500 text-red-200 text-sm font-semibold transition-colors">
-                    {isLastQ ? 'Submit Final' : qIdx < 3 ? 'Next' : 'Root Complete'}
-                  </button>
-                </div>
+                    <button onClick={handleSaveAndExit} className="px-3 py-2 rounded-xl border border-zinc-700 text-zinc-500 text-xs hover:bg-zinc-800 transition-colors">
+                      Save & Exit
+                    </button>
+                    <button onClick={() => handleSubmitQ('[Skipped]')} disabled={savedFlash}
+                      className="px-3 py-2 rounded-xl border border-zinc-700 text-zinc-600 text-xs hover:bg-zinc-800 transition-colors disabled:opacity-50">
+                      Skip
+                    </button>
+                    <button onClick={handleSubmitQ} disabled={!currentAnswer.trim() || savedFlash}
+                      className="px-6 py-2.5 rounded-xl bg-red-900/60 hover:bg-red-800/70 disabled:bg-zinc-700 disabled:text-zinc-500 text-red-200 text-sm font-semibold transition-colors">
+                      {isLastQ ? 'Submit Final' : qIdx < 3 ? 'Next' : 'Root Complete'}
+                    </button>
+                  </div>
               </div>
             </div>
           </div>
