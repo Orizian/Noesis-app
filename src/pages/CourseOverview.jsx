@@ -1,19 +1,19 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { ROOTS } from '../components/courseData';
+import { useCourse } from '../components/course/CourseContext';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
 import GauntletBoard from '../components/course/GauntletBoard';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
+import { getQuestionCriteria, deriveRootStatus, getTotalGauntletPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
 import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/course/MasteryBars';
 import { BookOpen } from 'lucide-react';
 
-function ProgressSection({ profileId }) {
+function ProgressSection({ profileId, roots }) {
   let totalPoints = 0;
   let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
-  ROOTS.forEach(r => {
+  roots.forEach(r => {
     const qc = profileId ? getQuestionCriteria(profileId, r.id) : {};
     const rPts = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
     totalPoints += rPts;
@@ -46,6 +46,7 @@ function ProgressSection({ profileId }) {
 
 export default function CourseOverview() {
   const { activeProfileId, refresh } = useProfile();
+  const { activeCourse } = useCourse();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
   const tapTimer = useRef(null);
