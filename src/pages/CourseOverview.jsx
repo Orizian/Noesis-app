@@ -24,7 +24,7 @@ function ProgressSection({ profileId }) {
     if (profileId && isRootPerfected(profileId, r.id)) perfectedCount++;
   });
 
-  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId) : 0;
+  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, roots.length) : 0;
   const anyGauntlet = gauntletTotal > 0;
 
   const vocabScore = profileId ? getTotalVocabScore(profileId) : 0;
