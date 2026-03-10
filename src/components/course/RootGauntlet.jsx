@@ -139,8 +139,9 @@ function ResultPanel({ result, qMeta, onContinue, continueLabel }) {
 
 // ── Main exported hook-based evaluator ────────────────────────────────────────
 // Exported so AbsoluteGauntlet can reuse evaluation logic
-export async function evaluateAnswer({ root, qMeta, answer }) {
-  const getRubric = (key) => key === 'root' ? root.rubric : (BRANCH_RUBRICS[root.id]?.[key] || root.rubric);
+// branchRubrics must be passed explicitly (cannot use hooks here)
+export async function evaluateAnswer({ root, qMeta, answer, branchRubrics = {} }) {
+  const getRubric = (key) => key === 'root' ? root.rubric : (branchRubrics[root.id]?.[key] || root.rubric);
   const getQuestion = (key) => {
     if (key === 'root') return root.rootQuestion;
     const idx = parseInt(key.split('_')[1]) - 1;
