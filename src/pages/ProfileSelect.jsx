@@ -288,7 +288,8 @@ export default function ProfileSelect() {
     refreshProfiles();
   };
 
-  const canAdd = canAddProfile();
+  // Derived from already-loaded state — no storage read on every render
+  const canAdd = profiles.length < account.maxProfiles;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
