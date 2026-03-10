@@ -146,6 +146,14 @@ export default function CourseOverview() {
           dictionary={dictionary}
         />
       )}
+
+      {showCourseInfo && (
+        <CourseSummaryOverlay
+          course={meta}
+          onClose={() => setShowCourseInfo(false)}
+          onEnter={null}
+        />
+      )}
     </div>
   );
 }
