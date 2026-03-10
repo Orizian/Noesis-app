@@ -2,19 +2,13 @@ import React from 'react';
 
 // Color — pure function of points earned, never derived from tier labels
 function getMasteryColor(value, max) {
-  if (max === 104) {
-    if (value <= 15) return 'bg-zinc-600';
-    if (value <= 39) {
-      // green interpolating: emerald-400 approaching emerald-600
-      const t = (value - 16) / (39 - 16);
-      return t < 0.5 ? 'bg-emerald-400' : 'bg-emerald-500';
-    }
-    if (value < 104) {
-      // teal interpolating
-      const t = (value - 40) / (103 - 40);
-      return t < 0.5 ? 'bg-teal-400' : 'bg-teal-500';
-    }
-    return 'bg-violet-500'; // 104
+  // Global bar: max = rootCount * 13
+  if (max > 13) {
+    const pct = max > 0 ? value / max : 0;
+    if (pct <= 0.15) return 'bg-zinc-600';
+    if (pct < 0.4) return pct < 0.28 ? 'bg-emerald-400' : 'bg-emerald-500';
+    if (pct < 1) return pct < 0.7 ? 'bg-teal-400' : 'bg-teal-500';
+    return 'bg-violet-500';
   }
   if (max === 13) {
     if (value <= 1) return 'bg-zinc-600';
