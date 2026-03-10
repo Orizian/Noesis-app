@@ -18,11 +18,13 @@ const STATUS_CONFIG = {
   mastered:    { label: 'Mastered',    badgeClass: 'bg-violet-950/50 text-violet-300 border-violet-800/50', borderClass: 'border-l-violet-500' },
 };
 
-// Derive tier label purely from total root points (0–13)
-function getTierFromPoints(pts) {
-  if (pts <= 1) return null;
-  if (pts <= 5) return { label: 'Pass', className: 'text-emerald-400' };
-  if (pts <= 12) return { label: 'Great', className: 'text-teal-400' };
+// Derive tier label based on percentage of max points
+function getTierFromPoints(pts, maxPts) {
+  if (!maxPts) return null;
+  const pct = pts / maxPts;
+  if (pct < 0.1) return null;
+  if (pct < 0.46) return { label: 'Pass', className: 'text-emerald-400' };
+  if (pct < 0.85) return { label: 'Great', className: 'text-teal-400' };
   return { label: 'Excellent', className: 'text-violet-400' };
 }
 
