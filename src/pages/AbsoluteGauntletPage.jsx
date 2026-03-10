@@ -343,7 +343,7 @@ export default function AbsoluteGauntletPage() {
       setTimeout(() => textareaRef.current?.focus(), 50);
     } else {
       // End of this root
-      if (rootIdx < 7) {
+      if (rootIdx < roots.length - 1) {
         setPhase('root_transition');
         setCurrentAnswer('');
         if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
@@ -444,7 +444,7 @@ export default function AbsoluteGauntletPage() {
   // ── Run ──
   if (phase === 'run') {
     const qMeta = GAUNTLET_QUESTIONS[qIdx];
-    const isLastQ = rootIdx === 7 && qIdx === 3;
+    const isLastQ = rootIdx === roots.length - 1 && qIdx === 3;
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <div className="max-w-2xl mx-auto px-4 py-6">
