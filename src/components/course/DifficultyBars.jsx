@@ -1,4 +1,5 @@
 import React from 'react';
+import { useCourse } from './CourseContext';
 
 // difficulty: 'foundational' | 'applied' | 'mechanistic'
 const DIFFICULTY_CONFIG = {
@@ -7,19 +8,9 @@ const DIFFICULTY_CONFIG = {
   mechanistic:  { filled: 3, color: 'bg-violet-500',  label: 'Mechanistic' },
 };
 
-export const ROOT_DIFFICULTY = {
-  1: 'mechanistic',
-  2: 'mechanistic',
-  3: 'mechanistic',
-  4: 'mechanistic',
-  5: 'mechanistic',
-  6: 'mechanistic',
-  7: 'applied',
-  8: 'applied',
-};
-
 export default function DifficultyBars({ rootId, showLabel = false, size = 'sm' }) {
-  const tier = ROOT_DIFFICULTY[rootId] || 'mechanistic';
+  const { rootDifficultyMap } = useCourse();
+  const tier = rootDifficultyMap[rootId] || 'mechanistic';
   const { filled, color, label } = DIFFICULTY_CONFIG[tier];
 
   const barH = size === 'sm' ? 'h-[5px]' : 'h-[7px]';
