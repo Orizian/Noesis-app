@@ -4,7 +4,28 @@ import { COURSES } from '../courseData/index';
 // Default to the first course (exercise-science / Human Performance Physiology)
 const DEFAULT_COURSE_ID = 'exercise-science';
 
+// Platform scoring constants
+export const ROOT_CRITERIA_POINTS = 4;
+export const BRANCH_CRITERIA_POINTS = 3;
+
 const CourseContext = createContext(null);
+
+// ─── Gauntlet scoring helpers ───────────────────────────────────────────────
+export function getRootGauntletMaxPoints(root) {
+  return ROOT_CRITERIA_POINTS + root.branches.length * BRANCH_CRITERIA_POINTS;
+}
+
+export function getCourseGauntletMaxPoints(roots) {
+  return roots.reduce((sum, r) => sum + getRootGauntletMaxPoints(r), 0);
+}
+
+export function getGauntletTier(points, maxPoints) {
+  const pct = points / maxPoints;
+  if (pct >= 1.0) return 'excellent';
+  if (pct >= 0.85) return 'great';
+  if (pct >= 0.5) return 'pass';
+  return 'incomplete';
+}
 
 // ── Derived dimension helpers ──────────────────────────────────────────────────
 // These are computed from the active course data so no hardcoded numbers
