@@ -336,7 +336,7 @@ export default function AbsoluteGauntletPage() {
       const newQ = qIdx + 1;
       setQIdx(newQ);
       setCurrentAnswer('');
-      if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: newQ, answers: newAnswers });
+      if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: newQ, answers: newAnswers });
       setTimeout(() => textareaRef.current?.focus(), 50);
     } else {
       // End of this root
