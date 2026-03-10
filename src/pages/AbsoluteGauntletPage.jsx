@@ -19,13 +19,10 @@ import { ArrowLeft } from 'lucide-react';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import { format } from 'date-fns';
 import { base44 } from '@/api/base44Client';
+import { getQuestionsForRoot } from '../components/course/RootGauntletFlow';
 
-const GAUNTLET_QUESTIONS = [
-  { key: 'root',     label: 'Root Question', maxCriteria: 4 },
-  { key: 'branch_1', label: 'Branch 1',      maxCriteria: 3 },
-  { key: 'branch_2', label: 'Branch 2',      maxCriteria: 3 },
-  { key: 'branch_3', label: 'Branch 3',      maxCriteria: 3 },
-];
+// getQuestionsForRoot moved to RootGauntletFlow.jsx — import it if needed
+// For AbsoluteGauntlet, construct questions dynamically per root
 
 const TIER_CONFIG = {
   excellent:  { label: 'Excellent',  className: 'bg-violet-950/60 border-violet-700 text-violet-300' },
@@ -198,9 +195,9 @@ function RootSection({ root, rootResults, rootIndex }) {
       </button>
       {expanded && (
         <div className="border-t border-zinc-800/50 bg-zinc-900/30">
-          {GAUNTLET_QUESTIONS.map((q, qi) => (
-            <QuestionRow key={qi} result={rootResults[qi] || { score: 0, tier: 'incomplete', criteria_met: [], criteria_breakdown: [], feedback: '' }} qMeta={q} />
-          ))}
+          {getQuestionsForRoot(root).map((q, qi) => (
+             <QuestionRow key={qi} result={rootResults[qi] || { score: 0, tier: 'incomplete', criteria_met: [], criteria_breakdown: [], feedback: '' }} qMeta={q} />
+           ))}
         </div>
       )}
     </div>
@@ -256,11 +253,23 @@ export default function AbsoluteGauntletPage() {
     if (hasSession && saved?.qIdx != null) return saved.qIdx;
     return 0;
   });
-  // All answers: flat array of 32 (rootIdx*4 + qIdx)
-  const totalQuestions = roots.length * 4;
+  // All answers: flat array of variable length (sum of all root question counts)
+  const totalQuestions = roots.reduce((sum, r) => sum + 1 + r.branches.length, 0);
+  
+  // Helper: compute flat index for a given (rootIdx, qIdx)
+  const flatIndexForQuestion = (ri, qi) => {
+    let idx = 0;
+    for (let i = 0; i < ri; i++) {
+      idx += 1 + roots[i].branches.length;
+    }
+    return idx + qi;
+  };
+
+  // Helper: compute the number of questions for a given root
+  const questionsPerRoot = (ri) => 1 + roots[ri].branches.length;
   const [allAnswers, setAllAnswers] = useState(() => {
     if (hasSession && saved?.answers) return saved.answers;
-    return Array(roots.length * 4).fill('');
+    return Array(totalQuestions).fill('');
   });
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
@@ -332,7 +341,7 @@ export default function AbsoluteGauntletPage() {
   const root = roots[rootIdx];
 
   const startFresh = () => {
-    const newAnswers = Array(roots.length * 4).fill('');
+    const newAnswers = Array(totalQuestions).fill('');
     setAllAnswers(newAnswers);
     setRootIdx(0); setQIdx(0); setCurrentAnswer('');
     if (activeProfileId) {
@@ -351,7 +360,7 @@ export default function AbsoluteGauntletPage() {
   const handleSubmitQ = async (answerOverride) => {
     const answer = answerOverride ?? currentAnswer;
     if (!answer.trim()) return;
-    const answerIndex = rootIdx * 4 + qIdx;
+    const answerIndex = flatIndexForQuestion(rootIdx, qIdx);
     const newAnswers = [...allAnswers];
     newAnswers[answerIndex] = answer;
     setAllAnswers(newAnswers);
@@ -367,7 +376,8 @@ export default function AbsoluteGauntletPage() {
     await new Promise(r => setTimeout(r, 500));
     setSavedFlash(false);
 
-    if (qIdx < 3) {
+    const qsPerRoot = questionsPerRoot(rootIdx);
+    if (qIdx < qsPerRoot - 1) {
       const newQ = qIdx + 1;
       setQIdx(newQ);
       setCurrentAnswer('');
@@ -378,15 +388,20 @@ export default function AbsoluteGauntletPage() {
       if (rootIdx < roots.length - 1) {
         setPhase('root_transition');
         setCurrentAnswer('');
-        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
+        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: qsPerRoot - 1, answers: newAnswers });
       } else {
-        // All 32 done — sequential per-root evaluation
+        // All done — sequential per-root evaluation
         setPhase('evaluating');
         setEvalProgress(0);
         try {
           const allResults = [];
           for (let ri = 0; ri < roots.length; ri++) {
-            const rootAnswers = newAnswers.slice(ri * 4, ri * 4 + 4);
+            const qCount = questionsPerRoot(ri);
+            let startIdx = 0;
+            for (let i = 0; i < ri; i++) {
+              startIdx += questionsPerRoot(i);
+            }
+            const rootAnswers = newAnswers.slice(startIdx, startIdx + qCount);
             const rootResults = await evaluateRoot(roots[ri], rootAnswers, branchRubrics);
             console.log(`Root ${ri + 1} evaluation:`, JSON.stringify(rootResults));
             allResults.push(...rootResults);
@@ -396,8 +411,13 @@ export default function AbsoluteGauntletPage() {
           if (activeProfileId) {
             roots.forEach((r, ri) => {
               const bulk = {};
-              GAUNTLET_QUESTIONS.forEach((q, qi) => {
-                bulk[q.key] = allResults[ri * GAUNTLET_QUESTIONS.length + qi]?.score || 0;
+              const questions = getQuestionsForRoot(r);
+              questions.forEach((q, qi) => {
+                let resultIdx = 0;
+                for (let i = 0; i < ri; i++) {
+                  resultIdx += questionsPerRoot(i);
+                }
+                bulk[q.key] = allResults[resultIdx + qi]?.score || 0;
               });
               setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
             });
@@ -544,8 +564,9 @@ export default function AbsoluteGauntletPage() {
 
   // ── Run ──
   if (phase === 'run') {
-    const qMeta = GAUNTLET_QUESTIONS[qIdx];
-    const isLastQ = rootIdx === roots.length - 1 && qIdx === 3;
+    const questions = getQuestionsForRoot(root);
+    const qMeta = questions[qIdx];
+    const isLastQ = rootIdx === roots.length - 1 && qIdx === questions.length - 1;
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <div className="max-w-2xl mx-auto px-4 py-6">
@@ -577,10 +598,10 @@ export default function AbsoluteGauntletPage() {
                     <button onClick={() => handleSubmitQ('[Skipped]')} disabled={savedFlash}
                       className="px-3 py-2 rounded-xl border border-zinc-700 text-zinc-600 text-xs hover:bg-zinc-800 transition-colors disabled:opacity-50">
                       Skip
-                    </button>
+                    </button>{qIdx < questions.length - 1 ? 'Next' : 'Root Complete'}
                     <button onClick={handleSubmitQ} disabled={!currentAnswer.trim() || savedFlash}
                       className="px-6 py-2.5 rounded-xl bg-red-900/60 hover:bg-red-800/70 disabled:bg-zinc-700 disabled:text-zinc-500 text-red-200 text-sm font-semibold transition-colors">
-                      {isLastQ ? 'Submit Final' : qIdx < 3 ? 'Next' : 'Root Complete'}
+                      {isLastQ ? 'Submit Final' : qIdx < questions.length - 1 ? 'Next' : 'Root Complete'}
                     </button>
                   </div>
               </div>
@@ -726,36 +747,50 @@ export default function AbsoluteGauntletPage() {
           <div>
             {allPassed && <Star className="w-6 h-6 text-amber-400 fill-amber-400 mb-2" />}
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-0.5">
-              {allPassed ? 'Absolute Gauntlet Conquered' : 'Absolute Gauntlet Results'}
-            </p>
-            <h1 className={`text-2xl font-bold ${allPassed ? 'text-amber-400' : 'text-zinc-100'}`}>
-              {allPassed ? `Absolute Gauntlet Conquered — ${dateStr}` : `Absolute Gauntlet Results — ${dateStr}`}
-            </h1>
-          </div>
+               {allPassed ? 'Absolute Gauntlet Conquered' : 'Absolute Gauntlet Results'}
+             </p>
+             <h1 className={`text-2xl font-bold ${allPassed ? 'text-amber-400' : 'text-zinc-100'}`}>
+               {allPassed ? `Absolute Gauntlet Conquered — ${dateStr}` : `Absolute Gauntlet Results — ${dateStr}`}
+             </h1>
+            </div>
 
-          {/* Master score bar */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-zinc-500">Total Score</span>
-              <span className="text-xs text-zinc-500 font-mono">{totalScore} / {roots.length * 13}</span>
+            {/* Master score bar */}
+            <div>
+             {(() => {
+               const maxPts = roots.reduce((sum, r) => sum + (4 + r.branches.length * 3), 0);
+               return (
+                 <>
+                   <div className="flex items-center justify-between mb-1.5">
+                     <span className="text-xs text-zinc-500">Total Score</span>
+                     <span className="text-xs text-zinc-500 font-mono">{totalScore} / {maxPts}</span>
+                   </div>
+                   <div className="relative h-2.5 bg-zinc-800 rounded-full overflow-visible">
+                     <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColorDynamic(totalScore, maxPts)}`}
+                       style={{ width: `${(totalScore / maxPts) * 100}%` }} />
+                   </div>
+                   <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {maxPts}</p>
+                 </>
+               );
+             })()}
             </div>
-            <div className="relative h-2.5 bg-zinc-800 rounded-full overflow-visible">
-              <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColorDynamic(totalScore, roots.length * 13)}`}
-                style={{ width: `${(totalScore / (roots.length * 13)) * 100}%` }} />
-            </div>
-            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {roots.length * 13}</p>
-          </div>
 
           {/* Root sections */}
           <div className="space-y-2">
-            {roots.map((r, ri) => (
-              <RootSection
-                key={r.id}
-                root={r}
-                rootResults={finalResults.slice(ri * 4, ri * 4 + 4)}
-                rootIndex={ri}
-              />
-            ))}
+            {roots.map((r, ri) => {
+              let resultIdx = 0;
+              for (let i = 0; i < ri; i++) {
+                resultIdx += questionsPerRoot(i);
+              }
+              const qCount = questionsPerRoot(ri);
+              return (
+                <RootSection
+                  key={r.id}
+                  root={r}
+                  rootResults={finalResults.slice(resultIdx, resultIdx + qCount)}
+                  rootIndex={ri}
+                />
+              );
+            })}
           </div>
 
           {/* Buttons */}
