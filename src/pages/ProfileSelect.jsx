@@ -293,7 +293,7 @@ export default function ProfileSelect() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       {/* Header — matches CourseSelectionPage */}
-      <div className="pt-14 pb-8 text-center">
+      <div className="pt-14 pb-8 text-center relative">
         <div className="flex items-center justify-center gap-3 mb-2">
           <div className="w-9 h-9 rounded-xl bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center">
             <BookOpen className="w-4 h-4 text-emerald-500" />
@@ -301,6 +301,13 @@ export default function ProfileSelect() {
           <span className="text-xl font-semibold tracking-tight text-zinc-100">Noesis</span>
         </div>
         <p className="text-zinc-600 text-xs tracking-wide">Mechanistic learning, from first principles</p>
+        <button
+          onClick={() => { window.location.href = createPageUrl('AccountPage'); }}
+          className="absolute top-14 right-4 p-2 rounded-lg text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50 transition-colors"
+          aria-label="Account settings"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Title */}
