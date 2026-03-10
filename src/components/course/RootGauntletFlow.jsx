@@ -221,7 +221,7 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
          const bulk = {};
          const questions = getQuestionsForRoot(root);
          evalResults.forEach((r, i) => { bulk[questions[i].key] = r.score; });
-         setGauntletCriteriaBulk(profileId, courseId, root.id, bulk);
+         setGauntletCriteriaBulk(profileId, courseId, root.id, bulk, root.branches.length);
          const allPassed = evalResults.every(r => r.passed);
          if (allPassed) setGauntletPassedDate(profileId, courseId, root.id, Date.now());
        }
@@ -324,7 +324,7 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
      const totalScore = results.reduce((s, r) => s + (r.score || 0), 0);
      const allPassed = results.every(r => r.passed);
      const dateStr = format(new Date(), 'MMM d, yyyy');
-     const prevBest = profileId ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
+     const prevBest = profileId ? getGauntletRootPoints(profileId, courseId, root.id, root.branches.length) : 0;
      const personalBest = Math.max(prevBest, totalScore);
 
     return (

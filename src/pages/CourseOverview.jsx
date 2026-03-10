@@ -29,7 +29,7 @@ function ProgressSection({ profileId }) {
     if (profileId && isRootPerfected(profileId, courseId, r.id, r.branches.length)) perfectedCount++;
   });
 
-  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;
+  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, courseId, roots) : 0;
   const anyGauntlet = gauntletTotal > 0;
 
   const vocabScore = profileId ? getTotalVocabScore(profileId, courseId) : 0;

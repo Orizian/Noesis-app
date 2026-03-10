@@ -22,7 +22,7 @@ const TIER_LABELS = { unattempted: '—', attempted: 'Attempted', pass: 'Pass', 
 function masterAllRoots(profileId, courseId, roots) {
   roots.forEach(root => {
     ['root','branch_1','branch_2','branch_3'].forEach(k =>
-      setQuestionCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3)
+      setQuestionCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3, root.branches.length)
     );
   });
 }
@@ -35,7 +35,7 @@ function conquerAllGauntlets(profileId, courseId, roots) {
   const now = Date.now();
   roots.forEach(root => {
     ['root','branch_1','branch_2','branch_3'].forEach(k =>
-      setGauntletCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3)
+      setGauntletCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3, root.branches.length)
     );
     setGauntletPassedDate(profileId, courseId, root.id, now);
   });
@@ -126,11 +126,11 @@ function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
   const [expanded, setExpanded] = useState(false);
 
   // Cold attempt state
-  const initQC = () => { const qc = getQuestionCriteria(profileId, courseId, root.id); return { root: qc.root||0, branch_1: qc.branch_1||0, branch_2: qc.branch_2||0, branch_3: qc.branch_3||0 }; };
+  const initQC = () => { const qc = getQuestionCriteria(profileId, courseId, root.id, root.branches.length); return { root: qc.root||0, branch_1: qc.branch_1||0, branch_2: qc.branch_2||0, branch_3: qc.branch_3||0 }; };
   const [coldVals, setColdVals] = useState(initQC);
 
   // Gauntlet state
-  const initGC = () => { const gc = getGauntletCriteria(profileId, courseId, root.id); return { root: gc.root||0, branch_1: gc.branch_1||0, branch_2: gc.branch_2||0, branch_3: gc.branch_3||0 }; };
+  const initGC = () => { const gc = getGauntletCriteria(profileId, courseId, root.id, root.branches.length); return { root: gc.root||0, branch_1: gc.branch_1||0, branch_2: gc.branch_2||0, branch_3: gc.branch_3||0 }; };
   const [gauntletVals, setGauntletVals] = useState(initGC);
 
   // Vocab state — { termName: tier }
@@ -142,34 +142,34 @@ function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
   };
   const [vocabVals, setVocabVals] = useState(initVocab);
 
-  const setC = (key, val) => { setQuestionCriteriaExact(profileId, courseId, root.id, key, val); setColdVals(p => ({ ...p, [key]: val })); onChanged(); };
-  const setG = (key, val) => { setGauntletCriteriaExact(profileId, courseId, root.id, key, val); setGauntletVals(p => ({ ...p, [key]: val })); onChanged(); };
+  const setC = (key, val) => { setQuestionCriteriaExact(profileId, courseId, root.id, key, val, root.branches.length); setColdVals(p => ({ ...p, [key]: val })); onChanged(); };
+  const setG = (key, val) => { setGauntletCriteriaExact(profileId, courseId, root.id, key, val, root.branches.length); setGauntletVals(p => ({ ...p, [key]: val })); onChanged(); };
 
   const masterRoot = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3));
+    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3, root.branches.length));
     setColdVals({ root:4, branch_1:3, branch_2:3, branch_3:3 });
     onChanged();
   };
   const resetRoot = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, 0));
+    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, 0, root.branches.length));
     setColdVals({ root:0, branch_1:0, branch_2:0, branch_3:0 });
     onChanged();
   };
   const setGMax = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3));
+    ['root','branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3, root.branches.length));
     setGauntletPassedDate(profileId, courseId, root.id, Date.now());
     setGauntletVals({ root:4, branch_1:3, branch_2:3, branch_3:3 });
     onChanged();
   };
   const setGMinPass = () => {
-    setGauntletCriteriaExact(profileId, courseId, root.id, 'root', 2);
-    ['branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, 1));
+    setGauntletCriteriaExact(profileId, courseId, root.id, 'root', 2, root.branches.length);
+    ['branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, 1, root.branches.length));
     setGauntletPassedDate(profileId, courseId, root.id, Date.now());
     setGauntletVals({ root:2, branch_1:1, branch_2:1, branch_3:1 });
     onChanged();
   };
   const resetGauntlet = () => {
-    resetGauntletForRoot(profileId, courseId, root.id);
+    resetGauntletForRoot(profileId, courseId, root.id, root.branches.length);
     clearGauntletPassedDate(profileId, courseId, root.id);
     setGauntletVals({ root:0, branch_1:0, branch_2:0, branch_3:0 });
     onChanged();
@@ -317,7 +317,7 @@ export default function DevToolsModal({ profileId, onClose, onChanged, roots, di
               className="px-3 py-2 rounded-lg bg-violet-900/50 hover:bg-violet-900/70 border border-violet-700/60 text-violet-300 text-xs font-semibold transition-colors">
               Max Everything
             </button>
-            <button onClick={() => act(() => { resetAllProgress(profileId, courseId); roots.forEach(r => { resetGauntletForRoot(profileId, courseId, r.id); clearGauntletPassedDate(profileId, courseId, r.id); }); resetAbsoluteGauntlet(profileId, courseId); clearAllFlashcardTiers(profileId, courseId); })}
+            <button onClick={() => act(() => { resetAllProgress(profileId, courseId); roots.forEach(r => { resetGauntletForRoot(profileId, courseId, r.id, r.branches.length); clearGauntletPassedDate(profileId, courseId, r.id); }); resetAbsoluteGauntlet(profileId, courseId); clearAllFlashcardTiers(profileId, courseId); })}
               className="px-3 py-2 rounded-lg bg-red-950/60 hover:bg-red-950/80 border border-red-800/60 text-red-400 text-xs font-semibold transition-colors">
               Reset Everything
             </button>

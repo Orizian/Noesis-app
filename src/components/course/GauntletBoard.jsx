@@ -25,10 +25,10 @@ function getBarColorDynamic(pts, max) {
 }
 
 function GauntletTile({ root, profileId, courseId }) {
-  const eligible = profileId ? isGauntletEligible(profileId, courseId, root.id) : false;
+  const eligible = profileId ? isGauntletEligible(profileId, courseId, root.id, root.branches.length) : false;
   const passed = profileId ? isRootGauntletPassed(profileId, courseId, root.id) : false;
   const passedDate = passed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
-  const points = profileId ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
+  const points = profileId ? getGauntletRootPoints(profileId, courseId, root.id, root.branches.length) : 0;
   // "Perfected" = 13/13
   const perfected = points === 13;
 
@@ -130,7 +130,7 @@ function AbsoluteGauntletButton({ profileId, roots, courseId }) {
 export default function GauntletBoard({ profileId }) {
   const { roots, meta } = useCourse();
   const courseId = meta.id;
-  const totalPoints = profileId ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;
+  const totalPoints = profileId ? getTotalGauntletPoints(profileId, courseId, roots) : 0;
 
   return (
     <div className="mt-10 border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">

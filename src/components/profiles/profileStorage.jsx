@@ -544,10 +544,8 @@ export function getGauntletRootPoints(profileId, courseId, rootId, branchCount) 
   return Object.values(gc).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
 }
 
-export function getTotalGauntletPoints(profileId, courseId, rootCount) {
-  let total = 0;
-  for (let i = 1; i <= rootCount; i++) total += getGauntletRootPoints(profileId, courseId, i);
-  return total;
+export function getTotalGauntletPoints(profileId, courseId, roots) {
+  return roots.reduce((sum, r) => sum + getGauntletRootPoints(profileId, courseId, r.id, r.branches.length), 0);
 }
 
 export function isRootPerfected(profileId, courseId, rootId, branchCount) {
