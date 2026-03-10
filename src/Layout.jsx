@@ -15,7 +15,8 @@ function AppShell({ children, currentPageName }) {
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <ProfileProvider>
+    <CourseProvider>
+      <ProfileProvider>
       <div className="min-h-screen bg-zinc-950">
         <style>{`
           body {
