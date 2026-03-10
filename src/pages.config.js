@@ -49,22 +49,22 @@
  */
 import AbsoluteGauntletPage from './pages/AbsoluteGauntletPage';
 import CourseOverview from './pages/CourseOverview';
+import CourseSelectionPage from './pages/CourseSelectionPage';
 import ProfileSelect from './pages/ProfileSelect';
 import RootDetail from './pages/RootDetail';
 import RootGauntletPage from './pages/RootGauntletPage';
 import Stats from './pages/Stats';
-import CourseSelectionPage from './pages/CourseSelectionPage';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AbsoluteGauntletPage": AbsoluteGauntletPage,
     "CourseOverview": CourseOverview,
+    "CourseSelectionPage": CourseSelectionPage,
     "ProfileSelect": ProfileSelect,
     "RootDetail": RootDetail,
     "RootGauntletPage": RootGauntletPage,
     "Stats": Stats,
-    "CourseSelectionPage": CourseSelectionPage,
 }
 
 export const pagesConfig = {

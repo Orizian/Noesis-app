@@ -532,6 +532,28 @@ export function isAbsoluteGauntletConquered(profileId, courseId) {
   return !!(getCourseData(profile, courseId).absoluteGauntlet?.conqueredAt);
 }
 
+// ─── Absolute Gauntlet Checkpoints ────────────────────────────────────────────
+
+export function saveGauntletCheckpoint(profileId, courseId, answeredQuestions) {
+  const key = `${profileId}__${courseId}__gauntlet_checkpoint`;
+  const data = {
+    answeredQuestions,
+    savedAt: Date.now(),
+  };
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+export function loadGauntletCheckpoint(profileId, courseId) {
+  const key = `${profileId}__${courseId}__gauntlet_checkpoint`;
+  const raw = localStorage.getItem(key);
+  return raw ? JSON.parse(raw) : null;
+}
+
+export function clearGauntletCheckpoint(profileId, courseId) {
+  const key = `${profileId}__${courseId}__gauntlet_checkpoint`;
+  localStorage.removeItem(key);
+}
+
 // ─── Stats helpers ────────────────────────────────────────────────────────────
 
 export function getProfileStats(profileId, courseId, rootCount) {

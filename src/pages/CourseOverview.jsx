@@ -52,7 +52,7 @@ function ProgressSection({ profileId }) {
 }
 
 export default function CourseOverview() {
-  const { roots, dictionary, meta } = useCourse();
+  const { roots, dictionary, meta, activeCourse } = useCourse();
   const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
@@ -149,7 +149,7 @@ export default function CourseOverview() {
 
       {showCourseInfo && (
         <CourseSummaryOverlay
-          course={meta}
+          course={activeCourse}
           onClose={() => setShowCourseInfo(false)}
           onEnter={null}
         />
