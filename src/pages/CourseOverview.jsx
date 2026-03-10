@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useCourse } from '../components/course/CourseContext';
+import { DICTIONARY } from '../components/courseData';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
