@@ -41,7 +41,7 @@ function ProgressSection({ profileId }) {
       {anyGauntlet && (
         <GlobalGauntletBar totalPoints={gauntletTotal} rootCount={roots.length} />
       )}
-      <VocabBar excellentScore={vocabScore} rootCount={roots.length} />
+      <VocabBar excellentScore={vocabScore} courseMaxVocabScore={courseMaxVocabScore} />
     </div>
   );
 }
