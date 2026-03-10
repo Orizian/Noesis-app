@@ -355,18 +355,18 @@ export default function AbsoluteGauntletPage() {
         });
         const results = await batchEvaluateAll(allQ, branchRubrics);
         // Save to storage
-        if (activeProfileId) {
+        if (activeProfileId && courseId) {
           roots.forEach((r, ri) => {
             const bulk = {};
             GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
-            setGauntletCriteriaBulk(activeProfileId, r.id, bulk);
+            setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
           });
           const allPassed = results.every(r => r.passed);
           if (allPassed) {
             const ts = Date.now();
-            setAbsoluteGauntletSession(activeProfileId, { conqueredAt: ts, inProgress: false });
+            setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
           } else {
-            setAbsoluteGauntletSession(activeProfileId, { inProgress: false });
+            setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
           }
           refresh();
         }
