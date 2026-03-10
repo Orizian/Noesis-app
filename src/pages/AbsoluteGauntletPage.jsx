@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useCourse } from '../components/course/CourseContext';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { useCourse } from '../components/course/CourseContext';
 import {
   isAllGauntletsPassed,
   getAbsoluteGauntlet,
@@ -66,8 +65,8 @@ function getQuestionText(root, key) {
   return root.branches[idx]?.question || root.rootQuestion;
 }
 
-function getRubricCriteria(root, key) {
-  const rubricStr = key === 'root' ? root.rubric : (BRANCH_RUBRICS[root.id]?.[key] || root.rubric);
+function getRubricCriteria(root, key, branchRubrics) {
+  const rubricStr = key === 'root' ? root.rubric : (branchRubrics[root.id]?.[key] || root.rubric);
   const matches = [...rubricStr.matchAll(/Criterion\s+\d+:\s*(.+?)(?=Criterion\s+\d+:|$)/gi)];
   return matches.map(m => m[1].trim());
 }
@@ -281,7 +280,7 @@ export default function AbsoluteGauntletPage() {
             <ArrowLeft className="w-4 h-4" /> Course Overview
           </Link>
           <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 p-8 text-center">
-            <p className="text-zinc-500 text-sm">Pass all 8 Root Gauntlets to unlock The Absolute Gauntlet.</p>
+            <p className="text-zinc-500 text-sm">Pass all {roots.length} Root Gauntlets to unlock The Absolute Gauntlet.</p>
           </div>
         </div>
       </div>
