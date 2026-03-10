@@ -115,7 +115,7 @@ function TierCycler({ value, onChange }) {
 }
 
 // ── Per-Root Section ──────────────────────────────────────────────────────────
-function RootSection({ root, profileId, onChanged }) {
+function RootSection({ root, profileId, onChanged, dictionary }) {
   const [expanded, setExpanded] = useState(false);
 
   // Cold attempt state
@@ -127,7 +127,7 @@ function RootSection({ root, profileId, onChanged }) {
   const [gauntletVals, setGauntletVals] = useState(initGC);
 
   // Vocab state — { termName: tier }
-  const terms = DICTIONARY[root.id] || [];
+  const terms = dictionary[root.id] || [];
   const initVocab = () => {
     const obj = {};
     terms.forEach(t => { const tier = getFlashcardTier(profileId, root.id, t.term); obj[t.term] = tier || 'unattempted'; });
