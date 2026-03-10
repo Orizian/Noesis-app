@@ -1,5 +1,5 @@
 import React from 'react';
-import { ROOTS } from '../courseData';
+import { useCourse } from './CourseContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {

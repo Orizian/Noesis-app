@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ROOTS, BRANCH_RUBRICS } from '../components/courseData';
+import { useCourse } from '../components/course/CourseContext';
 import { useProfile } from '../components/profiles/ProfileContext';
 import {
   isAllGauntletsPassed,

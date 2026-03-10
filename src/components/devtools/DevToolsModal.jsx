@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { ROOTS, DICTIONARY } from '../courseData';
+import { useCourse } from '../course/CourseContext';
 import {
   setQuestionCriteriaExact,
   getQuestionCriteria,

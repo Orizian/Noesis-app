@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ROOTS } from '../components/courseData';
+import { useCourse } from '../components/course/CourseContext';
 import ModeSelector from '../components/course/ModeSelector';
 import QuestionBank from '../components/course/QuestionBank';
 import QuestionSelector from '../components/course/QuestionSelector';
