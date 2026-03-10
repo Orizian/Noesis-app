@@ -343,7 +343,7 @@ export default function AbsoluteGauntletPage() {
       if (rootIdx < roots.length - 1) {
         setPhase('root_transition');
         setCurrentAnswer('');
-        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
+        if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
       } else {
         // All 32 done — batch evaluate
         setPhase('evaluating');
