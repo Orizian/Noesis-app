@@ -524,7 +524,7 @@ export default function AbsoluteGauntletPage() {
     const totalScore = finalResults.reduce((s, r) => s + (r.score || 0), 0);
     const allPassed = finalResults.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
-    const prevBest = activeProfileId ? getTotalGauntletPoints(activeProfileId, roots.length) : 0;
+    const prevBest = (activeProfileId && courseId) ? getTotalGauntletPoints(activeProfileId, courseId, roots.length) : 0;
     const personalBest = Math.max(prevBest, totalScore);
 
     return (
