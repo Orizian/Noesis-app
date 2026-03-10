@@ -71,26 +71,28 @@ function getRubricCriteria(root, key, branchRubrics) {
   return matches.map(m => m[1].trim());
 }
 
-// ── Batch evaluate all 32 questions ──────────────────────────────────────────
-async function batchEvaluateAll(allQuestions) {
+// ── Batch evaluate all questions ──────────────────────────────────────────────
+async function batchEvaluateAll(allQuestions, branchRubrics) {
   // allQuestions: [{root, qMeta, answer, rootIndex}]
+  const totalQ = allQuestions.length;
+  const totalRoots = totalQ / 4;
   const sets = allQuestions.map((q, i) => {
     const question = getQuestionText(q.root, q.qMeta.key);
-    const criteria = getRubricCriteria(q.root, q.qMeta.key);
+    const criteria = getRubricCriteria(q.root, q.qMeta.key, branchRubrics);
     return `Question ${i + 1} (Root ${q.root.id} — ${q.qMeta.label}):\nQuestion: "${question}"\nCriteria (${q.qMeta.maxCriteria}):\n${criteria.map((c, j) => `  ${j + 1}. ${c}`).join('\n')}\nStudent response: "${q.answer}"`;
   }).join('\n\n---\n\n');
 
-  const prompt = `You are evaluating a student's complete Absolute Gauntlet performance — 32 questions spanning 8 roots of a mechanistic learning course.
+  const prompt = `You are evaluating a student's complete Absolute Gauntlet performance — ${totalQ} questions spanning ${totalRoots} roots of a mechanistic learning course.
 Evaluate each response independently against its specific rubric criteria.
-Return ONLY a valid JSON array of 32 objects in exact order received. No preamble, no markdown backticks, no explanation outside the JSON.
+Return ONLY a valid JSON array of ${totalQ} objects in exact order received. No preamble, no markdown backticks, no explanation outside the JSON.
 
 RUBRIC TIERS:
 Root Question — 4 criteria, 1 point each, max 4 points. Tiers: 0-1 = Incomplete, 2 = Pass, 3 = Great, 4 = Excellent
 Branch Questions — 3 criteria, 1 point each, max 3 points. Tiers: 0 = Incomplete, 1 = Pass, 2 = Great, 3 = Excellent
 
-A criterion is met only if clearly demonstrated in the response. Do not award partial credit for vague gestures toward the concept. Evaluate understanding demonstrated not specific vocabulary used. Apply criteria consistently across all 32 questions.
+A criterion is met only if clearly demonstrated in the response. Do not award partial credit for vague gestures toward the concept. Evaluate understanding demonstrated not specific vocabulary used. Apply criteria consistently across all ${totalQ} questions.
 
-Return this exact structure for all 32 objects:
+Return this exact structure for all ${totalQ} objects:
 [
   {
     "root_index": 0,
@@ -103,7 +105,7 @@ Return this exact structure for all 32 objects:
   }
 ]
 
-All 32 questions, criteria, and student responses in order:
+All ${totalQ} questions, criteria, and student responses in order:
 ${sets}`;
 
   const result = await base44.integrations.Core.InvokeLLM({
