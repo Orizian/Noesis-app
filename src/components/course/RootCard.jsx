@@ -29,17 +29,18 @@ function getTierFromPoints(pts, maxPts) {
 }
 
 export default function RootCard({ root, profileId }) {
-  const { meta } = useCourse();
-  const courseId = meta.id;
-  const qc = profileId ? getQuestionCriteria(profileId, courseId, root.id, root.branches.length) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
-  const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
-  const status = deriveRootStatus(qc, root.branches.length);
-  const perfected = profileId ? isRootPerfected(profileId, courseId, root.id, root.branches.length) : false;
-  const gauntletPoints = profileId ? getGauntletRootPoints(profileId, courseId, root.id, root.branches.length) : 0;
-  const cfg = perfected
-    ? { label: 'Perfected', badgeClass: 'bg-violet-950/60 text-violet-300 border-violet-700', borderClass: 'border-l-violet-500' }
-    : STATUS_CONFIG[status];
-  const tier = getTierFromPoints(rootPoints);
+   const { meta } = useCourse();
+   const courseId = meta.id;
+   const qc = profileId ? getQuestionCriteria(profileId, courseId, root.id, root.branches.length) : emptyQuestionScores(root.branches.length);
+   const rootPoints = buildQuestionKeys(root.branches.length).reduce((sum, k) => sum + (qc[k] || 0), 0);
+   const rootMaxPoints = buildQuestionKeys(root.branches.length).reduce((sum, k, i) => sum + (i === 0 ? 4 : 3), 0);
+   const status = deriveRootStatus(qc, root.branches.length);
+   const perfected = profileId ? isRootPerfected(profileId, courseId, root.id, root.branches.length) : false;
+   const gauntletPoints = profileId ? getGauntletRootPoints(profileId, courseId, root.id, root.branches.length) : 0;
+   const cfg = perfected
+     ? { label: 'Perfected', badgeClass: 'bg-violet-950/60 text-violet-300 border-violet-700', borderClass: 'border-l-violet-500' }
+     : STATUS_CONFIG[status];
+   const tier = getTierFromPoints(rootPoints, rootMaxPoints);
 
   const gauntletEligible = profileId ? isGauntletEligible(profileId, courseId, root.id, root.branches.length) : false;
   const gauntletPassed = profileId ? isRootGauntletPassed(profileId, courseId, root.id) : false;
