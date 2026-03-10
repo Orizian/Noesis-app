@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { COURSES } from '../courseData/index';
 
 // Default to the first course (exercise-science / Human Performance Physiology)
