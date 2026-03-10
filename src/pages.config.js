@@ -53,6 +53,7 @@ import ProfileSelect from './pages/ProfileSelect';
 import RootDetail from './pages/RootDetail';
 import RootGauntletPage from './pages/RootGauntletPage';
 import Stats from './pages/Stats';
+import CourseSelectionPage from './pages/CourseSelectionPage';
 import __Layout from './Layout.jsx';
 
 
@@ -63,6 +64,7 @@ export const PAGES = {
     "RootDetail": RootDetail,
     "RootGauntletPage": RootGauntletPage,
     "Stats": Stats,
+    "CourseSelectionPage": CourseSelectionPage,
 }
 
 export const pagesConfig = {
