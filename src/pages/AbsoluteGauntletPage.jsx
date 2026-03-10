@@ -68,32 +68,30 @@ function getRubricCriteria(root, key, branchRubrics) {
   return matches.map(m => m[1].trim());
 }
 
-// ── Batch evaluate all questions ──────────────────────────────────────────────
-async function batchEvaluateAll(allQuestions, branchRubrics) {
-  // allQuestions: [{root, qMeta, answer, rootIndex}]
-  const totalQ = allQuestions.length;
-  const totalRoots = totalQ / 4;
-  const sets = allQuestions.map((q, i) => {
-    const question = getQuestionText(q.root, q.qMeta.key);
-    const criteria = getRubricCriteria(q.root, q.qMeta.key, branchRubrics);
-    return `Question ${i + 1} (Root ${q.root.id} — ${q.qMeta.label}):\nQuestion: "${question}"\nCriteria (${q.qMeta.maxCriteria}):\n${criteria.map((c, j) => `  ${j + 1}. ${c}`).join('\n')}\nStudent response: "${q.answer}"`;
+// ── Evaluate one root (4 questions) ────────────────────────────────────────────
+async function evaluateRoot(root, rootAnswers, branchRubrics) {
+  // rootAnswers: array of 4 answer strings in order [root, branch_1, branch_2, branch_3]
+  const sets = GAUNTLET_QUESTIONS.map((q, i) => {
+    const question = getQuestionText(root, q.key);
+    const criteria = getRubricCriteria(root, q.key, branchRubrics);
+    return `${q.label}:\nQuestion: "${question}"\nCriteria (${q.maxCriteria}):\n${criteria.map((c, j) => `  ${j+1}. ${c}`).join('\n')}\nStudent response: "${rootAnswers[i]}"`;
   }).join('\n\n---\n\n');
 
-  const prompt = `You are evaluating a student's complete Absolute Gauntlet performance — ${totalQ} questions spanning ${totalRoots} roots of a mechanistic learning course.
-Evaluate each response independently against its specific rubric criteria.
-Return ONLY a valid JSON array of ${totalQ} objects in exact order received. No preamble, no markdown backticks, no explanation outside the JSON.
+  const prompt = `You are evaluating a student's performance on one root of a mechanistic learning course.
+Evaluate each of the 4 responses independently against its specific rubric criteria.
+Return ONLY a valid JSON array of 4 objects in exact order. No preamble, no markdown backticks, no explanation outside the JSON.
 
 RUBRIC TIERS:
 Root Question — 4 criteria, 1 point each, max 4 points. Tiers: 0-1 = Incomplete, 2 = Pass, 3 = Great, 4 = Excellent
 Branch Questions — 3 criteria, 1 point each, max 3 points. Tiers: 0 = Incomplete, 1 = Pass, 2 = Great, 3 = Excellent
 
-A criterion is met only if clearly demonstrated in the response. Do not award partial credit for vague gestures toward the concept. Evaluate understanding demonstrated not specific vocabulary used. Apply criteria consistently across all ${totalQ} questions.
+A criterion is met only if clearly demonstrated in the response. Evaluate understanding demonstrated, not specific vocabulary used.
+If the student response is "[Skipped]", score it 0 across all criteria with feedback "Question skipped."
 
-Return this exact structure for all ${totalQ} objects:
+Return this exact structure for all 4 objects:
 [
   {
-    "root_index": 0,
-    "question": "root or branch1 or branch2 or branch3",
+    "question": "root or branch_1 or branch_2 or branch_3",
     "criteria_met": [true, false, true, true],
     "score": 3,
     "tier": "Great",
@@ -102,7 +100,7 @@ Return this exact structure for all ${totalQ} objects:
   }
 ]
 
-All ${totalQ} questions, criteria, and student responses in order:
+Root: ${root.title}
 ${sets}`;
 
   const result = await base44.integrations.Core.InvokeLLM({
@@ -116,7 +114,6 @@ ${sets}`;
           items: {
             type: 'object',
             properties: {
-              root_index: { type: 'number' },
               question: { type: 'string' },
               criteria_met: { type: 'array', items: { type: 'boolean' } },
               score: { type: 'number' },
@@ -133,21 +130,19 @@ ${sets}`;
   let arr = null;
   if (Array.isArray(result)) arr = result;
   else if (result?.results && Array.isArray(result.results)) arr = result.results;
-  if (!arr || arr.length === 0) {
-    return allQuestions.map((q, i) => ({ root_index: q.rootIndex, question: q.qMeta.key, criteria_met: [], score: 0, tier: 'Incomplete', feedback: 'Could not evaluate.', criteria_breakdown: [], passed: false }));
-  }
 
-  return allQuestions.map((q, i) => {
-    const r = arr[i] || {};
-    const criteria = getRubricCriteria(q.root, q.qMeta.key, branchRubrics);
+  return GAUNTLET_QUESTIONS.map((q, i) => {
+    const r = arr?.[i] || {};
+    const criteria = getRubricCriteria(root, q.key, branchRubrics);
     const critMet = Array.isArray(r.criteria_met) ? r.criteria_met : criteria.map(() => false);
     const score = typeof r.score === 'number' ? r.score : critMet.filter(Boolean).length;
     const breakdown = Array.isArray(r.criteria_breakdown) && r.criteria_breakdown.length > 0
       ? r.criteria_breakdown
       : criteria.map((c, j) => `${c} — ${critMet[j] ? 'Met' : 'Not Met'}`);
-    const tier = (r.tier || getTier(score, q.qMeta.key === 'root')).toLowerCase();
-    const passed = q.qMeta.key === 'root' ? score >= 2 : score >= 1;
-    return { root_index: q.rootIndex, question: q.qMeta.key, criteria_met: critMet, score, tier, feedback: r.feedback || '', criteria_breakdown: breakdown, passed };
+    const tier = (r.tier || getTier(score, q.key === 'root')).toLowerCase();
+    const passed = q.key === 'root' ? score >= 2 : score >= 1;
+    const feedback = r.feedback || (rootAnswers[i] === '[Skipped]' ? 'Question skipped.' : 'Could not evaluate.');
+    return { question: q.key, criteria_met: critMet, score, tier, feedback, criteria_breakdown: breakdown, passed };
   });
 }
 
@@ -271,6 +266,7 @@ export default function AbsoluteGauntletPage() {
   const [savedFlash, setSavedFlash] = useState(false);
   const [finalResults, setFinalResults] = useState(null); // flat array of 32 results
   const [evalError, setEvalError] = useState(null);
+  const [evalProgress, setEvalProgress] = useState(0);
   const [checkpointPrompt, setCheckpointPrompt] = useState(() => {
     if (!activeProfileId) return false;
     const cp = loadGauntletCheckpoint(activeProfileId, meta.id);
@@ -352,11 +348,12 @@ export default function AbsoluteGauntletPage() {
     if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx, answers: allAnswers });
   };
 
-  const handleSubmitQ = async () => {
-    if (!currentAnswer.trim()) return;
+  const handleSubmitQ = async (answerOverride) => {
+    const answer = answerOverride ?? currentAnswer;
+    if (!answer.trim()) return;
     const answerIndex = rootIdx * 4 + qIdx;
     const newAnswers = [...allAnswers];
-    newAnswers[answerIndex] = currentAnswer;
+    newAnswers[answerIndex] = answer;
     setAllAnswers(newAnswers);
 
     // Checkpoint every 8 answers — save answeredQuestions up to the current length
