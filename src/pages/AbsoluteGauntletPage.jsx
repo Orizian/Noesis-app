@@ -142,7 +142,7 @@ ${sets}`;
 
   return allQuestions.map((q, i) => {
     const r = arr[i] || {};
-    const criteria = getRubricCriteria(q.root, q.qMeta.key);
+    const criteria = getRubricCriteria(q.root, q.qMeta.key, branchRubrics);
     const critMet = Array.isArray(r.criteria_met) ? r.criteria_met : criteria.map(() => false);
     const score = typeof r.score === 'number' ? r.score : critMet.filter(Boolean).length;
     const breakdown = Array.isArray(r.criteria_breakdown) && r.criteria_breakdown.length > 0
@@ -242,7 +242,7 @@ function AbsoluteProgressBar({ rootIdx, qIdx, rootCount }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AbsoluteGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
-  const { roots } = useCourse();
+  const { roots, branchRubrics } = useCourse();
   const navigate = useNavigate();
 
   const conquered = activeProfileId ? isAbsoluteGauntletConquered(activeProfileId) : false;
