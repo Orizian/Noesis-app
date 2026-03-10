@@ -519,7 +519,7 @@ export default function AbsoluteGauntletPage() {
             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
           </div>
           <p className="text-zinc-300 font-medium animate-pulse">Evaluating your complete performance...</p>
-          <p className="text-xs text-zinc-600">All 32 questions. This takes a moment.</p>
+          <p className="text-xs text-zinc-600">All {totalQuestions} questions. This takes a moment.</p>
           <p className="text-xs text-zinc-700 italic">Uses an advanced model for accuracy.</p>
         </div>
       </div>
