@@ -441,7 +441,7 @@ export function getGauntletRootPoints(profileId, rootId) {
 
 export function getTotalGauntletPoints(profileId) {
   let total = 0;
-  for (let i = 1; i <= 8; i++) total += getGauntletRootPoints(profileId, i);
+  for (let i = 1; i <= ROOT_COUNT; i++) total += getGauntletRootPoints(profileId, i);
   return total;
 }
 
