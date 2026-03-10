@@ -193,6 +193,7 @@ function QuestionRow({ result, qMeta }) {
 function RootSection({ root, rootResults, rootIndex }) {
   const [expanded, setExpanded] = useState(false);
   const rootScore = rootResults.reduce((s, r) => s + (r.score || 0), 0);
+  const rootMax = 4 + root.branches.length * 3;
   return (
     <div className="border border-zinc-800 rounded-xl overflow-hidden">
       <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-zinc-800/20 transition-colors">
@@ -200,7 +201,7 @@ function RootSection({ root, rootResults, rootIndex }) {
         <div className="flex-1 min-w-0">
           <span className="text-sm font-semibold text-zinc-200">Root {root.id} — {root.title}</span>
         </div>
-        <span className="text-xs font-mono text-zinc-400 flex-shrink-0">{rootScore} / 13</span>
+        <span className="text-xs font-mono text-zinc-400 flex-shrink-0">{rootScore} / {rootMax}</span>
       </button>
       {expanded && (
         <div className="border-t border-zinc-800/50 bg-zinc-900/30">
