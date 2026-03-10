@@ -139,8 +139,8 @@ function ResultPanel({ result, qMeta, onContinue, continueLabel }) {
 
 // ── Main exported hook-based evaluator ────────────────────────────────────────
 // Exported so AbsoluteGauntlet can reuse evaluation logic
-export async function evaluateAnswer({ root, qMeta, answer }) {
-  const getRubric = (key) => key === 'root' ? root.rubric : (BRANCH_RUBRICS[root.id]?.[key] || root.rubric);
+export async function evaluateAnswer({ root, qMeta, answer, branchRubrics = {} }) {
+  const getRubric = (key) => key === 'root' ? root.rubric : (branchRubrics[root.id]?.[key] || root.rubric);
   const getQuestion = (key) => {
     if (key === 'root') return root.rootQuestion;
     const idx = parseInt(key.split('_')[1]) - 1;
@@ -181,6 +181,7 @@ Student answer: "${answer}"`;
 // ── Root Gauntlet Flow component ───────────────────────────────────────────────
 // Used inside RootGauntletPage
 export default function RootGauntletFlow({ root, profileId, onComplete, onCancel }) {
+  const { branchRubrics } = useCourse();
   const [phase, setPhase] = useState('caution'); // caution | active | evaluating | result | summary
   const [currentQ, setCurrentQ] = useState(0);
   const [answer, setAnswer] = useState('');
