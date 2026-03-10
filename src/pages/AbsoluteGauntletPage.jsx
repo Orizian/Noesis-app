@@ -548,16 +548,13 @@ export default function AbsoluteGauntletPage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-zinc-500">Total Score</span>
-              <span className="text-xs text-zinc-500 font-mono">{totalScore} / 104</span>
+              <span className="text-xs text-zinc-500 font-mono">{totalScore} / {roots.length * 13}</span>
             </div>
             <div className="relative h-2.5 bg-zinc-800 rounded-full overflow-visible">
               <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalScore)}`}
-                style={{ width: `${(totalScore / 104) * 100}%` }} />
-              {[32, 72, 104].map(tick => (
-                <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / 104) * 100}%` }} />
-              ))}
+                style={{ width: `${(totalScore / (roots.length * 13)) * 100}%` }} />
             </div>
-            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / 104</p>
+            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {roots.length * 13}</p>
           </div>
 
           {/* Root sections */}
