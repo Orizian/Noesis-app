@@ -596,9 +596,9 @@ export default function AbsoluteGauntletPage() {
                       Save & Exit
                     </button>
                     <button onClick={() => handleSubmitQ('[Skipped]')} disabled={savedFlash}
-                      className="px-3 py-2 rounded-xl border border-zinc-700 text-zinc-600 text-xs hover:bg-zinc-800 transition-colors disabled:opacity-50">
-                      Skip
-                    </button>{qIdx < questions.length - 1 ? 'Next' : 'Root Complete'}
+                       className="px-3 py-2 rounded-xl border border-zinc-700 text-zinc-600 text-xs hover:bg-zinc-800 transition-colors disabled:opacity-50">
+                       Skip
+                     </button>
                     <button onClick={handleSubmitQ} disabled={!currentAnswer.trim() || savedFlash}
                       className="px-6 py-2.5 rounded-xl bg-red-900/60 hover:bg-red-800/70 disabled:bg-zinc-700 disabled:text-zinc-500 text-red-200 text-sm font-semibold transition-colors">
                       {isLastQ ? 'Submit Final' : qIdx < questions.length - 1 ? 'Next' : 'Root Complete'}
@@ -683,7 +683,12 @@ export default function AbsoluteGauntletPage() {
                       try {
                         const allResults = [];
                         for (let ri = 0; ri < roots.length; ri++) {
-                          const rootAnswers = allAnswers.slice(ri * 4, ri * 4 + 4);
+                          const qCount = questionsPerRoot(ri);
+                          let startIdx = 0;
+                          for (let i = 0; i < ri; i++) {
+                            startIdx += questionsPerRoot(i);
+                          }
+                          const rootAnswers = allAnswers.slice(startIdx, startIdx + qCount);
                           const rootResults = await evaluateRoot(roots[ri], rootAnswers, branchRubrics);
                           console.log(`Root ${ri + 1} evaluation (retry):`, JSON.stringify(rootResults));
                           allResults.push(...rootResults);
@@ -692,8 +697,13 @@ export default function AbsoluteGauntletPage() {
                         if (activeProfileId) {
                           roots.forEach((r, ri) => {
                             const bulk = {};
-                            GAUNTLET_QUESTIONS.forEach((q, qi) => {
-                              bulk[q.key] = allResults[ri * GAUNTLET_QUESTIONS.length + qi]?.score || 0;
+                            const questions = getQuestionsForRoot(r);
+                            questions.forEach((q, qi) => {
+                              let resultIdx = 0;
+                              for (let i = 0; i < ri; i++) {
+                                resultIdx += questionsPerRoot(i);
+                              }
+                              bulk[q.key] = allResults[resultIdx + qi]?.score || 0;
                             });
                             setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
                           });
