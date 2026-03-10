@@ -1,5 +1,6 @@
 import React from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
+import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
 
 function AppShell({ children, currentPageName }) {
