@@ -95,7 +95,7 @@ export default function CourseOverview() {
 
         {/* Root list */}
         <div className="space-y-3">
-          {ROOTS.map((root) => (
+          {roots.map((root) => (
             <RootCard
               key={root.id}
               root={root}

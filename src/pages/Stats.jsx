@@ -37,7 +37,7 @@ export default function Stats() {
     ? Math.round((stats.totalPassed / stats.totalAttempts) * 100)
     : 0;
 
-  const strongestRoot = stats.strongestRootId ? ROOTS.find(r => r.id === stats.strongestRootId) : null;
+  const strongestRoot = stats.strongestRootId ? roots.find(r => r.id === stats.strongestRootId) : null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
