@@ -58,15 +58,14 @@ function getGauntletBarColor(score, max) {
   return 'bg-zinc-600';
 }
 
-// Global overview bar — 0 to 104
-export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, perfectedCount, rootCount }) {
-  const max = rootCount * 13;
+// Global overview bar — dynamic based on all roots
+export function GlobalMasteryBar({ roots, totalPoints, completeCount, masteredCount, perfectedCount }) {
+  const max = getCourseGauntletMaxPoints(roots);
   return (
     <div className="space-y-2">
       <ThinBar
         value={totalPoints}
         max={max}
-        ticks={[rootCount * 2, rootCount * 4]}
         label="Mastery"
         rightLabel={`${totalPoints} / ${max}`}
         height="h-2"
