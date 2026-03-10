@@ -7,9 +7,11 @@ import ColdAttemptPanel from './ColdAttemptPanel';
 import { useProfile } from '../profiles/ProfileContext';
 import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm, setQuestionCriteria, setBestTier, getQualityTier } from '../profiles/profileStorage';
 
+
 export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered, dictFocusedTerm }) {
   const { activeProfileId } = useProfile();
-  const { branchRubrics, dictionary } = useCourse();
+  const { branchRubrics, dictionary, meta } = useCourse();
+  const courseId = meta.id;
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -52,7 +54,7 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
     setPendingColdResult(null);
     setInput('');
     if (activeProfileId && mode === 'cold') {
-      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
+      const count = getColdAttemptCount(activeProfileId, courseId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
   }, [root.id, mode, questionType, dictFocusedTerm?.term]);
@@ -238,7 +240,7 @@ Rules:
     }
     const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
     if (termMatches.length > 0 && activeProfileId) {
-      termMatches.forEach(m => addEncounteredTerm(activeProfileId, root.id, m[1].trim()));
+      termMatches.forEach(m => addEncounteredTerm(activeProfileId, courseId, root.id, m[1].trim()));
     }
     const cleanResponse = response
       .replace(/\[COMPETENCY:[1-5]\]/g, '')
@@ -292,7 +294,7 @@ Rules:
     if (mode === 'cold' && coldPhase === 'input') {
       // Increment attempt counter
       const newCount = activeProfileId
-        ? incrementColdAttempt(activeProfileId, root.id, questionType)
+        ? incrementColdAttempt(activeProfileId, courseId, root.id, questionType)
         : coldAttemptNum;
       setColdAttemptNum(newCount);
       setColdPhase('evaluating');
@@ -324,9 +326,9 @@ Rules:
       const metCount = criteriaMatches.filter(m => m[1].toLowerCase() === 'met').length;
       const earnedCount = Math.min(metCount, totalCrit);
       if (activeProfileId) {
-        setQuestionCriteria(activeProfileId, root.id, questionType, earnedCount);
+        setQuestionCriteria(activeProfileId, courseId, root.id, questionType, earnedCount);
         const tier = getQualityTier(earnedCount, isRootQ);
-        setBestTier(activeProfileId, root.id, questionType, tier);
+        setBestTier(activeProfileId, courseId, root.id, questionType, tier);
       }
       if (response.includes('[PASS]')) {
         onPassColdAttempt(questionType, earnedCount);
@@ -343,7 +345,7 @@ Rules:
         if (termMatches.length > 0 && activeProfileId) {
           termMatches.forEach(m => {
             const term = m[1].trim();
-            addEncounteredTerm(activeProfileId, root.id, term);
+            addEncounteredTerm(activeProfileId, courseId, root.id, term);
             if (onTermEncountered) onTermEncountered(term);
           });
         }
@@ -379,7 +381,7 @@ Rules:
       content: `**Cold Attempt — ${getQuestionLabel()}** (Attempt ${coldAttemptNum + 1})\n\n> ${getQuestion()}\n\nTry again. Answer from memory — no assistance until you submit.`
     }]);
     if (activeProfileId) {
-      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
+      const count = getColdAttemptCount(activeProfileId, courseId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
   };
