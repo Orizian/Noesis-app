@@ -529,6 +529,7 @@ export default function AbsoluteGauntletPage() {
   // ── Grading sheet ──
   if (phase === 'grading' && finalResults) {
     const totalScore = finalResults.reduce((s, r) => s + (r.score || 0), 0);
+    const maxScore = ROOTS.reduce((sum, root) => sum + 4 + root.branches.length * 3, 0);
     const allPassed = finalResults.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
     const prevBest = activeProfileId ? getTotalGauntletPoints(activeProfileId) : 0;
@@ -552,16 +553,16 @@ export default function AbsoluteGauntletPage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-zinc-500">Total Score</span>
-              <span className="text-xs text-zinc-500 font-mono">{totalScore} / 104</span>
+              <span className="text-xs text-zinc-500 font-mono">{totalScore} / {maxScore}</span>
             </div>
             <div className="relative h-2.5 bg-zinc-800 rounded-full overflow-visible">
               <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalScore)}`}
-                style={{ width: `${(totalScore / 104) * 100}%` }} />
-              {[32, 72, 104].map(tick => (
-                <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / 104) * 100}%` }} />
+                style={{ width: `${(totalScore / maxScore) * 100}%` }} />
+              {[Math.round(maxScore * 0.3), Math.round(maxScore * 0.69), maxScore].map(tick => (
+                <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / maxScore) * 100}%` }} />
               ))}
             </div>
-            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / 104</p>
+            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {maxScore}</p>
           </div>
 
           {/* Root sections */}
@@ -570,7 +571,7 @@ export default function AbsoluteGauntletPage() {
               <RootSection
                 key={r.id}
                 root={r}
-                rootResults={finalResults.slice(ri * 4, ri * 4 + 4)}
+                rootResults={finalResults.slice(ri * questionsPerRoot, ri * questionsPerRoot + questionsPerRoot)}
                 rootIndex={ri}
               />
             ))}
