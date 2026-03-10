@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BookMarked, HelpCircle, X, ChevronRight, ArrowLeft, GraduationCap, Star, ChevronDown, Lock, Zap } from 'lucide-react';
-import { DICTIONARY } from '../courseData';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '../profiles/ProfileContext';
+import { useCourse } from './CourseContext';
 import { getFlashcardTier, setFlashcardTier } from '../profiles/profileStorage';
 import FlashcardGauntlet from './FlashcardGauntlet';
 
