@@ -268,6 +268,8 @@ export default function ProfileSelect() {
   };
 
   const handleSelect = (profile) => {
+    // Write to storage and update context state, then navigate immediately.
+    // Progress recalculation happens lazily in destination components.
     selectProfile(profile.id);
     window.location.href = createPageUrl('CourseSelectionPage');
   };
