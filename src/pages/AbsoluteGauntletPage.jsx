@@ -309,7 +309,7 @@ export default function AbsoluteGauntletPage() {
     );
   }
 
-  const root = ROOTS[rootIdx];
+  const root = roots[rootIdx];
 
   const startFresh = () => {
     const newAnswers = Array(32).fill('');
@@ -351,7 +351,7 @@ export default function AbsoluteGauntletPage() {
         // All 32 done — batch evaluate
         setPhase('evaluating');
         const allQ = [];
-        ROOTS.forEach((r, ri) => {
+        roots.forEach((r, ri) => {
           GAUNTLET_QUESTIONS.forEach((q, qi) => {
             allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * 4 + qi], rootIndex: ri });
           });
@@ -359,7 +359,7 @@ export default function AbsoluteGauntletPage() {
         const results = await batchEvaluateAll(allQ);
         // Save to storage
         if (activeProfileId) {
-          ROOTS.forEach((r, ri) => {
+          roots.forEach((r, ri) => {
             const bulk = {};
             GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
             setGauntletCriteriaBulk(activeProfileId, r.id, bulk);
