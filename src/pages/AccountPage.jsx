@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Cloud, Check, Pencil, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   getAccount,
   setAccountTier,
@@ -30,6 +31,7 @@ function SectionHeader({ title }) {
 }
 
 export default function AccountPage() {
+  const navigate = useNavigate();
   const [account, setAccountState] = useState(() => getAccount());
   const [profiles] = useState(() => getProfiles());
   const [editingName, setEditingName] = useState(false);
@@ -51,7 +53,7 @@ export default function AccountPage() {
 
   const handleClearAll = () => {
     clearAllAccountData();
-    window.location.href = createPageUrl('ProfileSelect');
+    navigate(createPageUrl('ProfileSelect'));
   };
 
   const currentTierIdx = TIERS.findIndex(t => t.key === account.tierName);
@@ -64,7 +66,7 @@ export default function AccountPage() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => { window.location.href = createPageUrl('ProfileSelect'); }}
+            onClick={() => { navigate(createPageUrl('ProfileSelect')); }}
             className="p-2 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 transition-colors -ml-2"
           >
             <ArrowLeft className="w-4 h-4" />
