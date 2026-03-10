@@ -191,6 +191,7 @@ export default function RootDetail() {
           {/* Progress bars */}
           <div className="mt-4 p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl">
             <RootDetailBars
+              root={root}
               rootPoints={rootPoints}
               gauntletPoints={gauntletPoints}
               hasPerfected={perfected}
