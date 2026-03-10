@@ -6,28 +6,30 @@ import DevToolsModal from '../components/devtools/DevToolsModal';
 import GauntletBoard from '../components/course/GauntletBoard';
 import { useProfile } from '../components/profiles/ProfileContext';
 import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
+
 import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/course/MasteryBars';
 import { BookOpen } from 'lucide-react';
 
 function ProgressSection({ profileId }) {
-  const { roots, courseMaxVocabScore } = useCourse();
+  const { roots, courseMaxVocabScore, meta } = useCourse();
+  const courseId = meta.id;
   let totalPoints = 0;
   let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
   roots.forEach(r => {
-    const qc = profileId ? getQuestionCriteria(profileId, r.id) : {};
+    const qc = profileId ? getQuestionCriteria(profileId, courseId, r.id) : {};
     const rPts = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
     totalPoints += rPts;
     const status = deriveRootStatus(qc);
     if (status === 'mastered') masteredCount++;
     else if (status === 'complete') completeCount++;
-    if (profileId && isRootPerfected(profileId, r.id)) perfectedCount++;
+    if (profileId && isRootPerfected(profileId, courseId, r.id)) perfectedCount++;
   });
 
-  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, roots.length) : 0;
+  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;
   const anyGauntlet = gauntletTotal > 0;
 
-  const vocabScore = profileId ? getTotalVocabScore(profileId) : 0;
+  const vocabScore = profileId ? getTotalVocabScore(profileId, courseId) : 0;
 
   return (
     <div className="mb-10 space-y-3">
