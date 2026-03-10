@@ -111,7 +111,7 @@ function AbsoluteGauntletButton({ profileId, roots }) {
         border-red-700/60 bg-red-950/20 hover:bg-red-950/30 absolute-glow cursor-pointer"
     >
       <p className="text-red-200 font-bold text-xl">
-        {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of 8` : 'The Absolute Gauntlet'}
+        {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of ${roots.length}` : 'The Absolute Gauntlet'}
       </p>
       <p className="text-zinc-500 text-sm mt-1">All {roots.length} roots. {roots.length * 4} questions. One sitting.</p>
       {inProgress && (
