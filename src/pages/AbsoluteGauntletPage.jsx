@@ -408,7 +408,7 @@ export default function AbsoluteGauntletPage() {
           <div className="border border-red-800/40 rounded-2xl bg-red-950/10 p-8 space-y-5">
             <h1 className="text-xl font-bold text-red-300">The Absolute Gauntlet</h1>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              8 roots. 32 questions. No feedback mid-run. All results revealed at the end. One batch evaluation.
+              {roots.length} roots. {roots.length * 4} questions. No feedback mid-run. All results revealed at the end. One batch evaluation.
             </p>
             <div className="flex gap-3">
               <button onClick={startFresh} className="flex-1 py-3 rounded-xl bg-red-800/70 hover:bg-red-700/80 text-white font-bold text-sm transition-colors">Begin</button>
