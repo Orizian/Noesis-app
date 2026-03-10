@@ -152,18 +152,25 @@ export default function GauntletBoard({ profileId }) {
         </div>
 
         {/* Cumulative bar — always visible */}
-        <div>
-          <div className="flex justify-between items-baseline mb-1.5">
-            <span className="text-xs text-zinc-500">Gauntlet Total</span>
-            <span className="text-xs font-mono text-zinc-400">{totalPoints} / {roots.length * 13}</span>
+          <div>
+            {(() => {
+              const courseMax = getCourseGauntletMaxPoints(roots);
+              return (
+                <>
+                  <div className="flex justify-between items-baseline mb-1.5">
+                    <span className="text-xs text-zinc-500">Gauntlet Total</span>
+                    <span className="text-xs font-mono text-zinc-400">{totalPoints} / {courseMax}</span>
+                  </div>
+                  <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
+                    <div
+                      className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColorDynamic(totalPoints, courseMax)}`}
+                      style={{ width: `${Math.min((totalPoints / courseMax) * 100, 100)}%` }}
+                    />
+                  </div>
+                </>
+              );
+            })()}
           </div>
-          <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
-            <div
-              className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColorDynamic(totalPoints, roots.length * 13)}`}
-              style={{ width: `${Math.min((totalPoints / (roots.length * 13)) * 100, 100)}%` }}
-            />
-          </div>
-        </div>
 
         {/* Absolute Gauntlet button */}
         <AbsoluteGauntletButton profileId={profileId} roots={roots} courseId={courseId} />
