@@ -24,11 +24,11 @@ function getBarColorDynamic(pts, max) {
   return 'bg-violet-400';
 }
 
-function GauntletTile({ root, profileId }) {
-  const eligible = profileId ? isGauntletEligible(profileId, root.id) : false;
-  const passed = profileId ? isRootGauntletPassed(profileId, root.id) : false;
-  const passedDate = passed ? getGauntletPassedDate(profileId, root.id) : null;
-  const points = profileId ? getGauntletRootPoints(profileId, root.id) : 0;
+function GauntletTile({ root, profileId, courseId }) {
+  const eligible = (profileId && courseId) ? isGauntletEligible(profileId, courseId, root.id) : false;
+  const passed = (profileId && courseId) ? isRootGauntletPassed(profileId, courseId, root.id) : false;
+  const passedDate = passed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
+  const points = (profileId && courseId) ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
   // "Perfected" = 13/13
   const perfected = points === 13;
 
