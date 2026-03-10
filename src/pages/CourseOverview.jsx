@@ -10,7 +10,7 @@ import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/cou
 import { BookOpen } from 'lucide-react';
 
 function ProgressSection({ profileId }) {
-  const { roots } = useCourse();
+  const { roots, courseMaxVocabScore } = useCourse();
   let totalPoints = 0;
   let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
