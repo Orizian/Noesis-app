@@ -128,7 +128,10 @@ function AbsoluteGauntletButton({ profileId, roots }) {
 }
 
 export default function GauntletBoard({ profileId }) {
+  const { activeCourse } = useCourse();
+  const roots = activeCourse.roots;
   const totalPoints = profileId ? getTotalGauntletPoints(profileId) : 0;
+  const maxPoints = roots.reduce((sum, root) => sum + 4 + root.branches.length * 3, 0);
 
   return (
     <div className="mt-10 border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">
@@ -142,9 +145,9 @@ export default function GauntletBoard({ profileId }) {
       </div>
 
       <div className="p-5 space-y-5">
-        {/* 8-tile grid */}
+        {/* Root tile grid */}
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
-          {ROOTS.map(root => (
+          {roots.map(root => (
             <GauntletTile key={root.id} root={root} profileId={profileId} />
           ))}
         </div>
@@ -153,22 +156,22 @@ export default function GauntletBoard({ profileId }) {
         <div>
           <div className="flex justify-between items-baseline mb-1.5">
             <span className="text-xs text-zinc-500">Gauntlet Total</span>
-            <span className="text-xs font-mono text-zinc-400">{totalPoints} / 104</span>
+            <span className="text-xs font-mono text-zinc-400">{totalPoints} / {maxPoints}</span>
           </div>
           <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
             <div
               className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalPoints)}`}
-              style={{ width: `${Math.min((totalPoints / 104) * 100, 100)}%` }}
+              style={{ width: `${Math.min((totalPoints / maxPoints) * 100, 100)}%` }}
             />
-            {[32, 72, 104].map(tick => (
+            {[Math.round(maxPoints * 0.3), Math.round(maxPoints * 0.69), maxPoints].map(tick => (
               <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10"
-                style={{ left: `${(tick / 104) * 100}%` }} />
+                style={{ left: `${(tick / maxPoints) * 100}%` }} />
             ))}
           </div>
         </div>
 
         {/* Absolute Gauntlet button */}
-        <AbsoluteGauntletButton profileId={profileId} />
+        <AbsoluteGauntletButton profileId={profileId} roots={roots} />
       </div>
     </div>
   );
