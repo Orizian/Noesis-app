@@ -320,7 +320,11 @@ export default function AbsoluteGauntletPage() {
     const newAnswers = Array(roots.length * 4).fill('');
     setAllAnswers(newAnswers);
     setRootIdx(0); setQIdx(0); setCurrentAnswer('');
-    if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
+    if (activeProfileId) {
+      setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
+      clearGauntletCheckpoint(activeProfileId, courseId);
+    }
+    setCheckpointPrompt(false);
     setPhase('run');
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
