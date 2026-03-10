@@ -4,11 +4,14 @@ import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import DevToolsModal from '../components/devtools/DevToolsModal';
 import GauntletBoard from '../components/course/GauntletBoard';
+import CourseSummaryOverlay from '../components/course/CourseSummaryOverlay';
 import { useProfile } from '../components/profiles/ProfileContext';
 import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/course/MasteryBars';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ArrowLeft, Info } from 'lucide-react';
 
 function ProgressSection({ profileId }) {
   const { roots, courseMaxVocabScore, meta } = useCourse();
