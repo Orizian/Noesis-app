@@ -492,7 +492,7 @@ export default function AbsoluteGauntletPage() {
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
         <div className="max-w-md w-full mx-auto px-4 text-center space-y-6 animate-in fade-in duration-500">
           <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of 8 Complete</p>
-          <p className="text-3xl font-bold text-zinc-100">{ROOTS[rootIdx].title}</p>
+          <p className="text-3xl font-bold text-zinc-100">{roots[rootIdx].title}</p>
           <p className="text-xs text-zinc-600">Continuing to next root. No scores during the run.</p>
           <button onClick={handleContinueRoot}
             className="w-full py-3 rounded-xl bg-red-900/60 hover:bg-red-800/70 text-red-200 font-semibold text-sm transition-colors">
@@ -527,7 +527,7 @@ export default function AbsoluteGauntletPage() {
     const totalScore = finalResults.reduce((s, r) => s + (r.score || 0), 0);
     const allPassed = finalResults.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
-    const prevBest = activeProfileId ? getTotalGauntletPoints(activeProfileId) : 0;
+    const prevBest = activeProfileId ? getTotalGauntletPoints(activeProfileId, roots.length) : 0;
     const personalBest = Math.max(prevBest, totalScore);
 
     return (
