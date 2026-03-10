@@ -271,7 +271,8 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
   const headerLegendRef = useRef(null);
   const prevLockedRef = useRef(false);
   const { activeProfileId, profilesVersion } = useProfile();
-  const { dictionary } = useCourse();
+  const { dictionary, meta } = useCourse();
+  const courseId = meta.id;
 
   const terms = dictionary[rootId] || [];
 
@@ -302,7 +303,7 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const getRowTier = (termName) => pendingTiers[termName] ?? (activeProfileId ? getFlashcardTier(activeProfileId, rootId, termName) : null);
+  const getRowTier = (termName) => pendingTiers[termName] ?? (activeProfileId ? getFlashcardTier(activeProfileId, courseId, rootId, termName) : null);
 
   const attemptedCount = terms.filter(t => { const tier = getRowTier(t.term); return tier && tier !== null; }).length;
   const allAttemptedAtPass = terms.every(t => { const tier = getRowTier(t.term); return tier === 'pass' || tier === 'great' || tier === 'excellent'; });
