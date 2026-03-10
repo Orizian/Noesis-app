@@ -547,7 +547,7 @@ export default function AbsoluteGauntletPage() {
               <span className="text-xs text-zinc-500 font-mono">{totalScore} / {roots.length * 13}</span>
             </div>
             <div className="relative h-2.5 bg-zinc-800 rounded-full overflow-visible">
-              <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalScore)}`}
+              <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColorDynamic(totalScore, roots.length * 13)}`}
                 style={{ width: `${(totalScore / (roots.length * 13)) * 100}%` }} />
             </div>
             <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {roots.length * 13}</p>
