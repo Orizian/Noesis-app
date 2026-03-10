@@ -123,9 +123,8 @@ export function resetProfileProgress(profileId) {
 export function getProfileCompletionPercent(profileId) {
   const profile = getProfileById(profileId);
   if (!profile?.progress) return 0;
-  const total = 8;
   const complete = Object.values(profile.progress).filter(p => p.status === 'complete' || p.status === 'mastered').length;
-  return Math.round((complete / total) * 100);
+  return Math.round((complete / ROOT_COUNT) * 100);
 }
 
 export function markRootComplete(profileId, rootId) {
