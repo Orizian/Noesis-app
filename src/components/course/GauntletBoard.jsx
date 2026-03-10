@@ -126,7 +126,8 @@ function AbsoluteGauntletButton({ profileId, roots }) {
 }
 
 export default function GauntletBoard({ profileId }) {
-  const totalPoints = profileId ? getTotalGauntletPoints(profileId) : 0;
+  const { roots } = useCourse();
+  const totalPoints = profileId ? getTotalGauntletPoints(profileId, roots.length) : 0;
 
   return (
     <div className="mt-10 border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">
@@ -140,9 +141,9 @@ export default function GauntletBoard({ profileId }) {
       </div>
 
       <div className="p-5 space-y-5">
-        {/* 8-tile grid */}
+        {/* root grid */}
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
-          {ROOTS.map(root => (
+          {roots.map(root => (
             <GauntletTile key={root.id} root={root} profileId={profileId} />
           ))}
         </div>
