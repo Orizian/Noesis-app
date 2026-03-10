@@ -100,9 +100,12 @@ export function updateProfile(id, updates) {
 }
 
 export function deleteProfile(id) {
-  const profiles = getProfiles().filter(p => p.id !== id);
-  saveProfiles(profiles);
+  const profiles = getProfiles();
+  if (profiles.length <= 1) return false; // cannot delete last profile
+  const updated = profiles.filter(p => p.id !== id);
+  saveProfiles(updated);
   if (getActiveProfileId() === id) clearActiveProfile();
+  return true;
 }
 
 // ─── Course-scoped data accessor ──────────────────────────────────────────────
