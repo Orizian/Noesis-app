@@ -336,6 +336,12 @@ export default function AbsoluteGauntletPage() {
     newAnswers[answerIndex] = currentAnswer;
     setAllAnswers(newAnswers);
 
+    // Checkpoint every 8 answers
+    const answeredCount = newAnswers.filter(a => a !== '').length;
+    if (activeProfileId && answeredCount > 0 && answeredCount % 8 === 0) {
+      saveGauntletCheckpoint(activeProfileId, courseId, newAnswers);
+    }
+
     setSavedFlash(true);
     await new Promise(r => setTimeout(r, 500));
     setSavedFlash(false);
