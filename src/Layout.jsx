@@ -2,6 +2,10 @@ import React from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
+import { runStorageMigrationIfNeeded } from './components/profiles/profileStorage';
+
+// Run once on app load — migrates old un-namespaced data to courseId-scoped format
+runStorageMigrationIfNeeded();
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
