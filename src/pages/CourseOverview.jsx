@@ -20,13 +20,13 @@ function ProgressSection({ profileId }) {
   let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
   roots.forEach(r => {
-    const qc = profileId ? getQuestionCriteria(profileId, courseId, r.id) : {};
-    const rPts = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
+    const qc = profileId ? getQuestionCriteria(profileId, courseId, r.id, r.branches.length) : {};
+    const rPts = Object.values(qc).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
     totalPoints += rPts;
-    const status = deriveRootStatus(qc);
+    const status = deriveRootStatus(qc, r.branches.length);
     if (status === 'mastered') masteredCount++;
     else if (status === 'complete') completeCount++;
-    if (profileId && isRootPerfected(profileId, courseId, r.id)) perfectedCount++;
+    if (profileId && isRootPerfected(profileId, courseId, r.id, r.branches.length)) perfectedCount++;
   });
 
   const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;

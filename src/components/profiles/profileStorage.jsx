@@ -219,28 +219,26 @@ export function getProfileCompletionPercent(profileId, courseId, rootCount) {
   return Math.round((complete / rootCount) * 100);
 }
 
-export function markRootComplete(profileId, courseId, rootId) {
+export function markRootComplete(profileId, courseId, rootId, branchCount) {
   const existing = getProfileRootProgress(profileId, courseId, rootId) || {};
+  const passedObj = emptyQuestionPassed(branchCount);
+  Object.keys(passedObj).forEach(k => passedObj[k] = true);
   setProfileRootProgress(profileId, courseId, rootId, {
     ...existing,
     status: 'complete',
-    root_question_passed: true,
-    branch_1_passed: true,
-    branch_2_passed: true,
-    branch_3_passed: true,
+    ...Object.fromEntries(Object.keys(passedObj).map(k => [`${k}_passed`, true])),
     completedAt: existing.completedAt || Date.now(),
   });
 }
 
-export function markRootMastered(profileId, courseId, rootId) {
+export function markRootMastered(profileId, courseId, rootId, branchCount) {
   const existing = getProfileRootProgress(profileId, courseId, rootId) || {};
+  const passedObj = emptyQuestionPassed(branchCount);
+  Object.keys(passedObj).forEach(k => passedObj[k] = true);
   setProfileRootProgress(profileId, courseId, rootId, {
     ...existing,
     status: 'mastered',
-    root_question_passed: true,
-    branch_1_passed: true,
-    branch_2_passed: true,
-    branch_3_passed: true,
+    ...Object.fromEntries(Object.keys(passedObj).map(k => [`${k}_passed`, true])),
     completedAt: existing.completedAt || Date.now(),
     masteredAt: existing.masteredAt || Date.now(),
   });
@@ -299,41 +297,61 @@ export function recordModeOpened(profileId, courseId, rootId, mode) {
   }
 }
 
-// ─── Criteria-based scoring ────────────────────────────────────────────────────
+// ─── Dynamic question key helpers ──────────────────────────────────────────────
 
-export function getQuestionCriteria(profileId, courseId, rootId) {
-  const profile = getProfileById(profileId);
-  return getCourseData(profile, courseId).questionCriteria?.[rootId] || { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+function buildQuestionKeys(branchCount) {
+  const keys = ['root'];
+  for (let i = 1; i <= branchCount; i++) keys.push(`branch_${i}`);
+  return keys;
 }
 
-export function setQuestionCriteria(profileId, courseId, rootId, questionType, count) {
+function emptyQuestionScores(branchCount) {
+  const obj = {};
+  buildQuestionKeys(branchCount).forEach(k => obj[k] = 0);
+  return obj;
+}
+
+function emptyQuestionPassed(branchCount) {
+  const obj = {};
+  buildQuestionKeys(branchCount).forEach(k => obj[k] = false);
+  return obj;
+}
+
+// ─── Criteria-based scoring ────────────────────────────────────────────────────
+
+export function getQuestionCriteria(profileId, courseId, rootId, branchCount) {
+  const profile = getProfileById(profileId);
+  return getCourseData(profile, courseId).questionCriteria?.[rootId] || emptyQuestionScores(branchCount);
+}
+
+export function setQuestionCriteria(profileId, courseId, rootId, questionType, count, branchCount) {
   const profiles = getProfiles();
   const idx = profiles.findIndex(p => p.id === profileId);
   if (idx === -1) return;
   const cd = ensureCourseData(profiles, idx, courseId);
   if (!cd.questionCriteria) cd.questionCriteria = {};
-  if (!cd.questionCriteria[rootId]) cd.questionCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  if (!cd.questionCriteria[rootId]) cd.questionCriteria[rootId] = emptyQuestionScores(branchCount);
   const current = cd.questionCriteria[rootId][questionType] || 0;
   cd.questionCriteria[rootId][questionType] = Math.max(current, count);
   profiles[idx].lastStudied = Date.now();
   saveProfiles(profiles);
 }
 
-export function setQuestionCriteriaExact(profileId, courseId, rootId, questionType, count) {
+export function setQuestionCriteriaExact(profileId, courseId, rootId, questionType, count, branchCount) {
   const profiles = getProfiles();
   const idx = profiles.findIndex(p => p.id === profileId);
   if (idx === -1) return;
   const cd = ensureCourseData(profiles, idx, courseId);
   if (!cd.questionCriteria) cd.questionCriteria = {};
-  if (!cd.questionCriteria[rootId]) cd.questionCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  if (!cd.questionCriteria[rootId]) cd.questionCriteria[rootId] = emptyQuestionScores(branchCount);
   cd.questionCriteria[rootId][questionType] = count;
   profiles[idx].lastStudied = Date.now();
   saveProfiles(profiles);
 }
 
-export function getRootPoints(profileId, courseId, rootId) {
-  const qc = getQuestionCriteria(profileId, courseId, rootId);
-  return (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
+export function getRootPoints(profileId, courseId, rootId, branchCount) {
+  const qc = getQuestionCriteria(profileId, courseId, rootId, branchCount);
+  return Object.values(qc).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
 }
 
 export function getTotalPoints(profileId, courseId, rootCount) {
@@ -343,14 +361,16 @@ export function getTotalPoints(profileId, courseId, rootCount) {
 }
 
 // Derive status from criteria points (display only)
-export function deriveRootStatus(qc) {
+export function deriveRootStatus(qc, branchCount) {
   const rootPts = qc?.root || 0;
-  const b1 = qc?.branch_1 || 0;
-  const b2 = qc?.branch_2 || 0;
-  const b3 = qc?.branch_3 || 0;
-  const total = rootPts + b1 + b2 + b3;
+  const total = Object.values(qc).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
   if (total === 0) return 'not_started';
-  if (rootPts >= 4 && b1 >= 3 && b2 >= 3 && b3 >= 3) return 'mastered';
+  
+  // Check if all branches meet their passing threshold (3 points each)
+  const branchKeys = buildQuestionKeys(branchCount).filter(k => k !== 'root');
+  const allBranchesPerfect = branchKeys.every(k => (qc?.[k] || 0) >= 3);
+  
+  if (rootPts >= 4 && allBranchesPerfect) return 'mastered';
   if (rootPts >= 2) return 'complete';
   return 'in_progress';
 }
@@ -464,65 +484,64 @@ export function getRootVocabScore(profileId, courseId, rootId) {
 
 // ─── Gauntlet storage ─────────────────────────────────────────────────────────
 
-export function getGauntletCriteria(profileId, courseId, rootId) {
+export function getGauntletCriteria(profileId, courseId, rootId, branchCount) {
   const profile = getProfileById(profileId);
-  return getCourseData(profile, courseId).gauntletCriteria?.[rootId] || { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  return getCourseData(profile, courseId).gauntletCriteria?.[rootId] || emptyQuestionScores(branchCount);
 }
 
-export function setGauntletCriteria(profileId, courseId, rootId, questionType, count) {
+export function setGauntletCriteria(profileId, courseId, rootId, questionType, count, branchCount) {
   const profiles = getProfiles();
   const idx = profiles.findIndex(p => p.id === profileId);
   if (idx === -1) return;
   const cd = ensureCourseData(profiles, idx, courseId);
   if (!cd.gauntletCriteria) cd.gauntletCriteria = {};
-  if (!cd.gauntletCriteria[rootId]) cd.gauntletCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  if (!cd.gauntletCriteria[rootId]) cd.gauntletCriteria[rootId] = emptyQuestionScores(branchCount);
   const current = cd.gauntletCriteria[rootId][questionType] || 0;
   cd.gauntletCriteria[rootId][questionType] = Math.max(current, count);
   profiles[idx].lastStudied = Date.now();
   saveProfiles(profiles);
 }
 
-export function setGauntletCriteriaExact(profileId, courseId, rootId, questionType, count) {
+export function setGauntletCriteriaExact(profileId, courseId, rootId, questionType, count, branchCount) {
   const profiles = getProfiles();
   const idx = profiles.findIndex(p => p.id === profileId);
   if (idx === -1) return;
   const cd = ensureCourseData(profiles, idx, courseId);
   if (!cd.gauntletCriteria) cd.gauntletCriteria = {};
-  if (!cd.gauntletCriteria[rootId]) cd.gauntletCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  if (!cd.gauntletCriteria[rootId]) cd.gauntletCriteria[rootId] = emptyQuestionScores(branchCount);
   cd.gauntletCriteria[rootId][questionType] = count;
   saveProfiles(profiles);
 }
 
-export function setGauntletCriteriaBulk(profileId, courseId, rootId, data) {
+export function setGauntletCriteriaBulk(profileId, courseId, rootId, data, branchCount) {
   const profiles = getProfiles();
   const idx = profiles.findIndex(p => p.id === profileId);
   if (idx === -1) return;
   const cd = ensureCourseData(profiles, idx, courseId);
   if (!cd.gauntletCriteria) cd.gauntletCriteria = {};
-  const existing = cd.gauntletCriteria[rootId] || { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
-  cd.gauntletCriteria[rootId] = {
-    root: Math.max(existing.root || 0, data.root || 0),
-    branch_1: Math.max(existing.branch_1 || 0, data.branch_1 || 0),
-    branch_2: Math.max(existing.branch_2 || 0, data.branch_2 || 0),
-    branch_3: Math.max(existing.branch_3 || 0, data.branch_3 || 0),
-  };
+  const existing = cd.gauntletCriteria[rootId] || emptyQuestionScores(branchCount);
+  const merged = {};
+  buildQuestionKeys(branchCount).forEach(k => {
+    merged[k] = Math.max(existing[k] || 0, data[k] || 0);
+  });
+  cd.gauntletCriteria[rootId] = merged;
   profiles[idx].lastStudied = Date.now();
   saveProfiles(profiles);
 }
 
-export function resetGauntletForRoot(profileId, courseId, rootId) {
+export function resetGauntletForRoot(profileId, courseId, rootId, branchCount) {
   const profiles = getProfiles();
   const idx = profiles.findIndex(p => p.id === profileId);
   if (idx === -1) return;
   const cd = ensureCourseData(profiles, idx, courseId);
   if (!cd.gauntletCriteria) cd.gauntletCriteria = {};
-  cd.gauntletCriteria[rootId] = { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  cd.gauntletCriteria[rootId] = emptyQuestionScores(branchCount);
   saveProfiles(profiles);
 }
 
-export function getGauntletRootPoints(profileId, courseId, rootId) {
-  const gc = getGauntletCriteria(profileId, courseId, rootId);
-  return (gc.root || 0) + (gc.branch_1 || 0) + (gc.branch_2 || 0) + (gc.branch_3 || 0);
+export function getGauntletRootPoints(profileId, courseId, rootId, branchCount) {
+  const gc = getGauntletCriteria(profileId, courseId, rootId, branchCount);
+  return Object.values(gc).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
 }
 
 export function getTotalGauntletPoints(profileId, courseId, rootCount) {
@@ -531,14 +550,20 @@ export function getTotalGauntletPoints(profileId, courseId, rootCount) {
   return total;
 }
 
-export function isRootPerfected(profileId, courseId, rootId) {
-  const gc = getGauntletCriteria(profileId, courseId, rootId);
-  return (gc.root || 0) >= 4 && (gc.branch_1 || 0) >= 3 && (gc.branch_2 || 0) >= 3 && (gc.branch_3 || 0) >= 3;
+export function isRootPerfected(profileId, courseId, rootId, branchCount) {
+  const gc = getGauntletCriteria(profileId, courseId, rootId, branchCount);
+  const rootPerfect = (gc.root || 0) >= 4;
+  const branchKeys = buildQuestionKeys(branchCount).filter(k => k !== 'root');
+  const allBranchesPerfect = branchKeys.every(k => (gc[k] || 0) >= 3);
+  return rootPerfect && allBranchesPerfect;
 }
 
-export function isGauntletEligible(profileId, courseId, rootId) {
-  const qc = getQuestionCriteria(profileId, courseId, rootId);
-  return (qc.root || 0) >= 2 && (qc.branch_1 || 0) >= 1 && (qc.branch_2 || 0) >= 1 && (qc.branch_3 || 0) >= 1;
+export function isGauntletEligible(profileId, courseId, rootId, branchCount) {
+  const qc = getQuestionCriteria(profileId, courseId, rootId, branchCount);
+  const rootEligible = (qc.root || 0) >= 2;
+  const branchKeys = buildQuestionKeys(branchCount).filter(k => k !== 'root');
+  const allBranchesEligible = branchKeys.every(k => (qc[k] || 0) >= 1);
+  return rootEligible && allBranchesEligible;
 }
 
 // ─── Gauntlet passed dates ─────────────────────────────────────────────────────
@@ -648,10 +673,9 @@ export function getProfileStats(profileId, courseId, rootCount) {
   Object.keys(counts).forEach(key => { totalAttempts += counts[key]; });
   const allProgress = Object.values(progress);
   allProgress.forEach(p => {
-    if (p.root_question_passed) totalPassed++;
-    if (p.branch_1_passed) totalPassed++;
-    if (p.branch_2_passed) totalPassed++;
-    if (p.branch_3_passed) totalPassed++;
+    Object.keys(p).forEach(key => {
+      if (key.endsWith('_passed') && p[key]) totalPassed++;
+    });
   });
 
   const complete = allProgress.filter(p => p.status === 'complete').length;
