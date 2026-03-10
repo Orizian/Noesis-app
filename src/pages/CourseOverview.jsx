@@ -46,6 +46,7 @@ function ProgressSection({ profileId }) {
 }
 
 export default function CourseOverview() {
+  const { roots } = useCourse();
   const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
