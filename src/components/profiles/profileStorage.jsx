@@ -71,9 +71,11 @@ export function getProfileById(id) {
 
 export function createProfile({ name, color, emoji, pin }) {
   const id = 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+  const initials = name.trim().split(/\s+/).map(w => w[0]?.toUpperCase() || '').slice(0, 2).join('');
   const profile = {
     id,
     name,
+    initials,
     color,
     emoji: emoji || null,
     pin: pin || null,
