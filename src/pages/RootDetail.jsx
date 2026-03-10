@@ -22,6 +22,7 @@ import {
   getGauntletRootPoints,
   isRootPerfected,
   emptyQuestionScores,
+  buildQuestionKeys,
 } from '../components/profiles/profileStorage';
 
 import { format } from 'date-fns';
