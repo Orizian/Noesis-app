@@ -45,7 +45,8 @@ export default function RootCard({ root, profileId }) {
   const gauntletEligible = profileId ? isGauntletEligible(profileId, courseId, root.id, root.branches.length) : false;
   const gauntletPassed = profileId ? isRootGauntletPassed(profileId, courseId, root.id) : false;
   const gauntletPassedDate = gauntletPassed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
-  const gauntletPerfected = gauntletPoints === 13;
+  const gauntletMax = getRootGauntletMaxPoints(root);
+  const gauntletPerfected = gauntletPoints === gauntletMax;
 
   // Gauntlet status element
   let gauntletEl = null;
