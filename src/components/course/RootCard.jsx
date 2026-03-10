@@ -118,7 +118,7 @@ export default function RootCard({ root, profileId }) {
               </div>
               {/* Progress bars */}
               <div className="mt-3">
-                <RootCardBars rootPoints={rootPoints} gauntletPoints={gauntletPoints} hasPerfected={perfected} />
+                <RootCardBars root={root} rootPoints={rootPoints} gauntletPoints={gauntletPoints} hasPerfected={perfected} />
               </div>
               {/* Gauntlet status */}
               {gauntletEl}
