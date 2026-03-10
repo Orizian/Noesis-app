@@ -6,9 +6,9 @@ import DifficultyBars from './DifficultyBars';
 import { RootCardBars } from './MasteryBars';
 import {
   getQuestionCriteria, deriveRootStatus, getGauntletRootPoints, isRootPerfected,
-  isGauntletEligible, isRootGauntletPassed, getGauntletPassedDate,
+  isGauntletEligible, isRootGauntletPassed, getGauntletPassedDate, emptyQuestionScores, buildQuestionKeys,
 } from '../profiles/profileStorage';
-import { useCourse } from './CourseContext';
+import { useCourse, getRootGauntletMaxPoints } from './CourseContext';
 import { format } from 'date-fns';
 
 const STATUS_CONFIG = {
