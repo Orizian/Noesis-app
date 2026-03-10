@@ -299,13 +299,13 @@ export function recordModeOpened(profileId, courseId, rootId, mode) {
 
 // ─── Dynamic question key helpers ──────────────────────────────────────────────
 
-function buildQuestionKeys(branchCount) {
+export function buildQuestionKeys(branchCount) {
   const keys = ['root'];
   for (let i = 1; i <= branchCount; i++) keys.push(`branch_${i}`);
   return keys;
 }
 
-function emptyQuestionScores(branchCount) {
+export function emptyQuestionScores(branchCount) {
   const obj = {};
   buildQuestionKeys(branchCount).forEach(k => obj[k] = 0);
   return obj;

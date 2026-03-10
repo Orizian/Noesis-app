@@ -13,6 +13,7 @@ import {
   setFlashcardTierExact,
   clearAllFlashcardTiers,
   getFlashcardTier,
+  buildQuestionKeys,
 } from '../profiles/profileStorage';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -21,7 +22,7 @@ const TIER_LABELS = { unattempted: '—', attempted: 'Attempted', pass: 'Pass', 
 
 function masterAllRoots(profileId, courseId, roots) {
   roots.forEach(root => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k =>
+    buildQuestionKeys(root.branches.length).forEach(k =>
       setQuestionCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3, root.branches.length)
     );
   });
@@ -34,7 +35,7 @@ function resetAllProgress(profileId, courseId) {
 function conquerAllGauntlets(profileId, courseId, roots) {
   const now = Date.now();
   roots.forEach(root => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k =>
+    buildQuestionKeys(root.branches.length).forEach(k =>
       setGauntletCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3, root.branches.length)
     );
     setGauntletPassedDate(profileId, courseId, root.id, now);
@@ -126,11 +127,11 @@ function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
   const [expanded, setExpanded] = useState(false);
 
   // Cold attempt state
-  const initQC = () => { const qc = getQuestionCriteria(profileId, courseId, root.id, root.branches.length); return { root: qc.root||0, branch_1: qc.branch_1||0, branch_2: qc.branch_2||0, branch_3: qc.branch_3||0 }; };
+  const initQC = () => { const qc = getQuestionCriteria(profileId, courseId, root.id, root.branches.length); const obj = {}; buildQuestionKeys(root.branches.length).forEach(k => obj[k] = qc[k] || 0); return obj; };
   const [coldVals, setColdVals] = useState(initQC);
 
   // Gauntlet state
-  const initGC = () => { const gc = getGauntletCriteria(profileId, courseId, root.id, root.branches.length); return { root: gc.root||0, branch_1: gc.branch_1||0, branch_2: gc.branch_2||0, branch_3: gc.branch_3||0 }; };
+  const initGC = () => { const gc = getGauntletCriteria(profileId, courseId, root.id, root.branches.length); const obj = {}; buildQuestionKeys(root.branches.length).forEach(k => obj[k] = gc[k] || 0); return obj; };
   const [gauntletVals, setGauntletVals] = useState(initGC);
 
   // Vocab state — { termName: tier }
@@ -146,32 +147,32 @@ function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
   const setG = (key, val) => { setGauntletCriteriaExact(profileId, courseId, root.id, key, val, root.branches.length); setGauntletVals(p => ({ ...p, [key]: val })); onChanged(); };
 
   const masterRoot = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3, root.branches.length));
-    setColdVals({ root:4, branch_1:3, branch_2:3, branch_3:3 });
+    buildQuestionKeys(root.branches.length).forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3, root.branches.length));
+    const maxVals = {}; buildQuestionKeys(root.branches.length).forEach(k => maxVals[k] = k === 'root' ? 4 : 3); setColdVals(maxVals);
     onChanged();
   };
   const resetRoot = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, 0, root.branches.length));
-    setColdVals({ root:0, branch_1:0, branch_2:0, branch_3:0 });
+    buildQuestionKeys(root.branches.length).forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, 0, root.branches.length));
+    const zeroVals = {}; buildQuestionKeys(root.branches.length).forEach(k => zeroVals[k] = 0); setColdVals(zeroVals);
     onChanged();
   };
   const setGMax = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3, root.branches.length));
+    buildQuestionKeys(root.branches.length).forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3, root.branches.length));
     setGauntletPassedDate(profileId, courseId, root.id, Date.now());
-    setGauntletVals({ root:4, branch_1:3, branch_2:3, branch_3:3 });
+    const maxVals = {}; buildQuestionKeys(root.branches.length).forEach(k => maxVals[k] = k === 'root' ? 4 : 3); setGauntletVals(maxVals);
     onChanged();
   };
   const setGMinPass = () => {
     setGauntletCriteriaExact(profileId, courseId, root.id, 'root', 2, root.branches.length);
-    ['branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, 1, root.branches.length));
+    buildQuestionKeys(root.branches.length).filter(k => k !== 'root').forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, 1, root.branches.length));
     setGauntletPassedDate(profileId, courseId, root.id, Date.now());
-    setGauntletVals({ root:2, branch_1:1, branch_2:1, branch_3:1 });
+    const minPassVals = {}; buildQuestionKeys(root.branches.length).forEach(k => minPassVals[k] = k === 'root' ? 2 : 1); setGauntletVals(minPassVals);
     onChanged();
   };
   const resetGauntlet = () => {
     resetGauntletForRoot(profileId, courseId, root.id, root.branches.length);
     clearGauntletPassedDate(profileId, courseId, root.id);
-    setGauntletVals({ root:0, branch_1:0, branch_2:0, branch_3:0 });
+    const zeroVals = {}; buildQuestionKeys(root.branches.length).forEach(k => zeroVals[k] = 0); setGauntletVals(zeroVals);
     onChanged();
   };
 
@@ -235,7 +236,7 @@ function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
           <div>
             <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider mb-2">Cold Attempts</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-2">
-              {[['root','Root Q',4],['branch_1','Branch 1',3],['branch_2','Branch 2',3],['branch_3','Branch 3',3]].map(([k,label,max]) => (
+              {[['root', 'Root Q', 4], ...root.branches.map((_, i) => [`branch_${i+1}`, `Branch ${i+1}`, 3])].map(([k,label,max]) => (
                 <div key={k} className="flex items-center justify-between gap-2">
                   <span className="text-xs text-zinc-500">{label}</span>
                   <Stepper value={coldVals[k]} max={max} onChange={v => setC(k, v)} />
@@ -252,7 +253,7 @@ function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
           <div>
             <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider mb-2">Gauntlet</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-2">
-              {[['root','Root Q',4],['branch_1','Branch 1',3],['branch_2','Branch 2',3],['branch_3','Branch 3',3]].map(([k,label,max]) => (
+              {[['root', 'Root Q', 4], ...root.branches.map((_, i) => [`branch_${i+1}`, `Branch ${i+1}`, 3])].map(([k,label,max]) => (
                 <div key={k} className="flex items-center justify-between gap-2">
                   <span className="text-xs text-zinc-500">{label}</span>
                   <Stepper value={gauntletVals[k]} max={max} onChange={v => setG(k, v)} />

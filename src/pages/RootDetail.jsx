@@ -21,6 +21,7 @@ import {
   deriveRootStatus,
   getGauntletRootPoints,
   isRootPerfected,
+  emptyQuestionScores,
 } from '../components/profiles/profileStorage';
 
 import { format } from 'date-fns';
@@ -53,7 +54,7 @@ export default function RootDetail() {
   const progress = getRootProgress(rootId);
 
   // Criteria-based data
-  const qc = activeProfileId ? getQuestionCriteria(activeProfileId, courseId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  const qc = activeProfileId ? getQuestionCriteria(activeProfileId, courseId, rootId, root.branches.length) : emptyQuestionScores(root.branches.length);
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
   const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, courseId, rootId) : 0;
   const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, rootId) : false;
@@ -83,12 +84,12 @@ export default function RootDetail() {
     setActiveMode('teach');
     if (activeProfileId) recordModeOpened(activeProfileId, courseId, rootId, 'teach');
     if (activeProfileId && !progress) {
+      const branchPassed = {};
+      root.branches.forEach((_, i) => { branchPassed[`branch_${i+1}_passed`] = false; });
       setRootProgress(rootId, {
         status: 'in_progress',
         root_question_passed: false,
-        branch_1_passed: false,
-        branch_2_passed: false,
-        branch_3_passed: false,
+        ...branchPassed,
         startedAt: Date.now(),
       });
     }
@@ -105,12 +106,12 @@ export default function RootDetail() {
     }
     // Mark in_progress when teach mode first opened
     if (newMode === 'teach' && activeProfileId && !progress) {
+      const branchPassed = {};
+      root.branches.forEach((_, i) => { branchPassed[`branch_${i+1}_passed`] = false; });
       setRootProgress(rootId, {
         status: 'in_progress',
         root_question_passed: false,
-        branch_1_passed: false,
-        branch_2_passed: false,
-        branch_3_passed: false,
+        ...branchPassed,
         startedAt: Date.now(),
       });
     } else if (newMode === 'teach' && activeProfileId && progress && !progress.startedAt) {
@@ -125,9 +126,7 @@ export default function RootDetail() {
     const current = progress || { startedAt: Date.now() };
     const updates = { ...current };
     if (questionType === 'root') { updates.root_question_passed = true; }
-    if (questionType === 'branch_1') { updates.branch_1_passed = true; }
-    if (questionType === 'branch_2') { updates.branch_2_passed = true; }
-    if (questionType === 'branch_3') { updates.branch_3_passed = true; }
+    if (questionType.startsWith('branch_')) { updates[`${questionType}_passed`] = true; }
     updates.status = updates.root_question_passed ? 'complete' : 'in_progress';
     if (updates.root_question_passed && !updates.completedAt) updates.completedAt = Date.now();
     setRootProgress(rootId, updates);

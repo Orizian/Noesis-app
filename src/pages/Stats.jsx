@@ -43,7 +43,7 @@ export default function Stats() {
   const totalMasteryPoints = activeProfileId ? getTotalPoints(activeProfileId, courseId, roots.length) : 0;
   const totalGauntletPoints = activeProfileId ? getTotalGauntletPoints(activeProfileId, courseId, roots.length) : 0;
   const totalVocabScore = activeProfileId ? getTotalVocabScore(activeProfileId, courseId) : 0;
-  const perfectedCount = activeProfileId ? roots.filter(r => isRootPerfected(activeProfileId, courseId, r.id)).length : 0;
+  const perfectedCount = activeProfileId ? roots.filter(r => isRootPerfected(activeProfileId, courseId, r.id, r.branches.length)).length : 0;
   const overallPct = Math.round(((stats.complete + stats.mastered) / roots.length) * 100);
 
   return (
@@ -157,7 +157,7 @@ export default function Stats() {
           <div className="grid grid-cols-4 gap-3">
             {roots.map(root => {
               const p = stats.progress?.[root.id];
-              const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, root.id) : false;
+              const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, root.id, root.branches.length) : false;
               const status = perfected ? 'perfected' : (p?.status || 'not_started');
               const colorMap = { ...STATUS_COLORS, perfected: 'bg-yellow-600' };
               const iconMap = { ...STATUS_ICONS, perfected: Star };
