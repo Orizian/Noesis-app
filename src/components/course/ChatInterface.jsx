@@ -324,10 +324,10 @@ Rules:
       const criteriaMatches = [...response.matchAll(/\[CRITERIA:(met|unmet)\]/gi)];
       const metCount = criteriaMatches.filter(m => m[1].toLowerCase() === 'met').length;
       const earnedCount = Math.min(metCount, totalCrit);
-      if (activeProfileId) {
-        setQuestionCriteria(activeProfileId, root.id, questionType, earnedCount);
+      if (activeProfileId && courseId) {
+        setQuestionCriteria(activeProfileId, courseId, root.id, questionType, earnedCount);
         const tier = getQualityTier(earnedCount, isRootQ);
-        setBestTier(activeProfileId, root.id, questionType, tier);
+        setBestTier(activeProfileId, courseId, root.id, questionType, tier);
       }
       if (response.includes('[PASS]')) {
         onPassColdAttempt(questionType, earnedCount);
