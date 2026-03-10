@@ -27,8 +27,8 @@ function masterAllRoots(profileId, courseId, roots) {
   });
 }
 
-function resetAllProgress(profileId) {
-  resetProfileProgress(profileId);
+function resetAllProgress(profileId, courseId) {
+  resetProfileProgress(profileId, courseId);
 }
 
 function conquerAllGauntlets(profileId, courseId, roots) {
