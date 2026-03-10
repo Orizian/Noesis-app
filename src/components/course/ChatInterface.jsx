@@ -238,8 +238,8 @@ Rules:
       onCompetencyChange(parseInt(competencyMatch[1]));
     }
     const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
-    if (termMatches.length > 0 && activeProfileId) {
-      termMatches.forEach(m => addEncounteredTerm(activeProfileId, root.id, m[1].trim()));
+    if (termMatches.length > 0 && activeProfileId && courseId) {
+      termMatches.forEach(m => addEncounteredTerm(activeProfileId, courseId, root.id, m[1].trim()));
     }
     const cleanResponse = response
       .replace(/\[COMPETENCY:[1-5]\]/g, '')
