@@ -94,16 +94,16 @@ function getGauntletBarColor(value, max) {
   return 'bg-violet-500';
 }
 
-// Global overview bar — dynamic max
-export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, perfectedCount, maxPoints = 104 }) {
+// Global overview bar — 0 to 104
+export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, perfectedCount }) {
   return (
     <div className="space-y-2">
       <ThinBar
         value={totalPoints}
-        max={maxPoints}
-        ticks={[Math.round(maxPoints * 0.15), Math.round(maxPoints * 0.31)]}
+        max={104}
+        ticks={[16, 32]}
         label="Mastery"
-        rightLabel={`${totalPoints} / ${maxPoints}`}
+        rightLabel={`${totalPoints} / 104`}
         height="h-2"
       />
       <p className="text-xs text-zinc-500">
@@ -122,17 +122,17 @@ export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, pe
   );
 }
 
-// Global gauntlet bar — dynamic max, only shown if any gauntlet attempted
-export function GlobalGauntletBar({ totalPoints, maxPoints = 104 }) {
-  const color = getGauntletBarColor(totalPoints, maxPoints);
+// Global gauntlet bar — 0 to 104, only shown if any gauntlet attempted
+export function GlobalGauntletBar({ totalPoints }) {
+  const color = getGauntletBarColor(totalPoints, 104);
   return (
     <ThinBar
       value={totalPoints}
-      max={maxPoints}
-      ticks={[Math.round(maxPoints * 0.31), Math.round(maxPoints * 0.69)]}
+      max={104}
+      ticks={[32, 72]}
       color={color}
       label="Gauntlet"
-      rightLabel={`${totalPoints} / ${maxPoints}`}
+      rightLabel={`${totalPoints} / 104`}
       height="h-2"
     />
   );
@@ -147,17 +147,17 @@ function getVocabBarColor(score) {
   return 'bg-violet-500';
 }
 
-// Vocabulary bar — score = count of Excellent tiers, dynamic max
-export function VocabBar({ excellentScore, maxVocab = 80 }) {
+// Vocabulary bar — score = count of Excellent tiers, max 80
+export function VocabBar({ excellentScore }) {
   const score = excellentScore || 0;
   return (
     <ThinBar
       value={score}
-      max={maxVocab}
-      ticks={[Math.round(maxVocab * 0.25), Math.round(maxVocab * 0.62), maxVocab]}
+      max={80}
+      ticks={[20, 50, 80]}
       color={getVocabBarColor(score)}
       label="Vocabulary"
-      rightLabel={`${score} / ${maxVocab} Excellent`}
+      rightLabel={`${score} / 80 Excellent`}
       height="h-2"
     />
   );

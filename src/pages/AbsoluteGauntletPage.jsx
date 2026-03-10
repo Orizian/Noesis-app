@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useCourse } from '../components/course/CourseContext';
+import { ROOTS, BRANCH_RUBRICS } from '../components/courseData';
 import { useProfile } from '../components/profiles/ProfileContext';
 import {
   isAllGauntletsPassed,
@@ -193,7 +193,6 @@ function QuestionRow({ result, qMeta }) {
 function RootSection({ root, rootResults, rootIndex }) {
   const [expanded, setExpanded] = useState(false);
   const rootScore = rootResults.reduce((s, r) => s + (r.score || 0), 0);
-  const rootMax = 4 + root.branches.length * 3;
   return (
     <div className="border border-zinc-800 rounded-xl overflow-hidden">
       <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-zinc-800/20 transition-colors">
@@ -201,7 +200,7 @@ function RootSection({ root, rootResults, rootIndex }) {
         <div className="flex-1 min-w-0">
           <span className="text-sm font-semibold text-zinc-200">Root {root.id} — {root.title}</span>
         </div>
-        <span className="text-xs font-mono text-zinc-400 flex-shrink-0">{rootScore} / {rootMax}</span>
+        <span className="text-xs font-mono text-zinc-400 flex-shrink-0">{rootScore} / 13</span>
       </button>
       {expanded && (
         <div className="border-t border-zinc-800/50 bg-zinc-900/30">
@@ -214,26 +213,26 @@ function RootSection({ root, rootResults, rootIndex }) {
   );
 }
 
-// ── Progress bar with root ticks ────────────────────────────────────────────
-function AbsoluteProgressBar({ rootIdx, qIdx, rootCount, questionsPerRoot }) {
-  const total = rootCount * questionsPerRoot;
-  const done = rootIdx * questionsPerRoot + qIdx;
+// ── Progress bar with 8 root ticks ────────────────────────────────────────────
+function AbsoluteProgressBar({ rootIdx, qIdx }) {
+  const total = 32;
+  const done = rootIdx * 4 + qIdx;
   return (
     <div className="border-b border-zinc-800 px-4 pt-3 pb-2">
       {/* Tick labels */}
       <div className="relative h-4 mb-1">
-        {Array.from({ length: rootCount }, (_, i) => i + 1).map(n => (
-          <span key={n} className="absolute text-[10px] text-zinc-600 font-mono -translate-x-1/2" style={{ left: `${((n-1) / rootCount) * 100}%` }}>{n}</span>
+        {[1,2,3,4,5,6,7,8].map(n => (
+          <span key={n} className="absolute text-[10px] text-zinc-600 font-mono -translate-x-1/2" style={{ left: `${((n-1) / 8) * 100}%` }}>{n}</span>
         ))}
       </div>
       {/* Bar */}
       <div className="relative h-1.5 bg-zinc-800 rounded-full overflow-visible mb-1">
         <div className="h-full bg-red-700 rounded-full transition-all duration-500" style={{ width: `${(done / total) * 100}%` }} />
-        {Array.from({ length: rootCount - 1 }, (_, i) => i + 1).map(n => (
-          <div key={n} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(n / rootCount) * 100}%` }} />
+        {[1,2,3,4,5,6,7].map(n => (
+          <div key={n} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(n / 8) * 100}%` }} />
         ))}
       </div>
-      <p className="text-xs text-zinc-600 mt-1">Root {rootIdx + 1} of {rootCount} — Question {qIdx + 1} of {questionsPerRoot}</p>
+      <p className="text-xs text-zinc-600 mt-1">Root {rootIdx + 1} of 8 — Question {qIdx + 1} of 4</p>
     </div>
   );
 }
@@ -241,9 +240,6 @@ function AbsoluteProgressBar({ rootIdx, qIdx, rootCount, questionsPerRoot }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AbsoluteGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
-  const { activeCourse } = useCourse();
-  const ROOTS = activeCourse.roots;
-  const BRANCH_RUBRICS = activeCourse.branchRubrics;
   const navigate = useNavigate();
 
   const conquered = activeProfileId ? isAbsoluteGauntletConquered(activeProfileId) : false;
@@ -265,12 +261,9 @@ export default function AbsoluteGauntletPage() {
     return 0;
   });
   // All answers: flat array of 32 (rootIdx*4 + qIdx)
-  const totalQuestions = ROOTS.reduce((sum, r) => sum + 1 + r.branches.length, 0);
-  const questionsPerRoot = GAUNTLET_QUESTIONS.length;
-
   const [allAnswers, setAllAnswers] = useState(() => {
     if (hasSession && saved?.answers) return saved.answers;
-    return Array(totalQuestions).fill('');
+    return Array(32).fill('');
   });
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
@@ -317,7 +310,7 @@ export default function AbsoluteGauntletPage() {
   const root = ROOTS[rootIdx];
 
   const startFresh = () => {
-    const newAnswers = Array(totalQuestions).fill('');
+    const newAnswers = Array(32).fill('');
     setAllAnswers(newAnswers);
     setRootIdx(0); setQIdx(0); setCurrentAnswer('');
     if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
@@ -340,7 +333,7 @@ export default function AbsoluteGauntletPage() {
     await new Promise(r => setTimeout(r, 500));
     setSavedFlash(false);
 
-    if (qIdx < questionsPerRoot - 1) {
+    if (qIdx < 3) {
       const newQ = qIdx + 1;
       setQIdx(newQ);
       setCurrentAnswer('');
@@ -348,17 +341,17 @@ export default function AbsoluteGauntletPage() {
       setTimeout(() => textareaRef.current?.focus(), 50);
     } else {
       // End of this root
-      if (rootIdx < ROOTS.length - 1) {
+      if (rootIdx < 7) {
         setPhase('root_transition');
         setCurrentAnswer('');
-        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: questionsPerRoot - 1, answers: newAnswers });
+        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
       } else {
-        // All questions done — batch evaluate
+        // All 32 done — batch evaluate
         setPhase('evaluating');
         const allQ = [];
         ROOTS.forEach((r, ri) => {
           GAUNTLET_QUESTIONS.forEach((q, qi) => {
-            allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * questionsPerRoot + qi], rootIndex: ri });
+            allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * 4 + qi], rootIndex: ri });
           });
         });
         const results = await batchEvaluateAll(allQ);
@@ -366,7 +359,7 @@ export default function AbsoluteGauntletPage() {
         if (activeProfileId) {
           ROOTS.forEach((r, ri) => {
             const bulk = {};
-            GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * questionsPerRoot + qi]?.score || 0; });
+            GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
             setGauntletCriteriaBulk(activeProfileId, r.id, bulk);
           });
           const allPassed = results.every(r => r.passed);
@@ -449,12 +442,12 @@ export default function AbsoluteGauntletPage() {
   // ── Run ──
   if (phase === 'run') {
     const qMeta = GAUNTLET_QUESTIONS[qIdx];
-    const isLastQ = rootIdx === ROOTS.length - 1 && qIdx === questionsPerRoot - 1;
+    const isLastQ = rootIdx === 7 && qIdx === 3;
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <div className="max-w-2xl mx-auto px-4 py-6">
           <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 overflow-hidden">
-            <AbsoluteProgressBar rootIdx={rootIdx} qIdx={qIdx} rootCount={ROOTS.length} questionsPerRoot={questionsPerRoot} />
+            <AbsoluteProgressBar rootIdx={rootIdx} qIdx={qIdx} />
             <div className="p-5 space-y-4">
               <div>
                 <p className="text-xs font-mono text-zinc-600 mb-1">ROOT {String(root.id).padStart(2,'0')} — {root.title}</p>
@@ -496,7 +489,7 @@ export default function AbsoluteGauntletPage() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
         <div className="max-w-md w-full mx-auto px-4 text-center space-y-6 animate-in fade-in duration-500">
-          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of {ROOTS.length} Complete</p>
+          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of 8 Complete</p>
           <p className="text-3xl font-bold text-zinc-100">{ROOTS[rootIdx].title}</p>
           <p className="text-xs text-zinc-600">Continuing to next root. No scores during the run.</p>
           <button onClick={handleContinueRoot}
@@ -520,7 +513,7 @@ export default function AbsoluteGauntletPage() {
             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
           </div>
           <p className="text-zinc-300 font-medium animate-pulse">Evaluating your complete performance...</p>
-          <p className="text-xs text-zinc-600">All {totalQuestions} questions. This takes a moment.</p>
+          <p className="text-xs text-zinc-600">All 32 questions. This takes a moment.</p>
           <p className="text-xs text-zinc-700 italic">Uses an advanced model for accuracy.</p>
         </div>
       </div>
@@ -530,7 +523,6 @@ export default function AbsoluteGauntletPage() {
   // ── Grading sheet ──
   if (phase === 'grading' && finalResults) {
     const totalScore = finalResults.reduce((s, r) => s + (r.score || 0), 0);
-    const maxScore = ROOTS.reduce((sum, root) => sum + 4 + root.branches.length * 3, 0);
     const allPassed = finalResults.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
     const prevBest = activeProfileId ? getTotalGauntletPoints(activeProfileId) : 0;
@@ -554,16 +546,16 @@ export default function AbsoluteGauntletPage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-zinc-500">Total Score</span>
-              <span className="text-xs text-zinc-500 font-mono">{totalScore} / {maxScore}</span>
+              <span className="text-xs text-zinc-500 font-mono">{totalScore} / 104</span>
             </div>
             <div className="relative h-2.5 bg-zinc-800 rounded-full overflow-visible">
               <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalScore)}`}
-                style={{ width: `${(totalScore / maxScore) * 100}%` }} />
-              {[Math.round(maxScore * 0.3), Math.round(maxScore * 0.69), maxScore].map(tick => (
-                <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / maxScore) * 100}%` }} />
+                style={{ width: `${(totalScore / 104) * 100}%` }} />
+              {[32, 72, 104].map(tick => (
+                <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / 104) * 100}%` }} />
               ))}
             </div>
-            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {maxScore}</p>
+            <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / 104</p>
           </div>
 
           {/* Root sections */}
@@ -572,7 +564,7 @@ export default function AbsoluteGauntletPage() {
               <RootSection
                 key={r.id}
                 root={r}
-                rootResults={finalResults.slice(ri * questionsPerRoot, ri * questionsPerRoot + questionsPerRoot)}
+                rootResults={finalResults.slice(ri * 4, ri * 4 + 4)}
                 rootIndex={ri}
               />
             ))}

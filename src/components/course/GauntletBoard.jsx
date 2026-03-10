@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCourse } from './CourseContext';
+import { ROOTS } from '../courseData';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
@@ -69,17 +69,15 @@ function GauntletTile({ root, profileId }) {
   return content;
 }
 
-function AbsoluteGauntletButton({ profileId, roots }) {
+function AbsoluteGauntletButton({ profileId }) {
   const navigate = useNavigate();
   const eligible = profileId ? isAllGauntletsPassed(profileId) : false;
   const conquered = profileId ? isAbsoluteGauntletConquered(profileId) : false;
   const saved = profileId ? getAbsoluteGauntlet(profileId) : null;
   const inProgress = !conquered && saved?.inProgress;
-  const rootCount = roots.length;
-  const totalQuestions = roots.reduce((sum, r) => sum + 1 + r.branches.length, 0);
 
   const passedCount = profileId
-    ? roots.filter(r => isRootGauntletPassed(profileId, r.id)).length
+    ? ROOTS.filter(r => isRootGauntletPassed(profileId, r.id)).length
     : 0;
 
   if (conquered) {
@@ -97,8 +95,8 @@ function AbsoluteGauntletButton({ profileId, roots }) {
     return (
       <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/40 px-6 py-5 text-center">
         <p className="text-zinc-200 font-bold text-lg">The Absolute Gauntlet</p>
-        <p className="text-zinc-500 text-sm mt-1">All {rootCount} roots. {totalQuestions} questions. One sitting.</p>
-        <p className="text-zinc-600 text-xs mt-3">{rootCount - passedCount} of {rootCount} Gauntlets remaining</p>
+        <p className="text-zinc-500 text-sm mt-1">All 8 roots. 32 questions. One sitting.</p>
+        <p className="text-zinc-600 text-xs mt-3">{8 - passedCount} of 8 Gauntlets remaining</p>
       </div>
     );
   }
@@ -112,14 +110,14 @@ function AbsoluteGauntletButton({ profileId, roots }) {
         border-red-700/60 bg-red-950/20 hover:bg-red-950/30 absolute-glow cursor-pointer"
     >
       <p className="text-red-200 font-bold text-xl">
-        {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of ${rootCount}` : 'The Absolute Gauntlet'}
+        {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of 8` : 'The Absolute Gauntlet'}
       </p>
-      <p className="text-zinc-500 text-sm mt-1">All {rootCount} roots. {totalQuestions} questions. One sitting.</p>
+      <p className="text-zinc-500 text-sm mt-1">All 8 roots. 32 questions. One sitting.</p>
       {inProgress && (
         <div className="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-red-700 transition-all"
-            style={{ width: `${(Object.keys(saved?.completedRoots || {}).length / rootCount) * 100}%` }}
+            style={{ width: `${(Object.keys(saved?.completedRoots || {}).length / 8) * 100}%` }}
           />
         </div>
       )}
@@ -128,10 +126,7 @@ function AbsoluteGauntletButton({ profileId, roots }) {
 }
 
 export default function GauntletBoard({ profileId }) {
-  const { activeCourse } = useCourse();
-  const roots = activeCourse.roots;
   const totalPoints = profileId ? getTotalGauntletPoints(profileId) : 0;
-  const maxPoints = roots.reduce((sum, root) => sum + 4 + root.branches.length * 3, 0);
 
   return (
     <div className="mt-10 border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">
@@ -145,9 +140,9 @@ export default function GauntletBoard({ profileId }) {
       </div>
 
       <div className="p-5 space-y-5">
-        {/* Root tile grid */}
+        {/* 8-tile grid */}
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
-          {roots.map(root => (
+          {ROOTS.map(root => (
             <GauntletTile key={root.id} root={root} profileId={profileId} />
           ))}
         </div>
@@ -156,22 +151,22 @@ export default function GauntletBoard({ profileId }) {
         <div>
           <div className="flex justify-between items-baseline mb-1.5">
             <span className="text-xs text-zinc-500">Gauntlet Total</span>
-            <span className="text-xs font-mono text-zinc-400">{totalPoints} / {maxPoints}</span>
+            <span className="text-xs font-mono text-zinc-400">{totalPoints} / 104</span>
           </div>
           <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
             <div
               className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalPoints)}`}
-              style={{ width: `${Math.min((totalPoints / maxPoints) * 100, 100)}%` }}
+              style={{ width: `${Math.min((totalPoints / 104) * 100, 100)}%` }}
             />
-            {[Math.round(maxPoints * 0.3), Math.round(maxPoints * 0.69), maxPoints].map(tick => (
+            {[32, 72, 104].map(tick => (
               <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10"
-                style={{ left: `${(tick / maxPoints) * 100}%` }} />
+                style={{ left: `${(tick / 104) * 100}%` }} />
             ))}
           </div>
         </div>
 
         {/* Absolute Gauntlet button */}
-        <AbsoluteGauntletButton profileId={profileId} roots={roots} />
+        <AbsoluteGauntletButton profileId={profileId} />
       </div>
     </div>
   );

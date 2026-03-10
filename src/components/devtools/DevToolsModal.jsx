@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { useCourse } from '../course/CourseContext';
+import { ROOTS, DICTIONARY } from '../courseData';
 import {
   setQuestionCriteriaExact,
   getQuestionCriteria,
@@ -285,9 +285,6 @@ function RootSection({ root, profileId, onChanged }) {
 
 // ── Main Modal ────────────────────────────────────────────────────────────────
 export default function DevToolsModal({ profileId, onClose, onChanged }) {
-  const { activeCourse } = useCourse();
-  const ROOTS = activeCourse.roots;
-  const DICTIONARY = activeCourse.dictionary;
   const [inProgressRoot, setInProgressRoot] = useState(1);
 
   const act = (fn) => { fn(); onChanged(); };

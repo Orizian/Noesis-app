@@ -1,6 +1,5 @@
 import React from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
-import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
 
 function AppShell({ children, currentPageName }) {
@@ -16,7 +15,6 @@ function AppShell({ children, currentPageName }) {
 export default function Layout({ children, currentPageName }) {
   return (
     <ProfileProvider>
-      <CourseProvider>
       <div className="min-h-screen bg-zinc-950">
         <style>{`
           body {
@@ -32,7 +30,6 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </AppShell>
       </div>
-      </CourseProvider>
     </ProfileProvider>
   );
 }
