@@ -38,5 +38,3 @@ export const COURSES = [
     branchRubrics: {},
   },
 ];
-
-export { ROOTS, DICTIONARY, BRANCH_RUBRICS } from './humanPerformancePhysiology';

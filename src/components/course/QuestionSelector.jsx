@@ -4,9 +4,11 @@ import { CheckCircle2, Circle } from 'lucide-react';
 export default function QuestionSelector({ root, progress, selectedQuestion, onSelect }) {
   const questions = [
     { id: 'root', label: 'Root Question', passed: progress?.root_question_passed },
-    { id: 'branch_1', label: `Branch 1 — ${root.branches[0].label}`, passed: progress?.branch_1_passed },
-    { id: 'branch_2', label: `Branch 2 — ${root.branches[1].label}`, passed: progress?.branch_2_passed },
-    { id: 'branch_3', label: `Branch 3 — ${root.branches[2].label}`, passed: progress?.branch_3_passed },
+    ...root.branches.map((branch, i) => ({
+      id: `branch_${i + 1}`,
+      label: `Branch ${i + 1} — ${branch.label}`,
+      passed: progress?.[`branch_${i + 1}_passed`],
+    })),
   ];
 
   return (

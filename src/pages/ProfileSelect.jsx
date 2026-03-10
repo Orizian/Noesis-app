@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, BookOpen } from 'lucide-react';
 import { getProfiles, getProfileCompletionPercent } from '../components/profiles/profileStorage';
 import ProfileAvatar, { getColorConfig } from '../components/profiles/ProfileAvatar';
+import { useCourse } from '../components/course/CourseContext';
 import ProgressRing from '../components/profiles/ProgressRing';
 import CreateProfileModal from '../components/profiles/CreateProfileModal';
 import PinEntryOverlay from '../components/profiles/PinEntryOverlay';

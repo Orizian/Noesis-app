@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, XCircle, RotateCcw, ArrowRight, BookOpen } from 'lucide-react';
 import { getQualityTier } from '../profiles/profileStorage';
-import { ROOTS, BRANCH_RUBRICS } from '../courseData';
+import { useCourse } from './CourseContext';
 
 function parseRubricCriteria(rubricStr) {
   const matches = [...rubricStr.matchAll(/Criterion\s+\d+:\s*(.+?)(?=Criterion\s+\d+:|$)/gi)];
   return matches.map(m => m[1].trim());
-}
-
-function getRubricForQuestion(root, questionType) {
-  if (questionType === 'root') return root.rubric;
-  return BRANCH_RUBRICS[root.id]?.[questionType] || root.rubric;
 }
 
 const EVAL_STAGES = [
