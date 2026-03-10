@@ -426,7 +426,12 @@ export default function AbsoluteGauntletPage() {
           <div className="border border-amber-800/40 rounded-2xl bg-amber-950/10 p-8 space-y-4">
             <h1 className="text-xl font-bold text-amber-300">Saved Attempt Detected</h1>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              You have a checkpoint from earlier with {answeredCount} of {totalQuestions} questions answered. Resume where you left off?
+              {(() => {
+                const nextIdx = checkpointPrompt.answeredQuestions.length;
+                const resumeRootIdx = Math.floor(nextIdx / 4);
+                const resumeQIdx = nextIdx % 4;
+                return `Resume from Root ${resumeRootIdx + 1}, Question ${resumeQIdx + 1} (${nextIdx} of ${totalQuestions} answered).`;
+              })()}
             </p>
             <div className="flex gap-3">
               <button
