@@ -314,7 +314,7 @@ export default function RootGauntletFlow({ root, profileId, courseId, onComplete
     const totalScore = results.reduce((s, r) => s + (r.score || 0), 0);
     const allPassed = results.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
-    const prevBest = profileId ? getGauntletRootPoints(profileId, root.id) : 0;
+    const prevBest = (profileId && courseId) ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
     const personalBest = Math.max(prevBest, totalScore);
 
     return (
