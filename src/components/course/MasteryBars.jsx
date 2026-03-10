@@ -47,21 +47,15 @@ function ThinBar({ value, max, ticks = [], color, label, rightLabel, height = 'h
   );
 }
 
-// Gauntlet bar color — pure function of points
-function getGauntletBarColor(value, max) {
-  if (max > 13) {
-    // Global bar: proportional thresholds
-    const pct = max > 0 ? value / max : 0;
-    if (pct <= 0.3) return 'bg-zinc-600';
-    if (pct < 0.7) return 'bg-emerald-500';
-    if (pct < 1) return 'bg-teal-500';
-    return 'bg-violet-500';
-  }
-  // per-root (max 13)
-  if (value <= 3) return 'bg-zinc-600';
-  if (value <= 8) return 'bg-emerald-500';
-  if (value <= 12) return 'bg-teal-500';
-  return 'bg-violet-500';
+// Percentage-based gauntlet color — no hardcoded thresholds
+function getGauntletBarColor(score, max) {
+  if (!max || max <= 0) return 'bg-zinc-600';
+  const pct = score / max;
+  if (pct >= 1.0) return 'bg-violet-500';
+  if (pct >= 0.85) return 'bg-teal-500';
+  if (pct >= 0.5) return 'bg-emerald-500';
+  if (pct >= 0.15) return 'bg-orange-500';
+  return 'bg-zinc-600';
 }
 
 // Global overview bar — 0 to 104
