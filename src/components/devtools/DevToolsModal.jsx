@@ -283,8 +283,8 @@ function RootSection({ root, profileId, onChanged, dictionary }) {
 }
 
 // ── Main Modal ────────────────────────────────────────────────────────────────
-export default function DevToolsModal({ profileId, onClose, onChanged }) {
-  const [inProgressRoot, setInProgressRoot] = useState(1);
+export default function DevToolsModal({ profileId, onClose, onChanged, roots, dictionary }) {
+  const [inProgressRoot, setInProgressRoot] = useState(roots[0]?.id ?? 1);
 
   const act = (fn) => { fn(); onChanged(); };
 
@@ -304,15 +304,15 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
         <div className="px-5 py-4 border-b border-zinc-800">
           <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider mb-3">Global Controls</p>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => act(() => { masterAllRoots(profileId); conquerAllGauntlets(profileId); conquerAbsoluteGauntlet(profileId); maxAllVocabulary(profileId); })}
+            <button onClick={() => act(() => { masterAllRoots(profileId, roots); conquerAllGauntlets(profileId, roots); conquerAbsoluteGauntlet(profileId); maxAllVocabulary(profileId, dictionary); })}
               className="px-3 py-2 rounded-lg bg-violet-900/50 hover:bg-violet-900/70 border border-violet-700/60 text-violet-300 text-xs font-semibold transition-colors">
               Max Everything
             </button>
-            <button onClick={() => act(() => { resetAllProgress(profileId); ROOTS.forEach(r => { resetGauntletForRoot(profileId, r.id); clearGauntletPassedDate(profileId, r.id); }); resetAbsoluteGauntlet(profileId); clearAllFlashcardTiers(profileId); })}
+            <button onClick={() => act(() => { resetAllProgress(profileId); roots.forEach(r => { resetGauntletForRoot(profileId, r.id); clearGauntletPassedDate(profileId, r.id); }); resetAbsoluteGauntlet(profileId); clearAllFlashcardTiers(profileId); })}
               className="px-3 py-2 rounded-lg bg-red-950/60 hover:bg-red-950/80 border border-red-800/60 text-red-400 text-xs font-semibold transition-colors">
               Reset Everything
             </button>
-            <button onClick={() => act(() => masterAllRoots(profileId))}
+            <button onClick={() => act(() => masterAllRoots(profileId, roots))}
               className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-xs transition-colors">
               Master All Roots
             </button>
@@ -320,7 +320,7 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
               className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-xs transition-colors">
               Reset All Progress
             </button>
-            <button onClick={() => act(() => conquerAllGauntlets(profileId))}
+            <button onClick={() => act(() => conquerAllGauntlets(profileId, roots))}
               className="px-3 py-2 rounded-lg bg-amber-950/50 hover:bg-amber-950/70 border border-amber-800/50 text-amber-400 text-xs transition-colors">
               Conquer All Gauntlets
             </button>
@@ -328,7 +328,7 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
               className="px-3 py-2 rounded-lg bg-amber-950/50 hover:bg-amber-950/70 border border-amber-800/50 text-amber-400 text-xs transition-colors">
               Conquer Absolute Gauntlet
             </button>
-            <button onClick={() => act(() => maxAllVocabulary(profileId))}
+            <button onClick={() => act(() => maxAllVocabulary(profileId, dictionary))}
               className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-xs transition-colors">
               Max All Vocabulary
             </button>
@@ -343,8 +343,8 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
         <div className="border-b border-zinc-800">
           <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider px-5 py-3">Per Root — tap to expand</p>
           <div className="max-h-[45vh] overflow-y-auto">
-            {ROOTS.map(root => (
-              <RootSection key={root.id} root={root} profileId={profileId} onChanged={onChanged} />
+            {roots.map(root => (
+              <RootSection key={root.id} root={root} profileId={profileId} onChanged={onChanged} dictionary={dictionary} />
             ))}
           </div>
         </div>
@@ -364,7 +364,7 @@ export default function DevToolsModal({ profileId, onClose, onChanged }) {
                 onChange={e => setInProgressRoot(Number(e.target.value))}
                 className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300"
               >
-                {ROOTS.map(r => <option key={r.id} value={r.id}>Root {r.id}</option>)}
+                {roots.map(r => <option key={r.id} value={r.id}>Root {r.id}</option>)}
               </select>
               <button onClick={() => act(() => setAbsoluteGauntletInProgress(profileId, inProgressRoot))}
                 className="px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 border border-zinc-600 text-zinc-300 text-xs transition-colors whitespace-nowrap">
