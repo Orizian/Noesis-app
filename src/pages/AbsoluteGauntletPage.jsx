@@ -386,6 +386,7 @@ export default function AbsoluteGauntletPage() {
           } else {
             setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
           }
+          clearGauntletCheckpoint(activeProfileId, courseId);
           refresh();
         }
         setFinalResults(results);
