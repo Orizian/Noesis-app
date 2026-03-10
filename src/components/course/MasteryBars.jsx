@@ -1,41 +1,15 @@
 import React from 'react';
+import { getRootGauntletMaxPoints, getCourseGauntletMaxPoints } from './CourseContext';
 
-// Color — pure function of points earned, never derived from tier labels
-function getMasteryColor(value, max) {
-  // Global bar: max = rootCount * 13
-  if (max > 13) {
-    const pct = max > 0 ? value / max : 0;
-    if (pct <= 0.15) return 'bg-zinc-600';
-    if (pct < 0.4) return pct < 0.28 ? 'bg-emerald-400' : 'bg-emerald-500';
-    if (pct < 1) return pct < 0.7 ? 'bg-teal-400' : 'bg-teal-500';
-    return 'bg-violet-500';
-  }
-  if (max === 13) {
-    if (value <= 1) return 'bg-zinc-600';
-    if (value <= 5) {
-      const t = (value - 2) / (5 - 2);
-      return t < 0.5 ? 'bg-emerald-400' : 'bg-emerald-500';
-    }
-    if (value <= 12) {
-      const t = (value - 6) / (12 - 6);
-      return t < 0.5 ? 'bg-teal-400' : 'bg-teal-500';
-    }
-    return 'bg-violet-500'; // 13
-  }
-  // per-question bars (max 4 or 3)
-  if (max === 4) {
-    if (value < 2) return 'bg-zinc-600';
-    if (value < 3) return 'bg-emerald-500';
-    if (value < 4) return 'bg-teal-500';
-    return 'bg-violet-500';
-  }
-  if (max === 3) {
-    if (value < 1) return 'bg-zinc-600';
-    if (value < 2) return 'bg-emerald-500';
-    if (value < 3) return 'bg-teal-500';
-    return 'bg-violet-500';
-  }
-  return 'bg-emerald-500';
+// Percentage-based color logic — no hardcoded thresholds
+function getMasteryColor(score, max) {
+  if (!max || max <= 0) return 'bg-zinc-600';
+  const pct = score / max;
+  if (pct >= 1.0) return 'bg-violet-500';
+  if (pct >= 0.85) return 'bg-teal-500';
+  if (pct >= 0.5) return 'bg-emerald-500';
+  if (pct >= 0.15) return 'bg-orange-500';
+  return 'bg-zinc-600';
 }
 
 // Single thin horizontal bar with tick marks
