@@ -315,17 +315,9 @@ export default function FlashcardGauntlet({ rootId, rootTitle, profileId, terms,
           <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
             <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${scoreColor}`}
               style={{ width: `${(excellentCount / terms.length) * 100}%` }} />
-            {(() => {
-              const n = terms.length;
-              if (n <= 1) return null;
-              return [1, 2, 3].map(i => {
-                const tick = Math.round((i / 4) * n);
-                if (tick <= 0 || tick >= n) return null;
-                return (
-                  <div key={tick} className="absolute top-[-2px] bottom-[-2px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / n) * 100}%` }} />
-                );
-              });
-            })()}
+            {[3, 7, 10].filter(t => t < terms.length).map(t => (
+              <div key={t} className="absolute top-[-2px] bottom-[-2px] w-px bg-zinc-600 z-10" style={{ left: `${(t / terms.length) * 100}%` }} />
+            ))}
           </div>
         </div>
         <p className="text-xs text-zinc-600 mb-5">Personal Best: {personalBest} / {terms.length} Excellent</p>
