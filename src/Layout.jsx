@@ -7,6 +7,12 @@ import CourseSelectionPage from './pages/CourseSelectionPage';
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
 
+  // Pages that should always render regardless of profile state
+  const ALWAYS_RENDER_PAGES = ['AccountPage'];
+  if (ALWAYS_RENDER_PAGES.includes(currentPageName)) {
+    return <>{children}</>;
+  }
+
   if (!activeProfileId) {
     return <ProfileSelect />;
   }

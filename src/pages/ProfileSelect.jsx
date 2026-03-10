@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Lock, Pencil, BookOpen, Trash2, X, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   getProfiles,
   createProfile,
@@ -252,6 +253,7 @@ function EditProfileSheet({ profile, onClose, onDeleted, onRenamed }) {
 
 export default function ProfileSelect() {
   const { selectProfile } = useProfile();
+  const navigate = useNavigate();
   const [profiles, setProfiles] = useState(() => {
     const p = getProfiles();
     return Array.isArray(p) ? p : [];
@@ -267,10 +269,10 @@ export default function ProfileSelect() {
   };
 
   const handleSelect = (profile) => {
-    // Write to storage and update context state, then navigate immediately.
+    // Write to storage and update context state, then navigate via SPA.
     // Progress recalculation happens lazily in destination components.
     selectProfile(profile.id);
-    window.location.href = createPageUrl('CourseSelectionPage');
+    navigate(createPageUrl('CourseSelectionPage'));
   };
 
   const handleCreated = (profile) => {
@@ -304,7 +306,7 @@ export default function ProfileSelect() {
         </div>
         <p className="text-zinc-600 text-xs tracking-wide">Mechanistic learning, from first principles</p>
         <button
-          onClick={() => { window.location.href = createPageUrl('AccountPage'); }}
+          onClick={() => { navigate(createPageUrl('AccountPage')); }}
           className="absolute top-14 right-4 p-2 rounded-lg text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50 transition-colors"
           aria-label="Account settings"
         >
