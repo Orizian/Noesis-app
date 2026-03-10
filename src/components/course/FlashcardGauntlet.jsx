@@ -125,7 +125,7 @@ function GradingRow({ result, isNewBest }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function FlashcardGauntlet({ rootId, rootTitle, profileId, terms, onExit, onTiersUpdated }) {
+export default function FlashcardGauntlet({ rootId, courseId, rootTitle, profileId, terms, onExit, onTiersUpdated }) {
   const [phase, setPhase] = useState('caution'); // caution | run | evaluating | grading
   const [termIndex, setTermIndex] = useState(0);
   const [answers, setAnswers] = useState(Array(terms.length).fill(''));
@@ -135,7 +135,7 @@ export default function FlashcardGauntlet({ rootId, rootTitle, profileId, terms,
   const [newBests, setNewBests] = useState({}); // { termName: bool }
   const [prevBests] = useState(() => {
     const obj = {};
-    if (profileId) terms.forEach(t => { obj[t.term] = getFlashcardTier(profileId, rootId, t.term) || null; });
+    if (profileId) terms.forEach(t => { obj[t.term] = getFlashcardTier(profileId, courseId, rootId, t.term) || null; });
     return obj;
   });
 
@@ -175,10 +175,10 @@ export default function FlashcardGauntlet({ rootId, rootTitle, profileId, terms,
         const newRank = TIER_RANK[r.tier] || 0;
         if (newRank > prevRank) {
           nb[termName] = true;
-          if (profileId) setFlashcardTierExact(profileId, rootId, termName, r.tier);
+          if (profileId) setFlashcardTierExact(profileId, courseId, rootId, termName, r.tier);
         } else if (!prev && newRank >= 0) {
           // first attempt — always save
-          if (profileId) setFlashcardTierExact(profileId, rootId, termName, r.tier);
+          if (profileId) setFlashcardTierExact(profileId, courseId, rootId, termName, r.tier);
         }
       });
       setNewBests(nb);
@@ -284,7 +284,7 @@ export default function FlashcardGauntlet({ rootId, rootTitle, profileId, terms,
     const scoreColor = getScoreColor(excellentCount, terms.length);
 
     // Personal best = max excellent we've ever had for this root
-    const storedBestNow = terms.filter(t => (getFlashcardTier(profileId, rootId, t.term) === 'excellent')).length;
+    const storedBestNow = terms.filter(t => (getFlashcardTier(profileId, courseId, rootId, t.term) === 'excellent')).length;
     const prevBestCount = terms.filter(t => (prevBests[t.term] === 'excellent')).length;
     const personalBest = Math.max(storedBestNow, prevBestCount, excellentCount);
 
