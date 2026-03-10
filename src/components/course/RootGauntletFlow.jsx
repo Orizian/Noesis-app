@@ -10,12 +10,13 @@ import {
 
 import { format } from 'date-fns';
 
-export const GAUNTLET_QUESTIONS = [
-  { key: 'root',     label: 'Root Question', maxCriteria: 4 },
-  { key: 'branch_1', label: 'Branch 1',      maxCriteria: 3 },
-  { key: 'branch_2', label: 'Branch 2',      maxCriteria: 3 },
-  { key: 'branch_3', label: 'Branch 3',      maxCriteria: 3 },
-];
+export function getQuestionsForRoot(root) {
+  const qs = [{ key: 'root', label: 'Root Question', maxCriteria: 4 }];
+  root.branches.forEach((_, i) => {
+    qs.push({ key: `branch_${i + 1}`, label: `Branch ${i + 1}`, maxCriteria: 3 });
+  });
+  return qs;
+}
 
 const TIER_CONFIG = {
   excellent:  { label: 'Excellent',  className: 'bg-violet-950/60 border-violet-700 text-violet-300' },
@@ -58,18 +59,19 @@ function getRubricCriteria(root, key, branchRubrics) {
   return matches.map(m => m[1].trim());
 }
 
-// ── Batch evaluate all 4 questions ───────────────────────────────────────────
+// ── Batch evaluate all questions for a root ────────────────────────────────────
 async function batchEvaluateGauntlet(root, answers, branchRubrics) {
-  const sets = GAUNTLET_QUESTIONS.map((q, i) => {
+  const questions = getQuestionsForRoot(root);
+  const sets = questions.map((q, i) => {
     const question = getQuestionText(root, q.key);
     const rubricStr = q.key === 'root' ? root.rubric : (branchRubrics[root.id]?.[q.key] || root.rubric);
     const criteria = getRubricCriteria(root, q.key, branchRubrics);
     return `Question ${i + 1} (${q.label}):\nQuestion text: "${question}"\nRubric criteria (${q.maxCriteria} criteria):\n${criteria.map((c, j) => `  Criterion ${j + 1}: ${c}`).join('\n')}\nStudent response: "${answers[i]}"`;
   }).join('\n\n---\n\n');
 
-  const prompt = `You are evaluating a student's answers to a root question and three branch questions for a mechanistic learning platform.
+  const prompt = `You are evaluating a student's answers to a root question and ${root.branches.length} branch questions for a mechanistic learning platform.
 Evaluate each response independently against its specific rubric criteria.
-Return ONLY a valid JSON array of 4 objects in exact order. No preamble, no markdown backticks, no explanation outside the JSON.
+Return ONLY a valid JSON array of ${questions.length} objects in exact order. No preamble, no markdown backticks, no explanation outside the JSON.
 
 RUBRIC TIERS:
 Root Question — 4 criteria, 1 point each, max 4 points. Tiers: 0-1 = Incomplete, 2 = Pass, 3 = Great, 4 = Excellent
@@ -119,10 +121,10 @@ ${sets}`;
   if (Array.isArray(result)) arr = result;
   else if (result?.results && Array.isArray(result.results)) arr = result.results;
   if (!arr || arr.length === 0) {
-    return GAUNTLET_QUESTIONS.map(q => ({ question: q.key, criteria_met: [], score: 0, tier: 'Incomplete', feedback: 'Could not evaluate.', criteria_breakdown: [] }));
+    return questions.map(q => ({ question: q.key, criteria_met: [], score: 0, tier: 'Incomplete', feedback: 'Could not evaluate.', criteria_breakdown: [] }));
   }
 
-  return GAUNTLET_QUESTIONS.map((q, i) => {
+  return questions.map((q, i) => {
     const r = arr[i] || {};
     const criteria = getRubricCriteria(root, q.key, branchRubrics);
     const critMet = Array.isArray(r.criteria_met) ? r.criteria_met : criteria.map(() => false);
@@ -184,11 +186,11 @@ function GradingRow({ result, qMeta, index }) {
 
 // ── Main RootGauntletFlow ─────────────────────────────────────────────────────
 export default function RootGauntletFlow({ root, profileId, onComplete, onCancel }) {
-  const { branchRubrics, meta } = useCourse();
+  const { branchRubrics, getRootMaxPoints, meta } = useCourse();
   const courseId = meta.id;
   const [phase, setPhase] = useState('caution'); // caution | run | evaluating | grading | summary-legacy
   const [qIdx, setQIdx] = useState(0);
-  const [answers, setAnswers] = useState(['', '', '', '']);
+  const [answers, setAnswers] = useState(() => Array(root.branches.length + 1).fill(''));
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
   const [results, setResults] = useState([]);
@@ -205,31 +207,33 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
     await new Promise(r => setTimeout(r, 500));
     setSavedFlash(false);
 
-    if (qIdx < GAUNTLET_QUESTIONS.length - 1) {
+    const questions = getQuestionsForRoot(root);
+    if (qIdx < questions.length - 1) {
       setCurrentAnswer('');
       setQIdx(q => q + 1);
       setTimeout(() => textareaRef.current?.focus(), 50);
     } else {
       // Batch evaluate
-      setPhase('evaluating');
-      const evalResults = await batchEvaluateGauntlet(root, newAnswers, branchRubrics);
-      // Save to storage
-      if (profileId) {
-        const bulk = {};
-        evalResults.forEach((r, i) => { bulk[GAUNTLET_QUESTIONS[i].key] = r.score; });
-        setGauntletCriteriaBulk(profileId, courseId, root.id, bulk);
-        const allPassed = evalResults.every(r => r.passed);
-        if (allPassed) setGauntletPassedDate(profileId, courseId, root.id, Date.now());
-      }
-      setResults(evalResults);
-      setPhase('grading');
+       setPhase('evaluating');
+       const evalResults = await batchEvaluateGauntlet(root, newAnswers, branchRubrics);
+       // Save to storage
+       if (profileId) {
+         const bulk = {};
+         const questions = getQuestionsForRoot(root);
+         evalResults.forEach((r, i) => { bulk[questions[i].key] = r.score; });
+         setGauntletCriteriaBulk(profileId, courseId, root.id, bulk);
+         const allPassed = evalResults.every(r => r.passed);
+         if (allPassed) setGauntletPassedDate(profileId, courseId, root.id, Date.now());
+       }
+       setResults(evalResults);
+       setPhase('grading');
     }
   };
 
   const handleRetake = () => {
     setPhase('caution');
     setQIdx(0);
-    setAnswers(['', '', '', '']);
+    setAnswers(Array(root.branches.length + 1).fill(''));
     setCurrentAnswer('');
     setResults([]);
   };
@@ -239,11 +243,11 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
     return (
       <div className="border border-amber-800/40 rounded-2xl bg-amber-950/10 p-6 space-y-5">
         <div>
-          <h2 className="text-lg font-bold text-amber-300 mb-1">Root Gauntlet — {root.title}</h2>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            Answer all 4 questions back to back without feedback. Results revealed at the end.
-          </p>
-        </div>
+           <h2 className="text-lg font-bold text-amber-300 mb-1">Root Gauntlet — {root.title}</h2>
+           <p className="text-sm text-zinc-400 leading-relaxed">
+             Answer all {root.branches.length + 1} questions back to back without feedback. Results revealed at the end.
+           </p>
+         </div>
         <div className="flex gap-3">
           <button onClick={() => { setPhase('run'); setQIdx(0); setCurrentAnswer(''); setTimeout(() => textareaRef.current?.focus(), 100); }}
             className="flex-1 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-semibold text-sm transition-colors">
@@ -260,64 +264,68 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
 
   // ── Run ──
   if (phase === 'run') {
-    const qMeta = GAUNTLET_QUESTIONS[qIdx];
-    const progress = (qIdx / GAUNTLET_QUESTIONS.length) * 100;
+    const questions = getQuestionsForRoot(root);
+    const qMeta = questions[qIdx];
+    const progress = (qIdx / questions.length) * 100;
     return (
       <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 overflow-hidden">
-        <div className="border-b border-zinc-800">
-          <div className="flex items-center justify-between px-4 py-2.5">
-            <span className="text-xs font-semibold text-amber-400 tracking-wide">{qMeta.label}</span>
-            <span className="text-xs text-zinc-600 font-mono">Question {qIdx + 1} of 4</span>
-          </div>
-          <div className="h-1 bg-zinc-800">
-            <div className="h-full bg-violet-600 transition-all duration-500" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-        <div className="p-5 space-y-4">
-          <p className="text-sm text-zinc-300 leading-relaxed">{getQuestionText(root, qMeta.key)}</p>
-          <textarea
-            ref={textareaRef}
-            value={currentAnswer}
-            onChange={e => setCurrentAnswer(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmitQ(); }}
-            placeholder="Answer from memory — no assistance..."
-            rows={6}
-            className="w-full resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
-          />
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-600">
-              {savedFlash ? <span className="text-zinc-500">Answer saved</span> : '⌘↵ to submit'}
-            </span>
-            <button onClick={handleSubmitQ} disabled={!currentAnswer.trim() || savedFlash}
-              className="px-6 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-semibold transition-colors">
-              {qIdx < 3 ? 'Next' : 'Submit'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+         <div className="border-b border-zinc-800">
+           <div className="flex items-center justify-between px-4 py-2.5">
+             <span className="text-xs font-semibold text-amber-400 tracking-wide">{qMeta.label}</span>
+             <span className="text-xs text-zinc-600 font-mono">Question {qIdx + 1} of {questions.length}</span>
+           </div>
+           <div className="h-1 bg-zinc-800">
+             <div className="h-full bg-violet-600 transition-all duration-500" style={{ width: `${progress}%` }} />
+           </div>
+         </div>
+         <div className="p-5 space-y-4">
+           <p className="text-sm text-zinc-300 leading-relaxed">{getQuestionText(root, qMeta.key)}</p>
+           <textarea
+             ref={textareaRef}
+             value={currentAnswer}
+             onChange={e => setCurrentAnswer(e.target.value)}
+             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmitQ(); }}
+             placeholder="Answer from memory — no assistance..."
+             rows={6}
+             className="w-full resize-none bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
+           />
+           <div className="flex items-center justify-between">
+             <span className="text-xs text-zinc-600">
+               {savedFlash ? <span className="text-zinc-500">Answer saved</span> : '⌘↵ to submit'}
+             </span>
+             <button onClick={handleSubmitQ} disabled={!currentAnswer.trim() || savedFlash}
+               className="px-6 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-semibold transition-colors">
+               {qIdx < questions.length - 1 ? 'Next' : 'Submit'}
+             </button>
+           </div>
+         </div>
+       </div>
+     );
+   }
 
   // ── Evaluating ──
-  if (phase === 'evaluating') {
-    return (
-      <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 p-6 flex flex-col items-center justify-center gap-4 min-h-[220px]">
-        <div className="w-10 h-10 rounded-full border-2 border-zinc-700 flex items-center justify-center">
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-        </div>
-        <p className="text-zinc-300 text-sm font-medium animate-pulse">Evaluating your answers...</p>
-        <p className="text-xs text-zinc-600">All 4 questions at once</p>
-      </div>
-    );
-  }
+   if (phase === 'evaluating') {
+     const questionCount = root.branches.length + 1;
+     return (
+       <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 p-6 flex flex-col items-center justify-center gap-4 min-h-[220px]">
+         <div className="w-10 h-10 rounded-full border-2 border-zinc-700 flex items-center justify-center">
+           <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+         </div>
+         <p className="text-zinc-300 text-sm font-medium animate-pulse">Evaluating your answers...</p>
+         <p className="text-xs text-zinc-600">All {questionCount} questions at once</p>
+       </div>
+     );
+   }
 
   // ── Grading sheet ──
-  if (phase === 'grading') {
-    const totalScore = results.reduce((s, r) => s + (r.score || 0), 0);
-    const allPassed = results.every(r => r.passed);
-    const dateStr = format(new Date(), 'MMM d, yyyy');
-    const prevBest = profileId ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
-    const personalBest = Math.max(prevBest, totalScore);
+   if (phase === 'grading') {
+     const rootMax = getRootMaxPoints(root);
+     const questions = getQuestionsForRoot(root);
+     const totalScore = results.reduce((s, r) => s + (r.score || 0), 0);
+     const allPassed = results.every(r => r.passed);
+     const dateStr = format(new Date(), 'MMM d, yyyy');
+     const prevBest = profileId ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
+     const personalBest = Math.max(prevBest, totalScore);
 
     return (
       <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 p-5 space-y-4">
@@ -335,22 +343,22 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-zinc-500">Score</span>
-            <span className="text-xs text-zinc-500 font-mono">{totalScore} / 13</span>
+            <span className="text-xs text-zinc-500 font-mono">{totalScore} / {rootMax}</span>
           </div>
           <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
-            <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor(totalScore, 13)}`}
-              style={{ width: `${(totalScore / 13) * 100}%` }} />
-            {[4, 9, 13].map(tick => (
-              <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / 13) * 100}%` }} />
+            <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor(totalScore, rootMax)}`}
+              style={{ width: `${(totalScore / rootMax) * 100}%` }} />
+            {[4, ...root.branches.map((_, i) => 4 + (i + 1) * 3)].map(tick => (
+              <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(tick / rootMax) * 100}%` }} />
             ))}
           </div>
-          <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / 13</p>
+          <p className="text-xs text-zinc-600 mt-1.5">Personal Best: {personalBest} / {rootMax}</p>
         </div>
 
         {/* Question rows */}
         <div>
           {results.map((r, i) => (
-            <GradingRow key={i} result={r} qMeta={GAUNTLET_QUESTIONS[i]} index={i} />
+            <GradingRow key={i} result={r} qMeta={questions[i]} index={i} />
           ))}
         </div>
 
