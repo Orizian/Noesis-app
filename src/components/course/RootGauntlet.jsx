@@ -214,7 +214,7 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
 
     // Run AI + enforce min 5s wait via Promise.all
     const minWait = new Promise(res => setTimeout(res, 5000));
-    const evalPromise = evaluateAnswer({ root, qMeta, answer });
+    const evalPromise = evaluateAnswer({ root, qMeta, answer, branchRubrics });
     const [result] = await Promise.all([evalPromise, minWait]);
 
     clearTimers();
