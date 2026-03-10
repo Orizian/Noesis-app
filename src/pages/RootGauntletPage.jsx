@@ -9,7 +9,8 @@ import { ArrowLeft } from 'lucide-react';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 
 export default function RootGauntletPage() {
-  const { roots } = useCourse();
+  const { roots, meta } = useCourse();
+  const courseId = meta?.id;
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = roots.find(r => r.id === rootId) || roots[0];
@@ -17,7 +18,7 @@ export default function RootGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
   const navigate = useNavigate();
 
-  const eligible = activeProfileId ? isGauntletEligible(activeProfileId, rootId) : false;
+  const eligible = (activeProfileId && courseId) ? isGauntletEligible(activeProfileId, courseId, rootId) : false;
 
   const handleComplete = (results) => {
     refresh();
