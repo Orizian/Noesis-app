@@ -122,17 +122,17 @@ export function GlobalMasteryBar({ totalPoints, completeCount, masteredCount, pe
   );
 }
 
-// Global gauntlet bar — 0 to 104, only shown if any gauntlet attempted
-export function GlobalGauntletBar({ totalPoints }) {
-  const color = getGauntletBarColor(totalPoints, 104);
+// Global gauntlet bar — only shown if any gauntlet attempted
+export function GlobalGauntletBar({ totalPoints, rootCount }) {
+  const max = rootCount * 13;
+  const color = getGauntletBarColor(totalPoints, max);
   return (
     <ThinBar
       value={totalPoints}
-      max={104}
-      ticks={[32, 72]}
+      max={max}
       color={color}
       label="Gauntlet"
-      rightLabel={`${totalPoints} / 104`}
+      rightLabel={`${totalPoints} / ${max}`}
       height="h-2"
     />
   );
@@ -147,17 +147,17 @@ function getVocabBarColor(score) {
   return 'bg-violet-500';
 }
 
-// Vocabulary bar — score = count of Excellent tiers, max 80
-export function VocabBar({ excellentScore }) {
+// Vocabulary bar — score = count of Excellent tiers, max = rootCount * 10
+export function VocabBar({ excellentScore, rootCount }) {
   const score = excellentScore || 0;
+  const max = rootCount * 10;
   return (
     <ThinBar
       value={score}
-      max={80}
-      ticks={[20, 50, 80]}
+      max={max}
       color={getVocabBarColor(score)}
       label="Vocabulary"
-      rightLabel={`${score} / 80 Excellent`}
+      rightLabel={`${score} / ${max} Excellent`}
       height="h-2"
     />
   );
