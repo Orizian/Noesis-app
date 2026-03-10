@@ -15,10 +15,11 @@ import {
 import { Star, Trophy, Swords } from 'lucide-react';
 import { format } from 'date-fns';
 
-function getBarColor104(pts) {
-  if (pts < 32) return 'bg-zinc-500';
-  if (pts < 72) return 'bg-violet-500';
-  if (pts < 104) return 'bg-teal-500';
+function getBarColorDynamic(pts, max) {
+  const pct = max > 0 ? pts / max : 0;
+  if (pct < 0.31) return 'bg-zinc-500';
+  if (pct < 0.69) return 'bg-emerald-500';
+  if (pct < 1) return 'bg-teal-500';
   return 'bg-violet-400';
 }
 
@@ -152,17 +153,13 @@ export default function GauntletBoard({ profileId }) {
         <div>
           <div className="flex justify-between items-baseline mb-1.5">
             <span className="text-xs text-zinc-500">Gauntlet Total</span>
-            <span className="text-xs font-mono text-zinc-400">{totalPoints} / 104</span>
+            <span className="text-xs font-mono text-zinc-400">{totalPoints} / {roots.length * 13}</span>
           </div>
           <div className="relative h-2 bg-zinc-800 rounded-full overflow-visible">
             <div
-              className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColor104(totalPoints)}`}
-              style={{ width: `${Math.min((totalPoints / 104) * 100, 100)}%` }}
+              className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${getBarColorDynamic(totalPoints, roots.length * 13)}`}
+              style={{ width: `${Math.min((totalPoints / (roots.length * 13)) * 100, 100)}%` }}
             />
-            {[32, 72, 104].map(tick => (
-              <div key={tick} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10"
-                style={{ left: `${(tick / 104) * 100}%` }} />
-            ))}
           </div>
         </div>
 
