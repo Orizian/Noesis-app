@@ -215,25 +215,25 @@ function RootSection({ root, rootResults, rootIndex }) {
 }
 
 // ── Progress bar with 8 root ticks ────────────────────────────────────────────
-function AbsoluteProgressBar({ rootIdx, qIdx }) {
-  const total = 32;
+function AbsoluteProgressBar({ rootIdx, qIdx, rootCount }) {
+  const total = rootCount * 4;
   const done = rootIdx * 4 + qIdx;
   return (
     <div className="border-b border-zinc-800 px-4 pt-3 pb-2">
       {/* Tick labels */}
       <div className="relative h-4 mb-1">
-        {[1,2,3,4,5,6,7,8].map(n => (
-          <span key={n} className="absolute text-[10px] text-zinc-600 font-mono -translate-x-1/2" style={{ left: `${((n-1) / 8) * 100}%` }}>{n}</span>
+        {Array.from({ length: rootCount }, (_, i) => i + 1).map(n => (
+          <span key={n} className="absolute text-[10px] text-zinc-600 font-mono -translate-x-1/2" style={{ left: `${((n-1) / rootCount) * 100}%` }}>{n}</span>
         ))}
       </div>
       {/* Bar */}
       <div className="relative h-1.5 bg-zinc-800 rounded-full overflow-visible mb-1">
         <div className="h-full bg-red-700 rounded-full transition-all duration-500" style={{ width: `${(done / total) * 100}%` }} />
-        {[1,2,3,4,5,6,7].map(n => (
-          <div key={n} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(n / 8) * 100}%` }} />
+        {Array.from({ length: rootCount - 1 }, (_, i) => i + 1).map(n => (
+          <div key={n} className="absolute top-[-3px] bottom-[-3px] w-px bg-zinc-600 z-10" style={{ left: `${(n / rootCount) * 100}%` }} />
         ))}
       </div>
-      <p className="text-xs text-zinc-600 mt-1">Root {rootIdx + 1} of 8 — Question {qIdx + 1} of 4</p>
+      <p className="text-xs text-zinc-600 mt-1">Root {rootIdx + 1} of {rootCount} — Question {qIdx + 1} of 4</p>
     </div>
   );
 }
