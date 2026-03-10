@@ -318,7 +318,7 @@ export default function AbsoluteGauntletPage() {
   };
 
   const saveProgress = () => {
-    if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx, answers: allAnswers });
+    if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx, answers: allAnswers });
   };
 
   const handleSubmitQ = async () => {
