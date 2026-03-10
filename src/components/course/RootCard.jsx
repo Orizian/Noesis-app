@@ -27,11 +27,13 @@ function getTierFromPoints(pts) {
 }
 
 export default function RootCard({ root, profileId }) {
-  const qc = profileId ? getQuestionCriteria(profileId, root.id) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  const { meta } = useCourse();
+  const courseId = meta?.id;
+  const qc = (profileId && courseId) ? getQuestionCriteria(profileId, courseId, root.id) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
   const status = deriveRootStatus(qc);
-  const perfected = profileId ? isRootPerfected(profileId, root.id) : false;
-  const gauntletPoints = profileId ? getGauntletRootPoints(profileId, root.id) : 0;
+  const perfected = (profileId && courseId) ? isRootPerfected(profileId, courseId, root.id) : false;
+  const gauntletPoints = (profileId && courseId) ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
   const cfg = perfected
     ? { label: 'Perfected', badgeClass: 'bg-violet-950/60 text-violet-300 border-violet-700', borderClass: 'border-l-violet-500' }
     : STATUS_CONFIG[status];
