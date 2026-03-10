@@ -248,7 +248,7 @@ export function getRootPoints(profileId, rootId) {
 
 export function getTotalPoints(profileId) {
   let total = 0;
-  for (let i = 1; i <= 8; i++) total += getRootPoints(profileId, i);
+  for (let i = 1; i <= ROOT_COUNT; i++) total += getRootPoints(profileId, i);
   return total;
 }
 
