@@ -380,35 +380,37 @@ export default function AbsoluteGauntletPage() {
         setCurrentAnswer('');
         if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
       } else {
-        // All 32 done — batch evaluate
+        // All 32 done — sequential per-root evaluation
         setPhase('evaluating');
-        const allQ = [];
-        roots.forEach((r, ri) => {
-          GAUNTLET_QUESTIONS.forEach((q, qi) => {
-            allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * 4 + qi], rootIndex: ri });
-          });
-        });
+        setEvalProgress(0);
         try {
-          const results = await batchEvaluateAll(allQ, branchRubrics);
-          console.log('Raw evaluation response:', JSON.stringify(results));
-          // Save to storage
+          const allResults = [];
+          for (let ri = 0; ri < roots.length; ri++) {
+            const rootAnswers = newAnswers.slice(ri * 4, ri * 4 + 4);
+            const rootResults = await evaluateRoot(roots[ri], rootAnswers, branchRubrics);
+            console.log(`Root ${ri + 1} evaluation:`, JSON.stringify(rootResults));
+            allResults.push(...rootResults);
+            setEvalProgress(ri + 1);
+          }
+
           if (activeProfileId) {
             roots.forEach((r, ri) => {
               const bulk = {};
-              GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
+              GAUNTLET_QUESTIONS.forEach((q, qi) => {
+                bulk[q.key] = allResults[ri * GAUNTLET_QUESTIONS.length + qi]?.score || 0;
+              });
               setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
             });
-            const allPassed = results.every(r => r.passed);
+            const allPassed = allResults.every(r => r.passed);
             if (allPassed) {
-              const ts = Date.now();
-              setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
+              setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: Date.now(), inProgress: false });
             } else {
               setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
             }
             clearGauntletCheckpoint(activeProfileId, courseId);
             refresh();
           }
-          setFinalResults(results);
+          setFinalResults(allResults);
           setPhase('grading');
         } catch (err) {
           console.error('Gauntlet evaluation failed:', err);
