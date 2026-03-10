@@ -62,7 +62,7 @@ async function batchEvaluateGauntlet(root, answers, branchRubrics) {
   const sets = GAUNTLET_QUESTIONS.map((q, i) => {
     const question = getQuestionText(root, q.key);
     const rubricStr = q.key === 'root' ? root.rubric : (branchRubrics[root.id]?.[q.key] || root.rubric);
-    const criteria = getRubricCriteria(root, q.key);
+    const criteria = getRubricCriteria(root, q.key, branchRubrics);
     return `Question ${i + 1} (${q.label}):\nQuestion text: "${question}"\nRubric criteria (${q.maxCriteria} criteria):\n${criteria.map((c, j) => `  Criterion ${j + 1}: ${c}`).join('\n')}\nStudent response: "${answers[i]}"`;
   }).join('\n\n---\n\n');
 
@@ -123,7 +123,7 @@ ${sets}`;
 
   return GAUNTLET_QUESTIONS.map((q, i) => {
     const r = arr[i] || {};
-    const criteria = getRubricCriteria(root, q.key);
+    const criteria = getRubricCriteria(root, q.key, branchRubrics);
     const critMet = Array.isArray(r.criteria_met) ? r.criteria_met : criteria.map(() => false);
     const score = typeof r.score === 'number' ? r.score : critMet.filter(Boolean).length;
     const breakdown = Array.isArray(r.criteria_breakdown) && r.criteria_breakdown.length > 0
@@ -183,6 +183,7 @@ function GradingRow({ result, qMeta, index }) {
 
 // ── Main RootGauntletFlow ─────────────────────────────────────────────────────
 export default function RootGauntletFlow({ root, profileId, onComplete, onCancel }) {
+  const { branchRubrics } = useCourse();
   const [phase, setPhase] = useState('caution'); // caution | run | evaluating | grading | summary-legacy
   const [qIdx, setQIdx] = useState(0);
   const [answers, setAnswers] = useState(['', '', '', '']);
