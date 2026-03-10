@@ -495,7 +495,7 @@ export default function AbsoluteGauntletPage() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
         <div className="max-w-md w-full mx-auto px-4 text-center space-y-6 animate-in fade-in duration-500">
-          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of 8 Complete</p>
+          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of {ROOTS.length} Complete</p>
           <p className="text-3xl font-bold text-zinc-100">{ROOTS[rootIdx].title}</p>
           <p className="text-xs text-zinc-600">Continuing to next root. No scores during the run.</p>
           <button onClick={handleContinueRoot}
