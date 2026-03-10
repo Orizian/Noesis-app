@@ -271,8 +271,9 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
   const headerLegendRef = useRef(null);
   const prevLockedRef = useRef(false);
   const { activeProfileId, profilesVersion } = useProfile();
+  const { dictionary } = useCourse();
 
-  const terms = DICTIONARY[rootId] || [];
+  const terms = dictionary[rootId] || [];
 
   // Handle lock/unlock
   useEffect(() => {

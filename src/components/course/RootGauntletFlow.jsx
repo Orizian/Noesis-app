@@ -51,17 +51,17 @@ function getQuestionText(root, key) {
   return root.branches[idx]?.question || root.rootQuestion;
 }
 
-function getRubricCriteria(root, key) {
-  const rubricStr = key === 'root' ? root.rubric : (BRANCH_RUBRICS[root.id]?.[key] || root.rubric);
+function getRubricCriteria(root, key, branchRubrics) {
+  const rubricStr = key === 'root' ? root.rubric : (branchRubrics[root.id]?.[key] || root.rubric);
   const matches = [...rubricStr.matchAll(/Criterion\s+\d+:\s*(.+?)(?=Criterion\s+\d+:|$)/gi)];
   return matches.map(m => m[1].trim());
 }
 
 // ── Batch evaluate all 4 questions ───────────────────────────────────────────
-async function batchEvaluateGauntlet(root, answers) {
+async function batchEvaluateGauntlet(root, answers, branchRubrics) {
   const sets = GAUNTLET_QUESTIONS.map((q, i) => {
     const question = getQuestionText(root, q.key);
-    const rubricStr = q.key === 'root' ? root.rubric : (BRANCH_RUBRICS[root.id]?.[q.key] || root.rubric);
+    const rubricStr = q.key === 'root' ? root.rubric : (branchRubrics[root.id]?.[q.key] || root.rubric);
     const criteria = getRubricCriteria(root, q.key);
     return `Question ${i + 1} (${q.label}):\nQuestion text: "${question}"\nRubric criteria (${q.maxCriteria} criteria):\n${criteria.map((c, j) => `  Criterion ${j + 1}: ${c}`).join('\n')}\nStudent response: "${answers[i]}"`;
   }).join('\n\n---\n\n');

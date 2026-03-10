@@ -10,6 +10,7 @@ import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm, setQuest
 
 export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered, dictFocusedTerm }) {
   const { activeProfileId } = useProfile();
+  const { branchRubrics, dictionary } = useCourse();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
