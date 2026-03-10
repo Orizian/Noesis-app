@@ -25,12 +25,12 @@ function getBarColorDynamic(pts, max) {
 }
 
 function GauntletTile({ root, profileId, courseId }) {
-  const eligible = profileId ? isGauntletEligible(profileId, courseId, root.id, root.branches.length) : false;
-  const passed = profileId ? isRootGauntletPassed(profileId, courseId, root.id) : false;
-  const passedDate = passed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
-  const points = profileId ? getGauntletRootPoints(profileId, courseId, root.id, root.branches.length) : 0;
-  // "Perfected" = 13/13
-  const perfected = points === 13;
+   const eligible = profileId ? isGauntletEligible(profileId, courseId, root.id, root.branches.length) : false;
+   const passed = profileId ? isRootGauntletPassed(profileId, courseId, root.id) : false;
+   const passedDate = passed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
+   const points = profileId ? getGauntletRootPoints(profileId, courseId, root.id, root.branches.length) : 0;
+   const rootMax = getRootGauntletMaxPoints(root);
+   const perfected = points === rootMax;
 
   let tileClass = 'border-zinc-800 bg-zinc-900/50 cursor-default';
   let statusEl = null;
