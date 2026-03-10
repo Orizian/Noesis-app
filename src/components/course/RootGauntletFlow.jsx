@@ -182,7 +182,7 @@ function GradingRow({ result, qMeta, index }) {
 }
 
 // ── Main RootGauntletFlow ─────────────────────────────────────────────────────
-export default function RootGauntletFlow({ root, profileId, onComplete, onCancel }) {
+export default function RootGauntletFlow({ root, profileId, courseId, onComplete, onCancel }) {
   const { branchRubrics } = useCourse();
   const [phase, setPhase] = useState('caution'); // caution | run | evaluating | grading | summary-legacy
   const [qIdx, setQIdx] = useState(0);
