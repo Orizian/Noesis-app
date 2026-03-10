@@ -182,7 +182,7 @@ function GradingRow({ result, qMeta, index }) {
 }
 
 // ── Main RootGauntletFlow ─────────────────────────────────────────────────────
-export default function RootGauntletFlow({ root, profileId, courseId, onComplete, onCancel }) {
+export default function RootGauntletFlow({ root, profileId, onComplete, onCancel }) {
   const { branchRubrics } = useCourse();
   const [phase, setPhase] = useState('caution'); // caution | run | evaluating | grading | summary-legacy
   const [qIdx, setQIdx] = useState(0);
@@ -212,12 +212,12 @@ export default function RootGauntletFlow({ root, profileId, courseId, onComplete
       setPhase('evaluating');
       const evalResults = await batchEvaluateGauntlet(root, newAnswers, branchRubrics);
       // Save to storage
-      if (profileId && courseId) {
+      if (profileId) {
         const bulk = {};
         evalResults.forEach((r, i) => { bulk[GAUNTLET_QUESTIONS[i].key] = r.score; });
-        setGauntletCriteriaBulk(profileId, courseId, root.id, bulk);
+        setGauntletCriteriaBulk(profileId, root.id, bulk);
         const allPassed = evalResults.every(r => r.passed);
-        if (allPassed) setGauntletPassedDate(profileId, courseId, root.id, Date.now());
+        if (allPassed) setGauntletPassedDate(profileId, root.id, Date.now());
       }
       setResults(evalResults);
       setPhase('grading');
@@ -314,7 +314,7 @@ export default function RootGauntletFlow({ root, profileId, courseId, onComplete
     const totalScore = results.reduce((s, r) => s + (r.score || 0), 0);
     const allPassed = results.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
-    const prevBest = (profileId && courseId) ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
+    const prevBest = profileId ? getGauntletRootPoints(profileId, root.id) : 0;
     const personalBest = Math.max(prevBest, totalScore);
 
     return (

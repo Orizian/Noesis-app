@@ -144,10 +144,10 @@ function getVocabBarColor(score) {
   return 'bg-violet-500';
 }
 
-// Vocabulary bar — score = count of Excellent tiers, max = courseMaxVocabScore (passed as prop)
-export function VocabBar({ excellentScore, courseMaxVocabScore }) {
+// Vocabulary bar — score = count of Excellent tiers, max = rootCount * 10
+export function VocabBar({ excellentScore, rootCount }) {
   const score = excellentScore || 0;
-  const max = courseMaxVocabScore || 0;
+  const max = rootCount * 10;
   return (
     <ThinBar
       value={score}

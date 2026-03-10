@@ -6,6 +6,7 @@ import QuestionSelector from '../components/course/QuestionSelector';
 import ChatInterface from '../components/course/ChatInterface';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
 import FlashcardDictionary from '../components/course/FlashcardDictionary';
+// RootGauntlet removed — Gauntlet accessible from Course Overview
 import CompetencyMeter from '../components/course/CompetencyMeter';
 import DifficultyBars from '../components/course/DifficultyBars';
 import { RootDetailBars } from '../components/course/MasteryBars';
@@ -30,33 +31,36 @@ const statusConfig = {
   mastered:     { label: 'Mastered',     className: 'bg-violet-950/50 text-violet-300 border-violet-800/50' },
 };
 
+// Ring removed — replaced by MasteryBars
+
 export default function RootDetail() {
-  const { roots, meta } = useCourse();
-  const courseId = meta?.id;
+  const { roots } = useCourse();
   const urlParams = new URLSearchParams(window.location.search);
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = roots.find(r => r.id === rootId) || roots[0];
 
-  const [activeMode, setActiveMode] = useState(null);
+  const [activeMode, setActiveMode] = useState(null); // null = no mode selected yet
   const [selectedQuestion, setSelectedQuestion] = useState('root');
   const [competencyStage, setCompetencyStage] = useState(1);
-  const [dictKey, setDictKey] = useState(0);
-  const [dictFocusedTerm, setDictFocusedTerm] = useState(null);
+  const [dictKey, setDictKey] = useState(0); // force re-render of dictionary on term encountered
+  const [dictFocusedTerm, setDictFocusedTerm] = useState(null); // for "Learn in Teach Me"
   const [dictFocusedFlashcardIndex, setDictFocusedFlashcardIndex] = useState(null);
 
   const { activeProfileId, getRootProgress, setRootProgress, refresh } = useProfile();
 
   const progress = getRootProgress(rootId);
 
-  const qc = (activeProfileId && courseId) ? getQuestionCriteria(activeProfileId, courseId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  // Criteria-based data
+  const qc = activeProfileId ? getQuestionCriteria(activeProfileId, rootId) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
-  const gauntletPoints = (activeProfileId && courseId) ? getGauntletRootPoints(activeProfileId, courseId, rootId) : 0;
-  const perfected = (activeProfileId && courseId) ? isRootPerfected(activeProfileId, courseId, rootId) : false;
+  const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, rootId) : 0;
+  const perfected = activeProfileId ? isRootPerfected(activeProfileId, rootId) : false;
   const status = deriveRootStatus(qc);
   const cfg = perfected
     ? { label: 'Perfected', className: 'bg-violet-950/50 text-violet-300 border-violet-700' }
     : (statusConfig[status] || statusConfig.not_started);
 
+  // Determine initial competency stage based on derived status
   useEffect(() => {
     if (status === 'complete' || status === 'mastered') {
       setCompetencyStage(4);
@@ -65,16 +69,17 @@ export default function RootDetail() {
     }
   }, [rootId]);
 
-  const openedModes = (activeProfileId && courseId) ? getOpenedModes(activeProfileId, courseId, rootId) : [];
+  // Mode open tracking for practice dot
+  const openedModes = activeProfileId ? getOpenedModes(activeProfileId, rootId) : [];
   const hasOpenedTeach = openedModes.includes('teach');
   const hasOpenedPractice = openedModes.includes('practice');
   const showPracticeDot = hasOpenedTeach && !hasOpenedPractice;
 
   const handleLearnInTeachMe = (term, termIndex) => {
     setDictFocusedTerm(term);
-    setDictFocusedFlashcardIndex(null);
+    setDictFocusedFlashcardIndex(null); // don't auto-open flashcard
     setActiveMode('teach');
-    if (activeProfileId && courseId) recordModeOpened(activeProfileId, courseId, rootId, 'teach');
+    if (activeProfileId) recordModeOpened(activeProfileId, rootId, 'teach');
     if (activeProfileId && !progress) {
       setRootProgress(rootId, {
         status: 'in_progress',
@@ -85,15 +90,18 @@ export default function RootDetail() {
         startedAt: Date.now(),
       });
     }
+    // Scroll to top of chat
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleModeChange = (newMode) => {
+    // Switching mode manually clears dict focus
     setDictFocusedTerm(null);
     setActiveMode(newMode);
-    if (activeProfileId && courseId) {
-      recordModeOpened(activeProfileId, courseId, rootId, newMode);
+    if (activeProfileId) {
+      recordModeOpened(activeProfileId, rootId, newMode);
     }
+    // Mark in_progress when teach mode first opened
     if (newMode === 'teach' && activeProfileId && !progress) {
       setRootProgress(rootId, {
         status: 'in_progress',
@@ -109,6 +117,8 @@ export default function RootDetail() {
   };
 
   const handlePassColdAttempt = (questionType, earnedCount) => {
+    // Criteria are already stored by ChatInterface before calling this.
+    // Here we just keep the legacy progress store in sync (for timestamps etc.)
     if (!activeProfileId) return;
     const current = progress || { startedAt: Date.now() };
     const updates = { ...current };
@@ -134,6 +144,7 @@ export default function RootDetail() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
             to={createPageUrl('CourseOverview')}
@@ -145,6 +156,7 @@ export default function RootDetail() {
           <ProfileDropdown />
         </div>
 
+        {/* Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div className="min-w-0">
@@ -159,6 +171,7 @@ export default function RootDetail() {
             </div>
           </div>
 
+          {/* Timestamps */}
           {(progress?.startedAt || progress?.completedAt || progress?.masteredAt) && (
             <div className="mb-3 flex flex-wrap gap-3">
               {progress?.startedAt && (
@@ -173,6 +186,7 @@ export default function RootDetail() {
             </div>
           )}
 
+          {/* Progress bars */}
           <div className="mt-4 p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl">
             <RootDetailBars
               rootPoints={rootPoints}
@@ -183,6 +197,7 @@ export default function RootDetail() {
           </div>
         </div>
 
+        {/* Vocabulary — first thing below header */}
         <div className="mb-8">
           <FlashcardDictionary
             rootId={rootId}
@@ -194,6 +209,7 @@ export default function RootDetail() {
           />
         </div>
 
+        {/* Mode Selector */}
         <div className="mb-6">
           <ModeSelector
             activeMode={activeMode || ''}
@@ -202,16 +218,19 @@ export default function RootDetail() {
           />
         </div>
 
+        {/* Empty state — no mode selected yet */}
         {!activeMode && (
           <div className="mb-10 py-12 text-center">
             <p className="text-zinc-500 text-sm">Start with Teach Me to build your understanding of this concept.</p>
           </div>
         )}
 
+        {/* Competency meter — Teach Me only */}
         {activeMode === 'teach' && (
           <CompetencyMeter stage={competencyStage} />
         )}
 
+        {/* Question Selector (for Practice and Cold modes) */}
         {activeMode && (activeMode === 'practice' || activeMode === 'cold') && (
           <div className="mb-4">
             <label className="text-xs text-zinc-500 mb-2 block">Select question</label>
@@ -224,6 +243,7 @@ export default function RootDetail() {
           </div>
         )}
 
+        {/* Chat Area */}
         {activeMode && (
           <div className="mb-10">
             <ChatInterface
@@ -240,10 +260,12 @@ export default function RootDetail() {
           </div>
         )}
 
+        {/* Gauntlet notice */}
         <div className="mb-6">
           <p className="text-xs text-zinc-600 text-center">Gauntlet available from course overview.</p>
         </div>
 
+        {/* Question Bank */}
         <QuestionBank root={root} progress={progress} />
       </div>
     </div>

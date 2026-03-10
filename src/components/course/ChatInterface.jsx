@@ -9,8 +9,7 @@ import { incrementColdAttempt, getColdAttemptCount, addEncounteredTerm, setQuest
 
 export default function ChatInterface({ root, mode, questionType, onPassColdAttempt, onSwitchMode, onCompetencyChange, onTermEncountered, dictFocusedTerm }) {
   const { activeProfileId } = useProfile();
-  const { branchRubrics, dictionary, meta } = useCourse();
-  const courseId = meta?.id;
+  const { branchRubrics, dictionary } = useCourse();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -52,8 +51,8 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
     setColdResult(null);
     setPendingColdResult(null);
     setInput('');
-    if (activeProfileId && courseId && mode === 'cold') {
-      const count = getColdAttemptCount(activeProfileId, courseId, root.id, questionType);
+    if (activeProfileId && mode === 'cold') {
+      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
   }, [root.id, mode, questionType, dictFocusedTerm?.term]);
@@ -238,8 +237,8 @@ Rules:
       onCompetencyChange(parseInt(competencyMatch[1]));
     }
     const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
-    if (termMatches.length > 0 && activeProfileId && courseId) {
-      termMatches.forEach(m => addEncounteredTerm(activeProfileId, courseId, root.id, m[1].trim()));
+    if (termMatches.length > 0 && activeProfileId) {
+      termMatches.forEach(m => addEncounteredTerm(activeProfileId, root.id, m[1].trim()));
     }
     const cleanResponse = response
       .replace(/\[COMPETENCY:[1-5]\]/g, '')
@@ -292,8 +291,8 @@ Rules:
     // Cold attempt: switch to evaluating phase
     if (mode === 'cold' && coldPhase === 'input') {
       // Increment attempt counter
-      const newCount = (activeProfileId && courseId)
-        ? incrementColdAttempt(activeProfileId, courseId, root.id, questionType)
+      const newCount = activeProfileId
+        ? incrementColdAttempt(activeProfileId, root.id, questionType)
         : coldAttemptNum;
       setColdAttemptNum(newCount);
       setColdPhase('evaluating');
@@ -324,10 +323,10 @@ Rules:
       const criteriaMatches = [...response.matchAll(/\[CRITERIA:(met|unmet)\]/gi)];
       const metCount = criteriaMatches.filter(m => m[1].toLowerCase() === 'met').length;
       const earnedCount = Math.min(metCount, totalCrit);
-      if (activeProfileId && courseId) {
-        setQuestionCriteria(activeProfileId, courseId, root.id, questionType, earnedCount);
+      if (activeProfileId) {
+        setQuestionCriteria(activeProfileId, root.id, questionType, earnedCount);
         const tier = getQualityTier(earnedCount, isRootQ);
-        setBestTier(activeProfileId, courseId, root.id, questionType, tier);
+        setBestTier(activeProfileId, root.id, questionType, tier);
       }
       if (response.includes('[PASS]')) {
         onPassColdAttempt(questionType, earnedCount);
@@ -341,10 +340,10 @@ Rules:
         }
         // Parse term signals
         const termMatches = [...response.matchAll(/\[TERM:([^\]]+)\]/g)];
-        if (termMatches.length > 0 && activeProfileId && courseId) {
+        if (termMatches.length > 0 && activeProfileId) {
           termMatches.forEach(m => {
             const term = m[1].trim();
-            addEncounteredTerm(activeProfileId, courseId, root.id, term);
+            addEncounteredTerm(activeProfileId, root.id, term);
             if (onTermEncountered) onTermEncountered(term);
           });
         }
@@ -379,8 +378,8 @@ Rules:
       role: 'assistant',
       content: `**Cold Attempt — ${getQuestionLabel()}** (Attempt ${coldAttemptNum + 1})\n\n> ${getQuestion()}\n\nTry again. Answer from memory — no assistance until you submit.`
     }]);
-    if (activeProfileId && courseId) {
-      const count = getColdAttemptCount(activeProfileId, courseId, root.id, questionType);
+    if (activeProfileId) {
+      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
   };

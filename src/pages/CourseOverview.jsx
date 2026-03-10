@@ -10,25 +10,24 @@ import { GlobalMasteryBar, GlobalGauntletBar, VocabBar } from '../components/cou
 import { BookOpen } from 'lucide-react';
 
 function ProgressSection({ profileId }) {
-  const { roots, courseMaxVocabScore, meta } = useCourse();
-  const courseId = meta?.id;
+  const { roots } = useCourse();
   let totalPoints = 0;
   let completeCount = 0, masteredCount = 0, perfectedCount = 0;
 
   roots.forEach(r => {
-    const qc = (profileId && courseId) ? getQuestionCriteria(profileId, courseId, r.id) : {};
+    const qc = profileId ? getQuestionCriteria(profileId, r.id) : {};
     const rPts = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
     totalPoints += rPts;
     const status = deriveRootStatus(qc);
     if (status === 'mastered') masteredCount++;
     else if (status === 'complete') completeCount++;
-    if (profileId && courseId && isRootPerfected(profileId, courseId, r.id)) perfectedCount++;
+    if (profileId && isRootPerfected(profileId, r.id)) perfectedCount++;
   });
 
-  const gauntletTotal = (profileId && courseId) ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;
+  const gauntletTotal = profileId ? getTotalGauntletPoints(profileId, roots.length) : 0;
   const anyGauntlet = gauntletTotal > 0;
 
-  const vocabScore = (profileId && courseId) ? getTotalVocabScore(profileId, courseId) : 0;
+  const vocabScore = profileId ? getTotalVocabScore(profileId) : 0;
 
   return (
     <div className="mb-10 space-y-3">
@@ -42,13 +41,13 @@ function ProgressSection({ profileId }) {
       {anyGauntlet && (
         <GlobalGauntletBar totalPoints={gauntletTotal} rootCount={roots.length} />
       )}
-      <VocabBar excellentScore={vocabScore} courseMaxVocabScore={courseMaxVocabScore} />
+      <VocabBar excellentScore={vocabScore} rootCount={roots.length} />
     </div>
   );
 }
 
 export default function CourseOverview() {
-  const { roots, dictionary, meta } = useCourse();
+  const { roots, dictionary } = useCourse();
   const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
@@ -121,7 +120,6 @@ export default function CourseOverview() {
       {showDevTools && (
         <DevToolsModal
           profileId={activeProfileId}
-          courseId={meta?.id}
           onClose={() => setShowDevTools(false)}
           onChanged={() => { refresh(); }}
           roots={roots}

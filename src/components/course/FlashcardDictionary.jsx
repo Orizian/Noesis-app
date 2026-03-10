@@ -118,7 +118,7 @@ function RecommendedTag() {
 }
 
 // ── Shared evaluation logic ───────────────────────────────────────────────────
-async function runEvaluation(term, answer, profileId, courseId, rootId) {
+async function runEvaluation(term, answer, profileId, rootId) {
   const minDelay = new Promise(res => setTimeout(res, 3000));
   const [resp] = await Promise.all([
     base44.integrations.Core.InvokeLLM({
@@ -135,7 +135,7 @@ async function runEvaluation(term, answer, profileId, courseId, rootId) {
     minDelay,
   ]);
   const tier = ['attempted','pass','great','excellent'].includes(resp.tier) ? resp.tier : 'attempted';
-  if (profileId && courseId) setFlashcardTier(profileId, courseId, rootId, term.term, tier);
+  if (profileId) setFlashcardTier(profileId, rootId, term.term, tier);
   return { tier, feedback: resp.feedback || '', excellent_standard: resp.excellent_standard || '' };
 }
 

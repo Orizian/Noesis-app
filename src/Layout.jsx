@@ -1,21 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
-import { CourseProvider, useCourse } from './components/course/CourseContext';
+import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
-import { runStorageMigrationIfNeeded } from './components/profiles/profileStorage';
-
-// Run once on app load — migrates old un-namespaced data to courseId-scoped format
-runStorageMigrationIfNeeded();
-
-// Bridges the active courseId from CourseContext into ProfileContext
-function CourseBridge() {
-  const { meta } = useCourse();
-  const { setActiveCourseId } = useProfile();
-  useEffect(() => {
-    if (meta?.id) setActiveCourseId(meta.id);
-  }, [meta?.id]);
-  return null;
-}
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
@@ -31,7 +17,6 @@ export default function Layout({ children, currentPageName }) {
   return (
     <CourseProvider>
       <ProfileProvider>
-        <CourseBridge />
         <div className="min-h-screen bg-zinc-950">
           <style>{`
             body {

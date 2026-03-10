@@ -236,13 +236,12 @@ function AbsoluteProgressBar({ rootIdx, qIdx, rootCount }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AbsoluteGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
-  const { roots, branchRubrics, meta } = useCourse();
-  const courseId = meta?.id;
+  const { roots, branchRubrics } = useCourse();
   const navigate = useNavigate();
 
-  const conquered = (activeProfileId && courseId) ? isAbsoluteGauntletConquered(activeProfileId, courseId) : false;
-  const eligible = (activeProfileId && courseId) ? isAllGauntletsPassed(activeProfileId, courseId, roots.length) : false;
-  const saved = (activeProfileId && courseId) ? getAbsoluteGauntlet(activeProfileId, courseId) : null;
+  const conquered = activeProfileId ? isAbsoluteGauntletConquered(activeProfileId) : false;
+  const eligible = activeProfileId ? isAllGauntletsPassed(activeProfileId, roots.length) : false;
+  const saved = activeProfileId ? getAbsoluteGauntlet(activeProfileId) : null;
   const hasSession = saved?.inProgress && saved?.answers;
 
   // Session state
@@ -312,13 +311,13 @@ export default function AbsoluteGauntletPage() {
     const newAnswers = Array(roots.length * 4).fill('');
     setAllAnswers(newAnswers);
     setRootIdx(0); setQIdx(0); setCurrentAnswer('');
-    if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
+    if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
     setPhase('run');
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
   const saveProgress = () => {
-    if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx, answers: allAnswers });
+    if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx, answers: allAnswers });
   };
 
   const handleSubmitQ = async () => {
@@ -336,14 +335,14 @@ export default function AbsoluteGauntletPage() {
       const newQ = qIdx + 1;
       setQIdx(newQ);
       setCurrentAnswer('');
-      if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: newQ, answers: newAnswers });
+      if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: newQ, answers: newAnswers });
       setTimeout(() => textareaRef.current?.focus(), 50);
     } else {
       // End of this root
       if (rootIdx < roots.length - 1) {
         setPhase('root_transition');
         setCurrentAnswer('');
-        if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
+        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
       } else {
         // All 32 done — batch evaluate
         setPhase('evaluating');
@@ -355,18 +354,18 @@ export default function AbsoluteGauntletPage() {
         });
         const results = await batchEvaluateAll(allQ, branchRubrics);
         // Save to storage
-        if (activeProfileId && courseId) {
+        if (activeProfileId) {
           roots.forEach((r, ri) => {
             const bulk = {};
             GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
-            setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
+            setGauntletCriteriaBulk(activeProfileId, r.id, bulk);
           });
           const allPassed = results.every(r => r.passed);
           if (allPassed) {
             const ts = Date.now();
-            setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
+            setAbsoluteGauntletSession(activeProfileId, { conqueredAt: ts, inProgress: false });
           } else {
-            setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
+            setAbsoluteGauntletSession(activeProfileId, { inProgress: false });
           }
           refresh();
         }
@@ -382,7 +381,7 @@ export default function AbsoluteGauntletPage() {
     setQIdx(0);
     setCurrentAnswer('');
     setPhase('run');
-    if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx: newRootIdx, qIdx: 0, answers: allAnswers });
+    if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx: newRootIdx, qIdx: 0, answers: allAnswers });
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
@@ -524,7 +523,7 @@ export default function AbsoluteGauntletPage() {
     const totalScore = finalResults.reduce((s, r) => s + (r.score || 0), 0);
     const allPassed = finalResults.every(r => r.passed);
     const dateStr = format(new Date(), 'MMM d, yyyy');
-    const prevBest = (activeProfileId && courseId) ? getTotalGauntletPoints(activeProfileId, courseId, roots.length) : 0;
+    const prevBest = activeProfileId ? getTotalGauntletPoints(activeProfileId, roots.length) : 0;
     const personalBest = Math.max(prevBest, totalScore);
 
     return (

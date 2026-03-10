@@ -12,7 +12,6 @@ import {
   getAbsoluteGauntlet,
   getGauntletRootPoints,
 } from '../profiles/profileStorage';
-import { useEffect } from 'react';
 import { Star, Trophy, Swords } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -24,11 +23,11 @@ function getBarColorDynamic(pts, max) {
   return 'bg-violet-400';
 }
 
-function GauntletTile({ root, profileId, courseId }) {
-  const eligible = (profileId && courseId) ? isGauntletEligible(profileId, courseId, root.id) : false;
-  const passed = (profileId && courseId) ? isRootGauntletPassed(profileId, courseId, root.id) : false;
-  const passedDate = passed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
-  const points = (profileId && courseId) ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
+function GauntletTile({ root, profileId }) {
+  const eligible = profileId ? isGauntletEligible(profileId, root.id) : false;
+  const passed = profileId ? isRootGauntletPassed(profileId, root.id) : false;
+  const passedDate = passed ? getGauntletPassedDate(profileId, root.id) : null;
+  const points = profileId ? getGauntletRootPoints(profileId, root.id) : 0;
   // "Perfected" = 13/13
   const perfected = points === 13;
 
@@ -71,15 +70,15 @@ function GauntletTile({ root, profileId, courseId }) {
   return content;
 }
 
-function AbsoluteGauntletButton({ profileId, courseId, roots }) {
+function AbsoluteGauntletButton({ profileId, roots }) {
   const navigate = useNavigate();
-  const eligible = (profileId && courseId) ? isAllGauntletsPassed(profileId, courseId, roots.length) : false;
-  const conquered = (profileId && courseId) ? isAbsoluteGauntletConquered(profileId, courseId) : false;
-  const saved = (profileId && courseId) ? getAbsoluteGauntlet(profileId, courseId) : null;
+  const eligible = profileId ? isAllGauntletsPassed(profileId, roots.length) : false;
+  const conquered = profileId ? isAbsoluteGauntletConquered(profileId) : false;
+  const saved = profileId ? getAbsoluteGauntlet(profileId) : null;
   const inProgress = !conquered && saved?.inProgress;
 
-  const passedCount = (profileId && courseId)
-    ? roots.filter(r => isRootGauntletPassed(profileId, courseId, r.id)).length
+  const passedCount = profileId
+    ? roots.filter(r => isRootGauntletPassed(profileId, r.id)).length
     : 0;
 
   if (conquered) {
@@ -128,9 +127,8 @@ function AbsoluteGauntletButton({ profileId, courseId, roots }) {
 }
 
 export default function GauntletBoard({ profileId }) {
-  const { roots, meta } = useCourse();
-  const courseId = meta?.id;
-  const totalPoints = (profileId && courseId) ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;
+  const { roots } = useCourse();
+  const totalPoints = profileId ? getTotalGauntletPoints(profileId, roots.length) : 0;
 
   return (
     <div className="mt-10 border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">
@@ -147,7 +145,7 @@ export default function GauntletBoard({ profileId }) {
         {/* root grid */}
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
           {roots.map(root => (
-            <GauntletTile key={root.id} root={root} profileId={profileId} courseId={courseId} />
+            <GauntletTile key={root.id} root={root} profileId={profileId} />
           ))}
         </div>
 
