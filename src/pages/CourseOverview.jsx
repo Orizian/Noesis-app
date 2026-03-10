@@ -36,6 +36,7 @@ function ProgressSection({ profileId }) {
         completeCount={completeCount}
         masteredCount={masteredCount}
         perfectedCount={perfectedCount}
+        rootCount={roots.length}
       />
       {anyGauntlet && (
         <GlobalGauntletBar totalPoints={gauntletTotal} rootCount={roots.length} />
