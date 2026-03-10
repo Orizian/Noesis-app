@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useCourse } from './CourseContext';
+import React, { useState, useRef, useEffect } from 'react';
 import MessageBubble from './MessageBubble';
 import ColdAttemptPanel from './ColdAttemptPanel';
 import { useProfile } from '../profiles/ProfileContext';

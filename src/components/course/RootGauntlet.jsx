@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 // This file is kept for the evaluateAnswer export used by other components
 import { CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { ROOTS, BRANCH_RUBRICS } from '../courseData';
+import { useCourse } from './CourseContext';
 import {
   getQualityTier,
   setGauntletCriteriaBulk,

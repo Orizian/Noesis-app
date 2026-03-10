@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { ROOTS, BRANCH_RUBRICS } from '../courseData';
+import { useCourse } from './CourseContext';
 import {
   setGauntletCriteriaBulk,
   setGauntletPassedDate,
