@@ -128,25 +128,24 @@ export function VocabBar({ excellentScore, courseMaxVocabScore }) {
 }
 
 // Per-root card bars (compact)
-export function RootCardBars({ rootPoints, gauntletPoints, hasPerfected }) {
+export function RootCardBars({ root, rootPoints, gauntletPoints, hasPerfected }) {
+  const rootMax = getRootGauntletMaxPoints(root);
   const gPts = gauntletPoints || 0;
   return (
     <div className="space-y-1.5 mt-2">
       <ThinBar
         value={rootPoints}
-        max={13}
-        ticks={[2, 4]}
-        rightLabel={`${rootPoints} / 13`}
+        max={rootMax}
+        rightLabel={`${rootPoints} / ${rootMax}`}
         height="h-1.5"
       />
       {(gPts > 0 || hasPerfected) && (
         <ThinBar
           value={gPts}
-          max={13}
-          ticks={[4, 9]}
-          color={getGauntletBarColor(gPts, 13)}
+          max={rootMax}
+          color={getGauntletBarColor(gPts, rootMax)}
           label="G"
-          rightLabel={`${gPts} / 13`}
+          rightLabel={`${gPts} / ${rootMax}`}
           height="h-1.5"
         />
       )}
