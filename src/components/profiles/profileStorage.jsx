@@ -114,11 +114,11 @@ export function resetProfileProgress(profileId) {
   saveProfiles(profiles);
 }
 
-export function getProfileCompletionPercent(profileId) {
+export function getProfileCompletionPercent(profileId, rootCount) {
   const profile = getProfileById(profileId);
   if (!profile?.progress) return 0;
   const complete = Object.values(profile.progress).filter(p => p.status === 'complete' || p.status === 'mastered').length;
-  return Math.round((complete / ROOT_COUNT) * 100);
+  return Math.round((complete / rootCount) * 100);
 }
 
 export function markRootComplete(profileId, rootId) {
@@ -240,9 +240,9 @@ export function getRootPoints(profileId, rootId) {
   return (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
 }
 
-export function getTotalPoints(profileId) {
+export function getTotalPoints(profileId, rootCount) {
   let total = 0;
-  for (let i = 1; i <= ROOT_COUNT; i++) total += getRootPoints(profileId, i);
+  for (let i = 1; i <= rootCount; i++) total += getRootPoints(profileId, i);
   return total;
 }
 
@@ -433,9 +433,9 @@ export function getGauntletRootPoints(profileId, rootId) {
   return (gc.root || 0) + (gc.branch_1 || 0) + (gc.branch_2 || 0) + (gc.branch_3 || 0);
 }
 
-export function getTotalGauntletPoints(profileId) {
+export function getTotalGauntletPoints(profileId, rootCount) {
   let total = 0;
-  for (let i = 1; i <= ROOT_COUNT; i++) total += getGauntletRootPoints(profileId, i);
+  for (let i = 1; i <= rootCount; i++) total += getGauntletRootPoints(profileId, i);
   return total;
 }
 
@@ -483,8 +483,8 @@ export function isRootGauntletPassed(profileId, rootId) {
   return !!getGauntletPassedDate(profileId, rootId);
 }
 
-export function isAllGauntletsPassed(profileId) {
-  for (let i = 1; i <= ROOT_COUNT; i++) {
+export function isAllGauntletsPassed(profileId, rootCount) {
+  for (let i = 1; i <= rootCount; i++) {
     if (!isRootGauntletPassed(profileId, i)) return false;
   }
   return true;
@@ -524,7 +524,7 @@ export function isAbsoluteGauntletConquered(profileId) {
 // ─── End Absolute Gauntlet storage ────────────────────────────────────────────
 
 // Stats helpers
-export function getProfileStats(profileId) {
+export function getProfileStats(profileId, rootCount) {
   const profile = getProfileById(profileId);
   if (!profile) return null;
   const progress = profile.progress || {};
