@@ -650,44 +650,46 @@ export default function AbsoluteGauntletPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  setEvalError(null);
-                  setPhase('evaluating');
-                  // Re-trigger evaluation
-                  (async () => {
-                    try {
-                      const allQ = [];
-                      roots.forEach((r, ri) => {
-                        GAUNTLET_QUESTIONS.forEach((q, qi) => {
-                          allQ.push({ root: r, qMeta: q, answer: allAnswers[ri * 4 + qi], rootIndex: ri });
-                        });
-                      });
-                      const results = await batchEvaluateAll(allQ, branchRubrics);
-                      console.log('Raw evaluation response (retry):', JSON.stringify(results));
-                      if (activeProfileId) {
-                        roots.forEach((r, ri) => {
-                          const bulk = {};
-                          GAUNTLET_QUESTIONS.forEach((q, qi) => { bulk[q.key] = results[ri * 4 + qi]?.score || 0; });
-                          setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
-                        });
-                        const allPassed = results.every(r => r.passed);
-                        if (allPassed) {
-                          const ts = Date.now();
-                          setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: ts, inProgress: false });
-                        } else {
-                          setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
+                    setEvalError(null);
+                    setEvalProgress(0);
+                    setPhase('evaluating');
+                    // Re-trigger evaluation with sequential per-root loop
+                    (async () => {
+                      try {
+                        const allResults = [];
+                        for (let ri = 0; ri < roots.length; ri++) {
+                          const rootAnswers = allAnswers.slice(ri * 4, ri * 4 + 4);
+                          const rootResults = await evaluateRoot(roots[ri], rootAnswers, branchRubrics);
+                          console.log(`Root ${ri + 1} evaluation (retry):`, JSON.stringify(rootResults));
+                          allResults.push(...rootResults);
+                          setEvalProgress(ri + 1);
                         }
-                        clearGauntletCheckpoint(activeProfileId, courseId);
-                        refresh();
+                        if (activeProfileId) {
+                          roots.forEach((r, ri) => {
+                            const bulk = {};
+                            GAUNTLET_QUESTIONS.forEach((q, qi) => {
+                              bulk[q.key] = allResults[ri * GAUNTLET_QUESTIONS.length + qi]?.score || 0;
+                            });
+                            setGauntletCriteriaBulk(activeProfileId, courseId, r.id, bulk);
+                          });
+                          const allPassed = allResults.every(r => r.passed);
+                          if (allPassed) {
+                            setAbsoluteGauntletSession(activeProfileId, courseId, { conqueredAt: Date.now(), inProgress: false });
+                          } else {
+                            setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: false });
+                          }
+                          clearGauntletCheckpoint(activeProfileId, courseId);
+                          refresh();
+                        }
+                        setFinalResults(allResults);
+                        setPhase('grading');
+                      } catch (retryErr) {
+                        console.error('Gauntlet evaluation retry failed:', retryErr);
+                        setEvalError(retryErr.message || 'Unknown error');
+                        setPhase('eval_error');
                       }
-                      setFinalResults(results);
-                      setPhase('grading');
-                    } catch (retryErr) {
-                      console.error('Gauntlet evaluation retry failed:', retryErr);
-                      setEvalError(retryErr.message || 'Unknown error');
-                      setPhase('eval_error');
-                    }
-                  })();
-                }}
+                    })();
+                  }}
                 className="flex-1 py-3 rounded-xl bg-red-800/70 hover:bg-red-700/80 text-white font-bold text-sm transition-colors"
               >
                 Retry
