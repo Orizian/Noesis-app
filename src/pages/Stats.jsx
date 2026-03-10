@@ -102,7 +102,7 @@ export default function Stats() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
           <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">All Roots</p>
           <div className="grid grid-cols-4 gap-3">
-            {ROOTS.map(root => {
+            {roots.map(root => {
               const p = stats.progress?.[root.id];
               const status = p?.status || 'not_started';
               const Icon = STATUS_ICONS[status];
