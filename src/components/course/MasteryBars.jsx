@@ -87,8 +87,8 @@ export function GlobalMasteryBar({ roots, totalPoints, completeCount, masteredCo
 }
 
 // Global gauntlet bar — only shown if any gauntlet attempted
-export function GlobalGauntletBar({ totalPoints, rootCount }) {
-  const max = rootCount * 13;
+export function GlobalGauntletBar({ roots, totalPoints }) {
+  const max = getCourseGauntletMaxPoints(roots);
   const color = getGauntletBarColor(totalPoints, max);
   return (
     <ThinBar
