@@ -562,7 +562,7 @@ export default function AbsoluteGauntletPage() {
 
           {/* Root sections */}
           <div className="space-y-2">
-            {ROOTS.map((r, ri) => (
+            {roots.map((r, ri) => (
               <RootSection
                 key={r.id}
                 root={r}
