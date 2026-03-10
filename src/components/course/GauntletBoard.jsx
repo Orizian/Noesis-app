@@ -112,12 +112,12 @@ function AbsoluteGauntletButton({ profileId, roots }) {
       <p className="text-red-200 font-bold text-xl">
         {inProgress ? `Resume — Root ${Object.keys(saved?.completedRoots || {}).length + 1} of 8` : 'The Absolute Gauntlet'}
       </p>
-      <p className="text-zinc-500 text-sm mt-1">All 8 roots. 32 questions. One sitting.</p>
+      <p className="text-zinc-500 text-sm mt-1">All {roots.length} roots. {roots.length * 4} questions. One sitting.</p>
       {inProgress && (
         <div className="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-red-700 transition-all"
-            style={{ width: `${(Object.keys(saved?.completedRoots || {}).length / 8) * 100}%` }}
+            style={{ width: `${(Object.keys(saved?.completedRoots || {}).length / roots.length) * 100}%` }}
           />
         </div>
       )}
