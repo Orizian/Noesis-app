@@ -52,8 +52,8 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
     setColdResult(null);
     setPendingColdResult(null);
     setInput('');
-    if (activeProfileId && mode === 'cold') {
-      const count = getColdAttemptCount(activeProfileId, root.id, questionType);
+    if (activeProfileId && courseId && mode === 'cold') {
+      const count = getColdAttemptCount(activeProfileId, courseId, root.id, questionType);
       setColdAttemptNum(count + 1);
     }
   }, [root.id, mode, questionType, dictFocusedTerm?.term]);
