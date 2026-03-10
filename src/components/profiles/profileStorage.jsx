@@ -551,7 +551,7 @@ export function getProfileStats(profileId) {
   const complete = allProgress.filter(p => p.status === 'complete').length;
   const mastered = allProgress.filter(p => p.status === 'mastered').length;
   const inProgress = allProgress.filter(p => p.status === 'in_progress').length;
-  const notStarted = 8 - complete - mastered - inProgress;
+  const notStarted = ROOT_COUNT - complete - mastered - inProgress;
 
   const firstSession = profile.createdAt ? Math.floor((Date.now() - profile.createdAt) / (1000 * 60 * 60 * 24)) : 0;
 
@@ -560,7 +560,7 @@ export function getProfileStats(profileId) {
   let strongestRootId = null;
   let bestRank = -1;
   let bestDate = Infinity;
-  for (let i = 1; i <= 8; i++) {
+  for (let i = 1; i <= ROOT_COUNT; i++) {
     const p = progress[i];
     if (!p) continue;
     const rank = statusRank[p.status] || 0;
