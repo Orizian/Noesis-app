@@ -15,19 +15,17 @@ function buildCourseHelpers(course) {
   const dictionary = course.dictionary || {};
   const rootCount = roots.length;
 
-  // Points per root: root question = 4 criteria, each branch = 3 criteria (fixed)
-  // Total per root = 4 + 3 + 3 + 3 = 13
-  const ROOT_QUESTION_CRITERIA = 4;
-  const BRANCH_CRITERIA = 3;
-  const rootMaxPoints = ROOT_QUESTION_CRITERIA + BRANCH_CRITERIA * 3;
+  // Points per root: root question = 4 criteria (fixed), each branch = 3 criteria (fixed)
+  // Total per root is variable — depends on root.branches.length
+  const getRootMaxPoints = (root) => 4 + root.branches.length * 3;
 
-  // Course-wide totals
-  const courseMaxPoints = rootCount * rootMaxPoints;                 // 104 for 8 roots
-  const courseMaxGauntletPoints = courseMaxPoints;                   // same structure
+  // Course-wide totals — computed dynamically
+  const courseMaxPoints = roots.reduce((sum, r) => sum + getRootMaxPoints(r), 0);
+  const courseMaxGauntletPoints = courseMaxPoints;
   const courseMaxVocabScore = roots.reduce((sum, root) => {
     return sum + (dictionary[root.id]?.length || 0);
-  }, 0);                                                             // 80 for 10 terms × 8 roots
-  const courseQuestionCount = rootCount * 4;                        // 32 for 8 roots (root + 3 branches)
+  }, 0);
+  const courseQuestionCount = roots.reduce((sum, r) => sum + 1 + r.branches.length, 0);
 
   // Per-root helpers
   const getRootTermCount = (rootId) => (dictionary[rootId]?.length || 0);
@@ -40,15 +38,13 @@ function buildCourseHelpers(course) {
 
     // Dimension values (replaces all hardcoded numbers)
     rootCount,
-    rootMaxPoints,
     courseMaxPoints,
     courseMaxGauntletPoints,
     courseMaxVocabScore,
     courseQuestionCount,
 
-    // Fixed criteria counts (branches always 3, root always 4)
-    ROOT_QUESTION_CRITERIA,
-    BRANCH_CRITERIA,
+    // Dynamic per-root points function
+    getRootMaxPoints,
 
     // Per-root helpers
     getRootTermCount,
