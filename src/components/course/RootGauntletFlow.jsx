@@ -212,12 +212,12 @@ export default function RootGauntletFlow({ root, profileId, courseId, onComplete
       setPhase('evaluating');
       const evalResults = await batchEvaluateGauntlet(root, newAnswers, branchRubrics);
       // Save to storage
-      if (profileId) {
+      if (profileId && courseId) {
         const bulk = {};
         evalResults.forEach((r, i) => { bulk[GAUNTLET_QUESTIONS[i].key] = r.score; });
-        setGauntletCriteriaBulk(profileId, root.id, bulk);
+        setGauntletCriteriaBulk(profileId, courseId, root.id, bulk);
         const allPassed = evalResults.every(r => r.passed);
-        if (allPassed) setGauntletPassedDate(profileId, root.id, Date.now());
+        if (allPassed) setGauntletPassedDate(profileId, courseId, root.id, Date.now());
       }
       setResults(evalResults);
       setPhase('grading');
