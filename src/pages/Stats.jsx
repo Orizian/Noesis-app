@@ -3,7 +3,7 @@ import { ArrowLeft, Star, CheckCircle2, Zap, Circle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getProfileStats } from '../components/profiles/profileStorage';
+import { getProfileStats, getTotalPoints, getTotalGauntletPoints, getTotalVocabScore, isRootPerfected } from '../components/profiles/profileStorage';
 import { useCourse } from '../components/course/CourseContext';
 
 const STATUS_COLORS = {
@@ -21,9 +21,10 @@ const STATUS_ICONS = {
 };
 
 export default function Stats() {
-  const { roots } = useCourse();
+  const { roots, courseMaxPoints, courseMaxGauntletPoints, courseMaxVocabScore, meta } = useCourse();
+  const courseId = meta.id;
   const { activeProfileId, activeProfile } = useProfile();
-  const stats = activeProfileId ? getProfileStats(activeProfileId, roots.length) : null;
+  const stats = activeProfileId ? getProfileStats(activeProfileId, courseId, roots.length) : null;
 
   if (!stats) {
     return (
@@ -38,6 +39,12 @@ export default function Stats() {
     : 0;
 
   const strongestRoot = stats.strongestRootId ? roots.find(r => r.id === stats.strongestRootId) : null;
+
+  const totalMasteryPoints = activeProfileId ? getTotalPoints(activeProfileId, courseId, roots.length) : 0;
+  const totalGauntletPoints = activeProfileId ? getTotalGauntletPoints(activeProfileId, courseId, roots.length) : 0;
+  const totalVocabScore = activeProfileId ? getTotalVocabScore(activeProfileId, courseId) : 0;
+  const perfectedCount = activeProfileId ? roots.filter(r => isRootPerfected(activeProfileId, courseId, r.id)).length : 0;
+  const overallPct = Math.round(((stats.complete + stats.mastered) / roots.length) * 100);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -56,15 +63,53 @@ export default function Stats() {
           )}
         </div>
 
+        {/* Score bars */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 space-y-4">
+          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Course Progress</p>
+          {/* Mastery */}
+          <div>
+            <div className="flex justify-between text-xs text-zinc-400 mb-1">
+              <span>Mastery Points</span>
+              <span className="font-mono text-zinc-300">{totalMasteryPoints} / {courseMaxPoints}</span>
+            </div>
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${courseMaxPoints > 0 ? Math.min((totalMasteryPoints / courseMaxPoints) * 100, 100) : 0}%` }} />
+            </div>
+          </div>
+          {/* Gauntlet */}
+          <div>
+            <div className="flex justify-between text-xs text-zinc-400 mb-1">
+              <span>Gauntlet Points</span>
+              <span className="font-mono text-zinc-300">{totalGauntletPoints} / {courseMaxGauntletPoints}</span>
+            </div>
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                style={{ width: `${courseMaxGauntletPoints > 0 ? Math.min((totalGauntletPoints / courseMaxGauntletPoints) * 100, 100) : 0}%` }} />
+            </div>
+          </div>
+          {/* Vocabulary */}
+          <div>
+            <div className="flex justify-between text-xs text-zinc-400 mb-1">
+              <span>Vocabulary (Excellent)</span>
+              <span className="font-mono text-zinc-300">{totalVocabScore} / {courseMaxVocabScore}</span>
+            </div>
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-full bg-violet-500 rounded-full transition-all duration-500"
+                style={{ width: `${courseMaxVocabScore > 0 ? Math.min((totalVocabScore / courseMaxVocabScore) * 100, 100) : 0}%` }} />
+            </div>
+          </div>
+        </div>
+
         {/* Key numbers */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-            <p className="text-3xl font-bold text-zinc-100">{stats.totalAttempts}</p>
-            <p className="text-xs text-zinc-500 mt-1">Total cold attempts</p>
+            <p className="text-3xl font-bold text-zinc-100">{overallPct}%</p>
+            <p className="text-xs text-zinc-500 mt-1">Overall completion</p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <p className="text-3xl font-bold text-zinc-100">{passRate}%</p>
-            <p className="text-xs text-zinc-500 mt-1">Overall pass rate</p>
+            <p className="text-xs text-zinc-500 mt-1">Cold attempt pass rate</p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <p className="text-3xl font-bold text-violet-400">{stats.mastered}</p>
@@ -79,8 +124,8 @@ export default function Stats() {
         {/* More stats */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Days since first session</span>
-            <span className="text-zinc-200 font-medium">{stats.firstSession}</span>
+            <span className="text-zinc-400">Roots perfected (Gauntlet)</span>
+            <span className="text-zinc-200 font-medium">{perfectedCount} / {roots.length}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-zinc-400">Roots in progress</span>
@@ -89,6 +134,14 @@ export default function Stats() {
           <div className="flex justify-between text-sm">
             <span className="text-zinc-400">Roots not started</span>
             <span className="text-zinc-200 font-medium">{stats.notStarted}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-zinc-400">Total cold attempts</span>
+            <span className="text-zinc-200 font-medium">{stats.totalAttempts}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-zinc-400">Days since first session</span>
+            <span className="text-zinc-200 font-medium">{stats.firstSession}</span>
           </div>
           {strongestRoot && (
             <div className="flex justify-between text-sm">
@@ -104,11 +157,14 @@ export default function Stats() {
           <div className="grid grid-cols-4 gap-3">
             {roots.map(root => {
               const p = stats.progress?.[root.id];
-              const status = p?.status || 'not_started';
-              const Icon = STATUS_ICONS[status];
+              const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, root.id) : false;
+              const status = perfected ? 'perfected' : (p?.status || 'not_started');
+              const colorMap = { ...STATUS_COLORS, perfected: 'bg-yellow-600' };
+              const iconMap = { ...STATUS_ICONS, perfected: Star };
+              const Icon = iconMap[status] || Circle;
               return (
                 <div key={root.id} className="flex flex-col items-center gap-1.5">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${STATUS_COLORS[status]}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colorMap[status] || STATUS_COLORS.not_started}`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-xs text-zinc-500 text-center leading-tight">Root {root.id}</p>
@@ -118,6 +174,7 @@ export default function Stats() {
           </div>
           <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-zinc-800">
             {[
+              { label: 'Perfected', color: 'bg-yellow-600' },
               { label: 'Mastered', color: 'bg-violet-500' },
               { label: 'Complete', color: 'bg-emerald-500' },
               { label: 'In Progress', color: 'bg-blue-500' },
