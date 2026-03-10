@@ -316,7 +316,7 @@ export default function AbsoluteGauntletPage() {
   const root = ROOTS[rootIdx];
 
   const startFresh = () => {
-    const newAnswers = Array(32).fill('');
+    const newAnswers = Array(totalQuestions).fill('');
     setAllAnswers(newAnswers);
     setRootIdx(0); setQIdx(0); setCurrentAnswer('');
     if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx: 0, qIdx: 0, answers: newAnswers, startedAt: Date.now() });
@@ -339,7 +339,7 @@ export default function AbsoluteGauntletPage() {
     await new Promise(r => setTimeout(r, 500));
     setSavedFlash(false);
 
-    if (qIdx < 3) {
+    if (qIdx < questionsPerRoot - 1) {
       const newQ = qIdx + 1;
       setQIdx(newQ);
       setCurrentAnswer('');
@@ -347,17 +347,17 @@ export default function AbsoluteGauntletPage() {
       setTimeout(() => textareaRef.current?.focus(), 50);
     } else {
       // End of this root
-      if (rootIdx < 7) {
+      if (rootIdx < ROOTS.length - 1) {
         setPhase('root_transition');
         setCurrentAnswer('');
-        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: 3, answers: newAnswers });
+        if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx, qIdx: questionsPerRoot - 1, answers: newAnswers });
       } else {
-        // All 32 done — batch evaluate
+        // All questions done — batch evaluate
         setPhase('evaluating');
         const allQ = [];
         ROOTS.forEach((r, ri) => {
           GAUNTLET_QUESTIONS.forEach((q, qi) => {
-            allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * 4 + qi], rootIndex: ri });
+            allQ.push({ root: r, qMeta: q, answer: newAnswers[ri * questionsPerRoot + qi], rootIndex: ri });
           });
         });
         const results = await batchEvaluateAll(allQ);
