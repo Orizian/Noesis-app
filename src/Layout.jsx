@@ -2,12 +2,22 @@ import React from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
+import CourseSelectionPage from './pages/CourseSelectionPage';
+import { createPageUrl } from '@/utils';
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
 
   if (!activeProfileId) {
     return <ProfileSelect />;
+  }
+
+  if (currentPageName === 'Home' || currentPageName === 'CourseOverview' && window.location.search === '') {
+    // Allow direct navigation to CourseOverview (e.g. from RootDetail back link)
+  }
+
+  if (!currentPageName || currentPageName === 'Home') {
+    return <CourseSelectionPage />;
   }
 
   return <>{children}</>;
