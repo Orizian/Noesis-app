@@ -5,7 +5,6 @@ import {
   createProfile,
   deleteProfile,
   updateProfile,
-  canAddProfile,
   getAccount,
 } from '../components/profiles/profileStorage';
 import { useProfile } from '../components/profiles/ProfileContext';
