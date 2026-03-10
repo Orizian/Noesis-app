@@ -118,7 +118,7 @@ function RecommendedTag() {
 }
 
 // ── Shared evaluation logic ───────────────────────────────────────────────────
-async function runEvaluation(term, answer, profileId, rootId) {
+async function runEvaluation(term, answer, profileId, courseId, rootId) {
   const minDelay = new Promise(res => setTimeout(res, 3000));
   const [resp] = await Promise.all([
     base44.integrations.Core.InvokeLLM({
@@ -135,7 +135,7 @@ async function runEvaluation(term, answer, profileId, rootId) {
     minDelay,
   ]);
   const tier = ['attempted','pass','great','excellent'].includes(resp.tier) ? resp.tier : 'attempted';
-  if (profileId) setFlashcardTier(profileId, rootId, term.term, tier);
+  if (profileId) setFlashcardTier(profileId, courseId, rootId, term.term, tier);
   return { tier, feedback: resp.feedback || '', excellent_standard: resp.excellent_standard || '' };
 }
 
@@ -154,7 +154,7 @@ function EvalLoader({ phraseIndex }) {
 }
 
 // ── Flashcard input screen ────────────────────────────────────────────────────
-function FlashcardInputScreen({ term, termIndex, totalTerms, rootId, profileId, onResult, onBack }) {
+function FlashcardInputScreen({ term, termIndex, totalTerms, rootId, courseId, profileId, onResult, onBack }) {
   const [answer, setAnswer] = useState('');
   const [evaluating, setEvaluating] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -166,7 +166,7 @@ function FlashcardInputScreen({ term, termIndex, totalTerms, rootId, profileId, 
     setPhraseIndex(0);
     let idx = 0;
     phraseTimer.current = setInterval(() => { idx = Math.min(idx + 1, 2); setPhraseIndex(idx); }, 1000);
-    const result = await runEvaluation(term, answer, profileId, rootId);
+    const result = await runEvaluation(term, answer, profileId, courseId, rootId);
     clearInterval(phraseTimer.current);
     onResult({ ...result, submittedAnswer: answer });
   };
@@ -430,6 +430,7 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
             <div className="bg-zinc-900/60">
               <FlashcardGauntlet
                 rootId={rootId}
+                courseId={courseId}
                 rootTitle={rootTitle || `Root ${rootId}`}
                 profileId={activeProfileId}
                 terms={terms}
@@ -486,6 +487,7 @@ export default function FlashcardDictionary({ rootId, rootTitle, onVocabChanged,
                   termIndex={flashcardIndex}
                   totalTerms={terms.length}
                   rootId={rootId}
+                  courseId={courseId}
                   profileId={activeProfileId}
                   onResult={handleResult}
                   onBack={handleBackToVocab}
