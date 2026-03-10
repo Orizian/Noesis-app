@@ -69,15 +69,17 @@ function GauntletTile({ root, profileId }) {
   return content;
 }
 
-function AbsoluteGauntletButton({ profileId }) {
+function AbsoluteGauntletButton({ profileId, roots }) {
   const navigate = useNavigate();
   const eligible = profileId ? isAllGauntletsPassed(profileId) : false;
   const conquered = profileId ? isAbsoluteGauntletConquered(profileId) : false;
   const saved = profileId ? getAbsoluteGauntlet(profileId) : null;
   const inProgress = !conquered && saved?.inProgress;
+  const rootCount = roots.length;
+  const totalQuestions = roots.reduce((sum, r) => sum + 1 + r.branches.length, 0);
 
   const passedCount = profileId
-    ? ROOTS.filter(r => isRootGauntletPassed(profileId, r.id)).length
+    ? roots.filter(r => isRootGauntletPassed(profileId, r.id)).length
     : 0;
 
   if (conquered) {
