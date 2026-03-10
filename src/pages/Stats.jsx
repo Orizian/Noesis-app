@@ -23,7 +23,7 @@ const STATUS_ICONS = {
 export default function Stats() {
   const { roots } = useCourse();
   const { activeProfileId, activeProfile } = useProfile();
-  const stats = activeProfileId ? getProfileStats(activeProfileId) : null;
+  const stats = activeProfileId ? getProfileStats(activeProfileId, roots.length) : null;
 
   if (!stats) {
     return (

@@ -1,11 +1,5 @@
 // Profile storage utilities — all data in localStorage
-import { ROOTS } from '../courseData/index';
-
-// Derived course dimensions — single source of truth, no hardcoded numbers
-const ROOT_COUNT = ROOTS.length;                          // 8
-const ROOT_QUESTION_CRITERIA = 4;
-const BRANCH_CRITERIA = 3;
-const ROOT_MAX_POINTS = ROOT_QUESTION_CRITERIA + BRANCH_CRITERIA * 3; // 13
+// No static course imports — rootCount is passed as a parameter where needed.
 
 const PROFILES_KEY = 'exsci_profiles';
 const ACTIVE_PROFILE_KEY = 'exsci_active_profile';
