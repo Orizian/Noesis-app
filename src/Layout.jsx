@@ -3,7 +3,6 @@ import { ProfileProvider, useProfile } from './components/profiles/ProfileContex
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
 import CourseSelectionPage from './pages/CourseSelectionPage';
-import { createPageUrl } from '@/utils';
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
@@ -12,10 +11,7 @@ function AppShell({ children, currentPageName }) {
     return <ProfileSelect />;
   }
 
-  if (currentPageName === 'Home' || currentPageName === 'CourseOverview' && window.location.search === '') {
-    // Allow direct navigation to CourseOverview (e.g. from RootDetail back link)
-  }
-
+  // After profile selection, default landing is the course selection screen
   if (!currentPageName || currentPageName === 'Home') {
     return <CourseSelectionPage />;
   }
