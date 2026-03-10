@@ -56,7 +56,9 @@ export default function CourseOverview() {
   const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
+  const [showCourseInfo, setShowCourseInfo] = useState(false);
   const tapTimer = useRef(null);
+  const navigate = useNavigate();
 
   const handleTitleTap = useCallback(() => {
     setTitleTaps(prev => {
