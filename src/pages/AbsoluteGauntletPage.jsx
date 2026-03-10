@@ -8,6 +8,9 @@ import {
   isAbsoluteGauntletConquered,
   setGauntletCriteriaBulk,
   getTotalGauntletPoints,
+  saveGauntletCheckpoint,
+  loadGauntletCheckpoint,
+  clearGauntletCheckpoint,
 } from '../components/profiles/profileStorage';
 import { CheckCircle2, XCircle, Trophy, ChevronRight, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
