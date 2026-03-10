@@ -128,8 +128,9 @@ function AbsoluteGauntletButton({ profileId, courseId, roots }) {
 }
 
 export default function GauntletBoard({ profileId }) {
-  const { roots } = useCourse();
-  const totalPoints = profileId ? getTotalGauntletPoints(profileId, roots.length) : 0;
+  const { roots, meta } = useCourse();
+  const courseId = meta?.id;
+  const totalPoints = (profileId && courseId) ? getTotalGauntletPoints(profileId, courseId, roots.length) : 0;
 
   return (
     <div className="mt-10 border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">
