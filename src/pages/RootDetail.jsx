@@ -56,10 +56,10 @@ export default function RootDetail() {
 
   // Criteria-based data
   const qc = activeProfileId ? getQuestionCriteria(activeProfileId, courseId, rootId, root.branches.length) : emptyQuestionScores(root.branches.length);
-  const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
-  const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, courseId, rootId) : 0;
-  const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, rootId) : false;
-  const status = deriveRootStatus(qc);
+  const rootPoints = buildQuestionKeys(root.branches.length).reduce((sum, k) => sum + (qc[k] || 0), 0);
+  const gauntletPoints = activeProfileId ? getGauntletRootPoints(activeProfileId, courseId, rootId, root.branches.length) : 0;
+  const perfected = activeProfileId ? isRootPerfected(activeProfileId, courseId, rootId, root.branches.length) : false;
+  const status = deriveRootStatus(qc, root.branches.length);
   const cfg = perfected
     ? { label: 'Perfected', className: 'bg-violet-950/50 text-violet-300 border-violet-700' }
     : (statusConfig[status] || statusConfig.not_started);
