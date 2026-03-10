@@ -147,7 +147,7 @@ export default function GauntletBoard({ profileId }) {
         {/* root grid */}
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
           {roots.map(root => (
-            <GauntletTile key={root.id} root={root} profileId={profileId} />
+            <GauntletTile key={root.id} root={root} profileId={profileId} courseId={courseId} />
           ))}
         </div>
 
