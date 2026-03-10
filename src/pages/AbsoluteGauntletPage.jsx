@@ -491,7 +491,7 @@ export default function AbsoluteGauntletPage() {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
         <div className="max-w-md w-full mx-auto px-4 text-center space-y-6 animate-in fade-in duration-500">
-          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of 8 Complete</p>
+          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Root {rootIdx + 1} of {roots.length} Complete</p>
           <p className="text-3xl font-bold text-zinc-100">{roots[rootIdx].title}</p>
           <p className="text-xs text-zinc-600">Continuing to next root. No scores during the run.</p>
           <button onClick={handleContinueRoot}
@@ -515,7 +515,7 @@ export default function AbsoluteGauntletPage() {
             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
           </div>
           <p className="text-zinc-300 font-medium animate-pulse">Evaluating your complete performance...</p>
-          <p className="text-xs text-zinc-600">All 32 questions. This takes a moment.</p>
+          <p className="text-xs text-zinc-600">All {roots.length * 4} questions. This takes a moment.</p>
           <p className="text-xs text-zinc-700 italic">Uses an advanced model for accuracy.</p>
         </div>
       </div>
