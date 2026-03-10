@@ -79,6 +79,13 @@ export default function CourseOverview() {
       <div className="max-w-3xl mx-auto px-4 py-8 md:py-16">
         {/* Header row */}
         <div className="mb-8">
+          <button
+            onClick={() => navigate(createPageUrl('CourseSelectionPage'))}
+            className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-400 transition-colors mb-3"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            All Courses
+          </button>
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center flex-shrink-0">
