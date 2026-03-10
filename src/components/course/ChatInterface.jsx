@@ -41,8 +41,8 @@ export default function ChatInterface({ root, mode, questionType, onPassColdAtte
   const getRubric = () => {
     if (questionType === 'root') return root.rubric;
     const branchKey = questionType;
-    const branchRubrics = BRANCH_RUBRICS[root.id];
-    return branchRubrics?.[branchKey] || root.rubric;
+    const rootBranchRubrics = branchRubrics[root.id];
+    return rootBranchRubrics?.[branchKey] || root.rubric;
   };
 
   useEffect(() => {
@@ -106,7 +106,7 @@ Keep responses short and conversational. Ask one question at a time.`;
     }
 
     if (mode === 'teach') {
-      const dictTerms = (DICTIONARY[root.id] || []).map(t => t.term).join(', ');
+      const dictTerms = (dictionary[root.id] || []).map(t => t.term).join(', ');
       return `You are a mastery-based exercise science instructor. You are teaching Root ${root.id}: "${root.title}".
 
 The target question is: "${question}"

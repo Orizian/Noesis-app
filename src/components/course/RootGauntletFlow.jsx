@@ -210,7 +210,7 @@ export default function RootGauntletFlow({ root, profileId, onComplete, onCancel
     } else {
       // Batch evaluate
       setPhase('evaluating');
-      const evalResults = await batchEvaluateGauntlet(root, newAnswers);
+      const evalResults = await batchEvaluateGauntlet(root, newAnswers, branchRubrics);
       // Save to storage
       if (profileId) {
         const bulk = {};
