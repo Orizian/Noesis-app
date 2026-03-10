@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { ROOTS, BRANCH_RUBRICS } from '../components/courseData';
+import { BRANCH_RUBRICS } from '../components/courseData';
 import { useProfile } from '../components/profiles/ProfileContext';
+import { useCourse } from '../components/course/CourseContext';
 import {
   isAllGauntletsPassed,
   getAbsoluteGauntlet,
