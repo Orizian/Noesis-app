@@ -32,6 +32,7 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </AppShell>
       </div>
+      </CourseProvider>
     </ProfileProvider>
   );
 }
