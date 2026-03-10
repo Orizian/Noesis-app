@@ -1,5 +1,5 @@
 import React from 'react';
-import { ROOTS } from '../components/courseData';
+import { useCourse } from '../components/course/CourseContext';
 import { useProfile } from '../components/profiles/ProfileContext';
 import { isGauntletEligible } from '../components/profiles/profileStorage';
 import RootGauntletFlow from '../components/course/RootGauntletFlow';
