@@ -38,9 +38,9 @@ function ProgressSection({ profileId }) {
         perfectedCount={perfectedCount}
       />
       {anyGauntlet && (
-        <GlobalGauntletBar totalPoints={gauntletTotal} />
+        <GlobalGauntletBar totalPoints={gauntletTotal} rootCount={roots.length} />
       )}
-      <VocabBar excellentScore={vocabScore} />
+      <VocabBar excellentScore={vocabScore} rootCount={roots.length} />
     </div>
   );
 }
@@ -121,6 +121,8 @@ export default function CourseOverview() {
           profileId={activeProfileId}
           onClose={() => setShowDevTools(false)}
           onChanged={() => { refresh(); }}
+          roots={roots}
+          dictionary={dictionary}
         />
       )}
     </div>
