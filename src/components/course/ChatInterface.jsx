@@ -292,8 +292,8 @@ Rules:
     // Cold attempt: switch to evaluating phase
     if (mode === 'cold' && coldPhase === 'input') {
       // Increment attempt counter
-      const newCount = activeProfileId
-        ? incrementColdAttempt(activeProfileId, root.id, questionType)
+      const newCount = (activeProfileId && courseId)
+        ? incrementColdAttempt(activeProfileId, courseId, root.id, questionType)
         : coldAttemptNum;
       setColdAttemptNum(newCount);
       setColdPhase('evaluating');
