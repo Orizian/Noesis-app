@@ -71,6 +71,7 @@ export function CourseProvider({ children, courseId }) {
   const course = COURSES.find(c => c.id === activeCourseId) || COURSES[0];
   const value = {
     ...buildCourseHelpers(course),
+    activeCourse: course,
     courses: COURSES,
     setActiveCourse: (id) => setActiveCourseId(id),
   };
