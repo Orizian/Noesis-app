@@ -1,0 +1,42 @@
+import { COURSE_META, ROOTS, DICTIONARY, BRANCH_RUBRICS } from './humanPerformancePhysiology';
+
+export const COURSES = [
+  {
+    ...COURSE_META,
+    roots: ROOTS,
+    dictionary: DICTIONARY,
+    branchRubrics: BRANCH_RUBRICS,
+  },
+  {
+    id: 'applied-personal-training',
+    title: 'Applied Personal Training',
+    description: 'A comprehensive certification-level course covering exercise programming, client assessment, movement coaching, and evidence-based training design for personal trainers and serious coaches.',
+    tag: 'Personal Training',
+    difficulty: 2,
+    depth: 2,
+    scope: 3,
+    duration: 'marathon',
+    comingSoon: true,
+    rootSummaries: [],
+    roots: [],
+    dictionary: {},
+    branchRubrics: {},
+  },
+  {
+    id: 'nutrition-fundamentals',
+    title: 'Nutrition Fundamentals',
+    description: 'The physiological mechanisms behind macronutrient metabolism, energy availability, body composition, and performance nutrition — built on causal understanding rather than dietary rules.',
+    tag: 'Nutrition',
+    difficulty: 2,
+    depth: 2,
+    scope: 2,
+    duration: 'medium',
+    comingSoon: true,
+    rootSummaries: [],
+    roots: [],
+    dictionary: {},
+    branchRubrics: {},
+  },
+];
+
+export { ROOTS, DICTIONARY, BRANCH_RUBRICS } from './humanPerformancePhysiology';
