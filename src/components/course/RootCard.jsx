@@ -27,19 +27,21 @@ function getTierFromPoints(pts) {
 }
 
 export default function RootCard({ root, profileId }) {
-  const qc = profileId ? getQuestionCriteria(profileId, root.id) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
+  const { meta } = useCourse();
+  const courseId = meta.id;
+  const qc = profileId ? getQuestionCriteria(profileId, courseId, root.id) : { root: 0, branch_1: 0, branch_2: 0, branch_3: 0 };
   const rootPoints = (qc.root || 0) + (qc.branch_1 || 0) + (qc.branch_2 || 0) + (qc.branch_3 || 0);
   const status = deriveRootStatus(qc);
-  const perfected = profileId ? isRootPerfected(profileId, root.id) : false;
-  const gauntletPoints = profileId ? getGauntletRootPoints(profileId, root.id) : 0;
+  const perfected = profileId ? isRootPerfected(profileId, courseId, root.id) : false;
+  const gauntletPoints = profileId ? getGauntletRootPoints(profileId, courseId, root.id) : 0;
   const cfg = perfected
     ? { label: 'Perfected', badgeClass: 'bg-violet-950/60 text-violet-300 border-violet-700', borderClass: 'border-l-violet-500' }
     : STATUS_CONFIG[status];
   const tier = getTierFromPoints(rootPoints);
 
-  const gauntletEligible = profileId ? isGauntletEligible(profileId, root.id) : false;
-  const gauntletPassed = profileId ? isRootGauntletPassed(profileId, root.id) : false;
-  const gauntletPassedDate = gauntletPassed ? getGauntletPassedDate(profileId, root.id) : null;
+  const gauntletEligible = profileId ? isGauntletEligible(profileId, courseId, root.id) : false;
+  const gauntletPassed = profileId ? isRootGauntletPassed(profileId, courseId, root.id) : false;
+  const gauntletPassedDate = gauntletPassed ? getGauntletPassedDate(profileId, courseId, root.id) : null;
   const gauntletPerfected = gauntletPoints === 13;
 
   // Gauntlet status element
