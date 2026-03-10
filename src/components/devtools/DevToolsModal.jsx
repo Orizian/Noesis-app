@@ -18,10 +18,10 @@ import {
 const VOCAB_TIERS = ['unattempted', 'attempted', 'pass', 'great', 'excellent'];
 const TIER_LABELS = { unattempted: '—', attempted: 'Attempted', pass: 'Pass', great: 'Great', excellent: 'Excellent' };
 
-function masterAllRoots(profileId, roots) {
+function masterAllRoots(profileId, courseId, roots) {
   roots.forEach(root => {
     ['root','branch_1','branch_2','branch_3'].forEach(k =>
-      setQuestionCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3)
+      setQuestionCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3)
     );
   });
 }
@@ -30,13 +30,13 @@ function resetAllProgress(profileId) {
   resetProfileProgress(profileId);
 }
 
-function conquerAllGauntlets(profileId, roots) {
+function conquerAllGauntlets(profileId, courseId, roots) {
   const now = Date.now();
   roots.forEach(root => {
     ['root','branch_1','branch_2','branch_3'].forEach(k =>
-      setGauntletCriteriaExact(profileId, root.id, k, k === 'root' ? 4 : 3)
+      setGauntletCriteriaExact(profileId, courseId, root.id, k, k === 'root' ? 4 : 3)
     );
-    setGauntletPassedDate(profileId, root.id, now);
+    setGauntletPassedDate(profileId, courseId, root.id, now);
   });
 }
 
@@ -70,14 +70,14 @@ function setAbsoluteGauntletInProgress(profileId, rootId) {
   }
 }
 
-function maxAllVocabulary(profileId, dictionary) {
+function maxAllVocabulary(profileId, courseId, dictionary) {
   Object.entries(dictionary).forEach(([rootId, terms]) => {
-    terms.forEach(term => setFlashcardTierExact(profileId, parseInt(rootId), term.term, 'excellent'));
+    terms.forEach(term => setFlashcardTierExact(profileId, courseId, parseInt(rootId), term.term, 'excellent'));
   });
 }
 
-function resetAllVocabulary(profileId) {
-  clearAllFlashcardTiers(profileId);
+function resetAllVocabulary(profileId, courseId) {
+  clearAllFlashcardTiers(profileId, courseId);
 }
 
 // ── Stepper ───────────────────────────────────────────────────────────────────
@@ -115,83 +115,82 @@ function TierCycler({ value, onChange }) {
 }
 
 // ── Per-Root Section ──────────────────────────────────────────────────────────
-function RootSection({ root, profileId, onChanged, dictionary }) {
+function RootSection({ root, profileId, courseId, onChanged, dictionary }) {
   const [expanded, setExpanded] = useState(false);
 
   // Cold attempt state
-  const initQC = () => { const qc = getQuestionCriteria(profileId, root.id); return { root: qc.root||0, branch_1: qc.branch_1||0, branch_2: qc.branch_2||0, branch_3: qc.branch_3||0 }; };
+  const initQC = () => { const qc = getQuestionCriteria(profileId, courseId, root.id); return { root: qc.root||0, branch_1: qc.branch_1||0, branch_2: qc.branch_2||0, branch_3: qc.branch_3||0 }; };
   const [coldVals, setColdVals] = useState(initQC);
 
   // Gauntlet state
-  const initGC = () => { const gc = getGauntletCriteria(profileId, root.id); return { root: gc.root||0, branch_1: gc.branch_1||0, branch_2: gc.branch_2||0, branch_3: gc.branch_3||0 }; };
+  const initGC = () => { const gc = getGauntletCriteria(profileId, courseId, root.id); return { root: gc.root||0, branch_1: gc.branch_1||0, branch_2: gc.branch_2||0, branch_3: gc.branch_3||0 }; };
   const [gauntletVals, setGauntletVals] = useState(initGC);
 
   // Vocab state — { termName: tier }
   const terms = dictionary[root.id] || [];
   const initVocab = () => {
     const obj = {};
-    terms.forEach(t => { const tier = getFlashcardTier(profileId, root.id, t.term); obj[t.term] = tier || 'unattempted'; });
+    terms.forEach(t => { const tier = getFlashcardTier(profileId, courseId, root.id, t.term); obj[t.term] = tier || 'unattempted'; });
     return obj;
   };
   const [vocabVals, setVocabVals] = useState(initVocab);
 
-  const setC = (key, val) => { setQuestionCriteriaExact(profileId, root.id, key, val); setColdVals(p => ({ ...p, [key]: val })); onChanged(); };
-  const setG = (key, val) => { setGauntletCriteriaExact(profileId, root.id, key, val); setGauntletVals(p => ({ ...p, [key]: val })); onChanged(); };
+  const setC = (key, val) => { setQuestionCriteriaExact(profileId, courseId, root.id, key, val); setColdVals(p => ({ ...p, [key]: val })); onChanged(); };
+  const setG = (key, val) => { setGauntletCriteriaExact(profileId, courseId, root.id, key, val); setGauntletVals(p => ({ ...p, [key]: val })); onChanged(); };
 
   const masterRoot = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, root.id, k, k==='root'?4:3));
+    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3));
     setColdVals({ root:4, branch_1:3, branch_2:3, branch_3:3 });
     onChanged();
   };
   const resetRoot = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, root.id, k, 0));
+    ['root','branch_1','branch_2','branch_3'].forEach(k => setQuestionCriteriaExact(profileId, courseId, root.id, k, 0));
     setColdVals({ root:0, branch_1:0, branch_2:0, branch_3:0 });
     onChanged();
   };
   const setGMax = () => {
-    ['root','branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, root.id, k, k==='root'?4:3));
-    setGauntletPassedDate(profileId, root.id, Date.now());
+    ['root','branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, k==='root'?4:3));
+    setGauntletPassedDate(profileId, courseId, root.id, Date.now());
     setGauntletVals({ root:4, branch_1:3, branch_2:3, branch_3:3 });
     onChanged();
   };
   const setGMinPass = () => {
-    setGauntletCriteriaExact(profileId, root.id, 'root', 2);
-    ['branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, root.id, k, 1));
-    setGauntletPassedDate(profileId, root.id, Date.now());
+    setGauntletCriteriaExact(profileId, courseId, root.id, 'root', 2);
+    ['branch_1','branch_2','branch_3'].forEach(k => setGauntletCriteriaExact(profileId, courseId, root.id, k, 1));
+    setGauntletPassedDate(profileId, courseId, root.id, Date.now());
     setGauntletVals({ root:2, branch_1:1, branch_2:1, branch_3:1 });
     onChanged();
   };
   const resetGauntlet = () => {
-    resetGauntletForRoot(profileId, root.id);
-    clearGauntletPassedDate(profileId, root.id);
+    resetGauntletForRoot(profileId, courseId, root.id);
+    clearGauntletPassedDate(profileId, courseId, root.id);
     setGauntletVals({ root:0, branch_1:0, branch_2:0, branch_3:0 });
     onChanged();
   };
 
   const setVocabTier = (termName, tier) => {
     if (tier === 'unattempted') {
-      // Clear this term
       const profiles = JSON.parse(localStorage.getItem('exsci_profiles') || '[]');
       const idx = profiles.findIndex(p => p.id === profileId);
-      if (idx !== -1 && profiles[idx].flashcardTiers?.[root.id]) {
-        delete profiles[idx].flashcardTiers[root.id][termName];
+      if (idx !== -1 && profiles[idx].courseData?.[courseId]?.flashcardTiers?.[root.id]) {
+        delete profiles[idx].courseData[courseId].flashcardTiers[root.id][termName];
         localStorage.setItem('exsci_profiles', JSON.stringify(profiles));
       }
     } else {
-      setFlashcardTierExact(profileId, root.id, termName, tier);
+      setFlashcardTierExact(profileId, courseId, root.id, termName, tier);
     }
     setVocabVals(p => ({ ...p, [termName]: tier }));
     onChanged();
   };
   const setAllExcellent = () => {
-    terms.forEach(t => setFlashcardTierExact(profileId, root.id, t.term, 'excellent'));
+    terms.forEach(t => setFlashcardTierExact(profileId, courseId, root.id, t.term, 'excellent'));
     const newVals = {};
     terms.forEach(t => { newVals[t.term] = 'excellent'; });
     setVocabVals(newVals);
     onChanged();
   };
   const setAllPass = () => {
-    terms.forEach(t => setFlashcardTierExact(profileId, root.id, t.term, 'pass'));
+    terms.forEach(t => setFlashcardTierExact(profileId, courseId, root.id, t.term, 'pass'));
     const newVals = {};
     terms.forEach(t => { newVals[t.term] = 'pass'; });
     setVocabVals(newVals);
@@ -201,8 +200,9 @@ function RootSection({ root, profileId, onChanged, dictionary }) {
     const profiles = JSON.parse(localStorage.getItem('exsci_profiles') || '[]');
     const idx = profiles.findIndex(p => p.id === profileId);
     if (idx !== -1) {
-      if (!profiles[idx].flashcardTiers) profiles[idx].flashcardTiers = {};
-      profiles[idx].flashcardTiers[root.id] = {};
+      if (!profiles[idx].courseData) profiles[idx].courseData = {};
+      if (!profiles[idx].courseData[courseId]) profiles[idx].courseData[courseId] = {};
+      profiles[idx].courseData[courseId].flashcardTiers = { [root.id]: {} };
       localStorage.setItem('exsci_profiles', JSON.stringify(profiles));
     }
     const newVals = {};
