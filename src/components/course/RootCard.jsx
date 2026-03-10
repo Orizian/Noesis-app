@@ -8,6 +8,7 @@ import {
   getQuestionCriteria, deriveRootStatus, getGauntletRootPoints, isRootPerfected,
   isGauntletEligible, isRootGauntletPassed, getGauntletPassedDate,
 } from '../profiles/profileStorage';
+import { useCourse } from './CourseContext';
 import { format } from 'date-fns';
 
 const STATUS_CONFIG = {
