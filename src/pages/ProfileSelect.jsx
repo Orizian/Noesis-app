@@ -20,6 +20,7 @@ function timeAgo(ts) {
 
 export default function ProfileSelect({ onNavigate }) {
   const { selectProfile } = useProfile();
+  const { rootCount } = useCourse();
   const [profiles, setProfiles] = useState(() => {
     const p = getProfiles();
     return Array.isArray(p) ? p : [];
@@ -69,7 +70,7 @@ export default function ProfileSelect({ onNavigate }) {
       <div className="flex-1 flex items-start justify-center px-6 pb-12">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 w-full max-w-2xl">
           {profiles.map(profile => {
-            const pct = getProfileCompletionPercent(profile.id);
+            const pct = getProfileCompletionPercent(profile.id, rootCount);
             return (
               <button
                 key={profile.id}

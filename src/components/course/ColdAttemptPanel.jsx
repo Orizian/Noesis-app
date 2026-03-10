@@ -56,6 +56,7 @@ export default function ColdAttemptPanel({
   onRetry,
   onTeachMe,
 }) {
+  const { branchRubrics } = useCourse();
   const [stage, setStage] = useState(0); // 0,1,2 = loading stages; 3 = reveal
   const [revealed, setRevealed] = useState(false);
   const timerDone = useRef(false);
@@ -89,8 +90,10 @@ export default function ColdAttemptPanel({
 
   const isRoot = questionType === 'root';
 
-  // Build rubric criteria array from courseData
-  const rubricStr = root ? getRubricForQuestion(root, questionType) : '';
+  // Build rubric criteria array from root prop + branchRubrics from context
+  const rubricStr = root
+    ? (questionType === 'root' ? root.rubric : (branchRubrics[root.id]?.[questionType] || root.rubric))
+    : '';
   const rubricCriteria = rubricStr ? parseRubricCriteria(rubricStr) : [];
   const totalCriteria = isRoot ? 4 : 3;
 
