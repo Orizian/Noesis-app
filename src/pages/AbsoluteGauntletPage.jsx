@@ -382,7 +382,7 @@ export default function AbsoluteGauntletPage() {
     setQIdx(0);
     setCurrentAnswer('');
     setPhase('run');
-    if (activeProfileId) setAbsoluteGauntletSession(activeProfileId, { inProgress: true, rootIdx: newRootIdx, qIdx: 0, answers: allAnswers });
+    if (activeProfileId && courseId) setAbsoluteGauntletSession(activeProfileId, courseId, { inProgress: true, rootIdx: newRootIdx, qIdx: 0, answers: allAnswers });
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
