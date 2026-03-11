@@ -7,7 +7,7 @@ export default function CourseSummaryOverlay({ course, onClose, onEnter }) {
   const learningMode = course.learningMode ? LEARNING_MODE_CONFIG[course.learningMode] : null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-zinc-950/40 backdrop-blur-lg overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-zinc-950/90 backdrop-blur-lg overflow-y-auto">
       <div className="max-w-2xl mx-auto px-4 py-8">
 
         <div className="flex justify-end mb-6">
