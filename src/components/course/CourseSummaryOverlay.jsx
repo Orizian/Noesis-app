@@ -53,11 +53,45 @@ export default function CourseSummaryOverlay({ course, onClose, onEnter }) {
           <h3 className="text-sm font-semibold text-zinc-300 mb-4 uppercase tracking-wider">
             Course Contents
           </h3>
-          {course.comingSoon || !course.rootSummaries?.length ? (
+          {course.comingSoon || (!course.sections?.length && !course.rootSummaries?.length) ? (
             <p className="text-zinc-600 text-sm italic">
               Course contents will be revealed at launch.
             </p>
+          ) : course.sections?.length ? (
+            // Section-grouped view
+            <div className="space-y-5">
+              {course.sections.map((section, idx) => {
+                const sectionRoots = course.rootSummaries?.filter(rs => section.rootIds.includes(rs.id)) || [];
+                return (
+                  <div key={section.id}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                        Section {idx + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-zinc-300">{section.title}</span>
+                    </div>
+                    <p className="text-xs text-zinc-500 mb-2 leading-relaxed">{section.summary}</p>
+                    {sectionRoots.length > 0 && (
+                      <div className="space-y-2 pl-2 border-l border-zinc-800">
+                        {sectionRoots.map(rs => (
+                          <div key={rs.id} className="flex gap-3 p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/40">
+                            <div className="text-xs font-mono text-zinc-600 mt-0.5 w-5 flex-shrink-0">
+                              {String(rs.id).padStart(2, '0')}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-zinc-200 mb-0.5">{rs.title}</div>
+                              <div className="text-xs text-zinc-500 leading-relaxed">{rs.summary}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ) : (
+            // Flat view (no sections)
             <div className="space-y-3">
               {course.rootSummaries.map((rs) => (
                 <div

@@ -52,7 +52,7 @@ function ProgressSection({ profileId }) {
 }
 
 export default function CourseOverview() {
-  const { roots, dictionary, meta, activeCourse } = useCourse();
+  const { roots, dictionary, meta, activeCourse, usesSections, orderedSections, rootsBySection } = useCourse();
   const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
@@ -115,16 +115,38 @@ export default function CourseOverview() {
           <ProgressSection profileId={activeProfileId} />
         </div>
 
-        {/* Root list */}
-        <div className="space-y-3">
-          {roots.map((root) => (
-            <RootCard
-              key={root.id}
-              root={root}
-              profileId={activeProfileId}
-            />
-          ))}
-        </div>
+        {/* Root list — grouped by section if available, flat otherwise */}
+        {usesSections ? (
+          <div className="space-y-8">
+            {orderedSections.map((section, idx) => (
+              <div key={section.id}>
+                <div className="mb-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                      Section {idx + 1}
+                    </span>
+                  </div>
+                  <h2 className="text-base font-semibold text-zinc-200">{section.title}</h2>
+                  <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{section.summary}</p>
+                </div>
+                <div className="space-y-3">
+                  {rootsBySection[section.id].map(root => (
+                    <RootCard key={root.id} root={root} profileId={activeProfileId} />
+                  ))}
+                </div>
+                {idx < orderedSections.length - 1 && (
+                  <div className="mt-8 border-t border-zinc-800/40" />
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {roots.map((root) => (
+              <RootCard key={root.id} root={root} profileId={activeProfileId} />
+            ))}
+          </div>
+        )}
 
         {/* Gauntlet Board */}
         <GauntletBoard profileId={activeProfileId} />
