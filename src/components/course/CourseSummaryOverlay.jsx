@@ -65,7 +65,7 @@ export default function CourseSummaryOverlay({ course, onClose, onEnter }) {
                 return (
                   <div key={section.id}>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                      <span className="text-[13px] font-mono text-zinc-600 uppercase tracking-widest">
                         Section {idx + 1}
                       </span>
                       <span className="text-xs font-semibold text-zinc-300">{section.title}</span>
