@@ -40,8 +40,8 @@ export default function Stats() {
 
   const strongestRoot = stats.strongestRootId ? roots.find(r => r.id === stats.strongestRootId) : null;
 
-  const totalMasteryPoints = activeProfileId ? getTotalPoints(activeProfileId, courseId, roots.length) : 0;
-  const totalGauntletPoints = activeProfileId ? getTotalGauntletPoints(activeProfileId, courseId, roots.length) : 0;
+  const totalMasteryPoints = activeProfileId ? getTotalPoints(activeProfileId, courseId, roots) : 0;
+  const totalGauntletPoints = activeProfileId ? getTotalGauntletPoints(activeProfileId, courseId, roots) : 0;
   const totalVocabScore = activeProfileId ? getTotalVocabScore(activeProfileId, courseId) : 0;
   const perfectedCount = activeProfileId ? roots.filter(r => isRootPerfected(activeProfileId, courseId, r.id, r.branches.length)).length : 0;
   const overallPct = Math.round(((stats.complete + stats.mastered) / roots.length) * 100);
