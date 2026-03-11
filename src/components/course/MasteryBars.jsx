@@ -119,7 +119,7 @@ export function VocabBar({ excellentScore, courseMaxVocabScore }) {
     <ThinBar
       value={score}
       max={max}
-      color={getVocabBarColor(score)}
+      color={getVocabBarColor(score, max)}
       label="Vocabulary"
       rightLabel={`${score} / ${max} Excellent`}
       height="h-2"
