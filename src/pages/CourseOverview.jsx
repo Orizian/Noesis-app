@@ -122,7 +122,7 @@ export default function CourseOverview() {
               <div key={section.id}>
                 <div className="mb-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                    <span className="text-[13px] font-mono text-zinc-600 uppercase tracking-widest">
                       Section {idx + 1}
                     </span>
                   </div>
