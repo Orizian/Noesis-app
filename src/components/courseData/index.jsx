@@ -14,7 +14,7 @@ export const COURSES = [
     tag: 'Personal Training',
     difficulty: 2,
     depth: 2,
-    scope: 3,
+    scope: 4,
     duration: 'marathon',
     comingSoon: true,
     rootSummaries: [],
