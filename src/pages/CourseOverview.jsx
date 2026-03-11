@@ -125,8 +125,8 @@ export default function CourseOverview() {
                     <span className="text-[13px] font-mono text-zinc-600 uppercase tracking-widest">
                       Section {idx + 1}
                     </span>
+                    <span className="text-base font-semibold text-zinc-200">{section.title}</span>
                   </div>
-                  <h2 className="text-base font-semibold text-zinc-200">{section.title}</h2>
                   <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{section.summary}</p>
                 </div>
                 <div className="space-y-3">
