@@ -12,6 +12,26 @@ export const COURSE_META = {
   scope: 2,
   duration: 'long',
   learningMode: 'Mastery-Based',
+  sections: [
+    {
+      id: 1,
+      title: 'Mechanical & Neural Foundations',
+      summary: 'Explains how force is produced, fueled, and expressed through muscle mechanics, energy systems, and neural recruitment.',
+      rootIds: [1, 2, 3]
+    },
+    {
+      id: 2,
+      title: 'Adaptation Signaling',
+      summary: 'Covers the endocrine, molecular, and cardiovascular systems that govern training adaptation.',
+      rootIds: [4, 5, 6]
+    },
+    {
+      id: 3,
+      title: 'Structural Limits & Training Design',
+      summary: 'Shows how connective tissue adaptation and core training principles determine safe and effective programming.',
+      rootIds: [7, 8]
+    }
+  ],
   rootSummaries: [
     {
       id: 1,

@@ -31,6 +31,44 @@ export function getGauntletTier(points, maxPoints) {
 // These are computed from the active course data so no hardcoded numbers
 // need to exist anywhere else in the app.
 
+// ─── Section validation & helpers ─────────────────────────────────────────────
+function buildSectionHelpers(course, roots) {
+  const raw = course.sections;
+  if (!raw || !Array.isArray(raw) || raw.length === 0) {
+    return { orderedSections: null, rootsBySection: null, usesSections: false, sectionCount: 0 };
+  }
+
+  try {
+    const validRootIds = new Set(roots.map(r => r.id));
+    const seen = new Set();
+    let expectedNext = roots.length > 0 ? roots[0].id : 1;
+
+    for (const section of raw) {
+      if (!Array.isArray(section.rootIds) || section.rootIds.length === 0) throw new Error('empty rootIds');
+      for (const rid of section.rootIds) {
+        if (!validRootIds.has(rid)) throw new Error(`invalid rootId: ${rid}`);
+        if (seen.has(rid)) throw new Error(`duplicate rootId: ${rid}`);
+        if (rid !== expectedNext) throw new Error(`non-sequential rootId: ${rid}, expected ${expectedNext}`);
+        seen.add(rid);
+        expectedNext = rid + 1;
+      }
+    }
+    // Every root must be covered
+    if (seen.size !== roots.length) throw new Error('sections do not cover all roots');
+
+    const rootMap = Object.fromEntries(roots.map(r => [r.id, r]));
+    const rootsBySection = {};
+    for (const section of raw) {
+      rootsBySection[section.id] = section.rootIds.map(rid => rootMap[rid]);
+    }
+
+    return { orderedSections: raw, rootsBySection, usesSections: true, sectionCount: raw.length };
+  } catch (e) {
+    console.warn('Noesis: sections config invalid, falling back to flat list.', e.message);
+    return { orderedSections: null, rootsBySection: null, usesSections: false, sectionCount: 0 };
+  }
+}
+
 function buildCourseHelpers(course) {
   const roots = course.roots || [];
   const dictionary = course.dictionary || {};
@@ -50,6 +88,8 @@ function buildCourseHelpers(course) {
 
   // Per-root helpers
   const getRootTermCount = (rootId) => (dictionary[rootId]?.length || 0);
+
+  const sectionHelpers = buildSectionHelpers(course, roots);
 
   return {
     // Raw data
@@ -72,6 +112,9 @@ function buildCourseHelpers(course) {
 
     // Per-root difficulty map (keyed by root id)
     rootDifficultyMap: course.rootDifficultyMap || {},
+
+    // Section helpers (null/false when course has no sections)
+    ...sectionHelpers,
 
     // Course metadata
     meta: {
