@@ -102,13 +102,17 @@ export function GlobalGauntletBar({ roots, totalPoints }) {
   );
 }
 
-// Vocabulary bar color — based on excellent score out of 80
-function getVocabBarColor(score) {
-  if (score <= 0) return 'bg-zinc-600';
-  if (score < 20) return 'bg-zinc-500';
-  if (score < 50) return 'bg-emerald-500';
-  if (score < 80) return 'bg-teal-500';
-  return 'bg-violet-500';
+// Vocabulary bar color — percentage-based relative to courseMaxVocabScore
+function getVocabBarColor(score, max) {
+  if (!max || max <= 0) return 'bg-zinc-600';
+
+  const pct = score / max;
+
+  if (pct >= 1.0) return 'bg-violet-500';
+  if (pct >= 0.85) return 'bg-teal-500';
+  if (pct >= 0.5) return 'bg-emerald-500';
+  if (pct >= 0.15) return 'bg-orange-500';
+  return 'bg-zinc-600';
 }
 
 // Vocabulary bar — score = count of Excellent tiers, max = courseMaxVocabScore (from CourseContext)
