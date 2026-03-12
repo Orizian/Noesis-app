@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 import { COURSES } from '../courseData/index';
 
-// Default to the first course (exercise-science / Human Performance Physiology)
-const DEFAULT_COURSE_ID = 'exercise-science';
+// Default to the first registered course
+const DEFAULT_COURSE_ID = COURSES[0]?.id || '';
 
 // Platform scoring constants
 export const ROOT_CRITERIA_POINTS = 4;

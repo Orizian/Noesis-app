@@ -18,7 +18,7 @@ export default function RootGauntletPage() {
   const { activeProfileId, refresh } = useProfile();
   const navigate = useNavigate();
 
-  const eligible = activeProfileId ? isGauntletEligible(activeProfileId, courseId, rootId) : false;
+  const eligible = activeProfileId ? isGauntletEligible(activeProfileId, courseId, rootId, root.branches.length) : false;
 
   const handleComplete = (results) => {
     refresh();
@@ -50,7 +50,7 @@ export default function RootGauntletPage() {
 
         {!eligible ? (
           <div className="border border-zinc-800 rounded-2xl bg-zinc-900/60 p-8 text-center">
-            <p className="text-zinc-500 text-sm">Complete all 4 cold attempts to unlock the Gauntlet for this root.</p>
+            <p className="text-zinc-500 text-sm">Complete root and branch cold attempts to unlock the Gauntlet for this root.</p>
             <Link to={createPageUrl('RootDetail') + `?rootId=${rootId}`}
               className="inline-block mt-4 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors">
               Back to Root
