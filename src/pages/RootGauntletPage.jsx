@@ -15,6 +15,14 @@ export default function RootGauntletPage() {
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = roots.find(r => r.id === rootId) || roots[0];
 
+  if (!root) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
+        <p className="text-zinc-500">No course active.</p>
+      </div>
+    );
+  }
+
   const { activeProfileId, refresh } = useProfile();
   const navigate = useNavigate();
 

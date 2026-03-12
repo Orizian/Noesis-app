@@ -43,6 +43,14 @@ export default function RootDetail() {
   const rootId = parseInt(urlParams.get('rootId')) || 1;
   const root = roots.find(r => r.id === rootId) || roots[0];
 
+  if (!root) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
+        <p className="text-zinc-500">No course active.</p>
+      </div>
+    );
+  }
+
   const [activeMode, setActiveMode] = useState(null); // null = no mode selected yet
   const [selectedQuestion, setSelectedQuestion] = useState('root');
   const [competencyStage, setCompetencyStage] = useState(1);
