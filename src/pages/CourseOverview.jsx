@@ -6,7 +6,7 @@ import DevToolsModal from '../components/devtools/DevToolsModal';
 import GauntletBoard from '../components/course/GauntletBoard';
 import CourseSummaryOverlay from '../components/course/CourseSummaryOverlay';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getQuestionCriteria, deriveRootStatus, getTotalPoints, getTotalGauntletPoints, getGauntletRootPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
+import { getQuestionCriteria, deriveRootStatus, getTotalGauntletPoints, isRootPerfected, getTotalVocabScore } from '../components/profiles/profileStorage';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
