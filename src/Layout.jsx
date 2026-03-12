@@ -17,9 +17,9 @@ function AppShell({ children, currentPageName }) {
     return <ProfileSelect />;
   }
 
-  // After profile selection, default landing is the course selection screen
+  // Default landing: go straight to course overview if profile already selected
   if (!currentPageName || currentPageName === 'Home') {
-    return <CourseSelectionPage />;
+    return <CourseOverview />;
   }
 
   return <>{children}</>;
