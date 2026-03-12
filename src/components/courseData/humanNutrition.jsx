@@ -15,16 +15,16 @@ export const COURSE_META = {
   rootDifficultyMap: {
     1: 'foundational',
     2: 'foundational',
-    3: 'foundational',
-    4: 'foundational',
+    3: 'applied',
+    4: 'applied',
     5: 'mechanistic',
     6: 'mechanistic',
-    7: 'mechanistic',
-    8: 'mechanistic',
-    9: 'applied',
+    7: 'applied',
+    8: 'applied',
+    9: 'mechanistic',
     10: 'applied',
-    11: 'applied'
-  },
+    11: 'mechanistic',
+},
   sections: [
     {
       id: 1,
