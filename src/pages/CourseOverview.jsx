@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useCourse } from '../components/course/CourseContext';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
@@ -53,12 +53,23 @@ function ProgressSection({ profileId }) {
 
 export default function CourseOverview() {
   const { roots, dictionary, meta, activeCourse, usesSections, orderedSections, rootsBySection } = useCourse();
-  const { activeProfileId, refresh } = useProfile();
+  const { activeProfileId, activeProfile, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
   const [showCourseInfo, setShowCourseInfo] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const tapTimer = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const key = `noesis_welcomed_${activeProfileId}`;
+    if (activeProfileId && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      setShowWelcome(true);
+      const t = setTimeout(() => setShowWelcome(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [activeProfileId]);
 
   const handleTitleTap = useCallback(() => {
     setTitleTaps(prev => {
