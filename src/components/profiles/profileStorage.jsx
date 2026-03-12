@@ -354,10 +354,8 @@ export function getRootPoints(profileId, courseId, rootId, branchCount) {
   return Object.values(qc).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
 }
 
-export function getTotalPoints(profileId, courseId, rootCount) {
-  let total = 0;
-  for (let i = 1; i <= rootCount; i++) total += getRootPoints(profileId, courseId, i);
-  return total;
+export function getTotalPoints(profileId, courseId, roots) {
+  return roots.reduce((sum, r) => sum + getRootPoints(profileId, courseId, r.id, r.branches.length), 0);
 }
 
 // Derive status from criteria points (display only)
