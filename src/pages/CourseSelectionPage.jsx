@@ -4,9 +4,11 @@ import CourseCard from '../components/course/CourseCard';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { BookOpen } from 'lucide-react';
+import { useProfile } from '../components/profiles/ProfileContext';
 
 export default function CourseSelectionPage() {
   const { courses, setActiveCourse } = useCourse();
+  const { activeProfile } = useProfile();
   const navigate = useNavigate();
 
   const handleEnterCourse = (course) => {
@@ -32,6 +34,9 @@ export default function CourseSelectionPage() {
         </div>
 
         <div className="mb-8">
+          {activeProfile && (
+            <p className="text-sm text-zinc-500 mb-1">Welcome back, <span className="text-zinc-300 font-medium">{activeProfile.name}</span>.</p>
+          )}
           <h2 className="text-2xl font-semibold text-zinc-100 mb-1">Choose Your Course</h2>
           <p className="text-sm text-zinc-500">Select a course to begin or continue your learning.</p>
         </div>

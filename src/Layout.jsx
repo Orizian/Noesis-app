@@ -3,7 +3,6 @@ import { ProfileProvider, useProfile } from './components/profiles/ProfileContex
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
 import CourseSelectionPage from './pages/CourseSelectionPage';
-import CourseOverview from './pages/CourseOverview';
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
@@ -18,9 +17,9 @@ function AppShell({ children, currentPageName }) {
     return <ProfileSelect />;
   }
 
-  // Default landing: go straight to course overview if profile already selected
+  // Default landing: go to course selection if profile already selected
   if (!currentPageName || currentPageName === 'Home') {
-    return <CourseOverview />;
+    return <CourseSelectionPage />;
   }
 
   return <>{children}</>;

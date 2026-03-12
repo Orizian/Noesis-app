@@ -57,19 +57,8 @@ export default function CourseOverview() {
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
   const [showCourseInfo, setShowCourseInfo] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
   const tapTimer = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const key = `noesis_welcomed_${activeProfileId}`;
-    if (activeProfileId && !sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, '1');
-      setShowWelcome(true);
-      const t = setTimeout(() => setShowWelcome(false), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [activeProfileId]);
 
   const handleTitleTap = useCallback(() => {
     setTitleTaps(prev => {
@@ -117,12 +106,6 @@ export default function CourseOverview() {
               </button>
               <ProfileDropdown />
           </div>
-
-          {showWelcome && activeProfile && (
-            <div className="mb-4 px-4 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/50 text-sm text-zinc-300 animate-pulse-once transition-opacity duration-700">
-              Welcome back, <span className="font-semibold text-zinc-100">{activeProfile.name}</span>.
-            </div>
-          )}
 
           <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-6">
             {meta.description}
