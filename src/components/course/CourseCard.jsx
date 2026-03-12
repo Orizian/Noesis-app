@@ -27,15 +27,21 @@ function MiniProgressBar({ label, value, max, colorClass }) {
 
 export default function CourseCard({ course, onEnter }) {
   const [showSummary, setShowSummary] = useState(false);
-  const { courseMaxPoints, courseMaxGauntletPoints, courseMaxVocabScore, roots } = useCourse();
   const { activeProfileId } = useProfile();
   const duration = DURATION_CONFIG[course.duration] || DURATION_CONFIG.medium;
   const isActive = !course.comingSoon;
 
+  // Compute max points directly from this card's course data — never from context
+  // (context may have a different or null active course at selection screen)
+  const cardRoots = course.roots || [];
+  const courseMaxPoints = cardRoots.reduce((sum, r) => sum + 4 + r.branches.length * 3, 0);
+  const courseMaxGauntletPoints = courseMaxPoints;
+  const courseMaxVocabScore = cardRoots.reduce((sum, r) => sum + (course.dictionary?.[r.id]?.length || 0), 0);
+
   const masteryPoints = isActive && activeProfileId
-    ? getTotalPoints(activeProfileId, course.id, roots) : 0;
-  const gauntletPoints = isActive && activeProfileId && roots.length > 0
-    ? roots.reduce((sum, r) => sum + getGauntletRootPoints(activeProfileId, course.id, r.id, r.branches.length), 0) : 0;
+    ? getTotalPoints(activeProfileId, course.id, cardRoots) : 0;
+  const gauntletPoints = isActive && activeProfileId && cardRoots.length > 0
+    ? cardRoots.reduce((sum, r) => sum + getGauntletRootPoints(activeProfileId, course.id, r.id, r.branches.length), 0) : 0;
   const vocabScore = isActive && activeProfileId
     ? getTotalVocabScore(activeProfileId, course.id) : 0;
 
