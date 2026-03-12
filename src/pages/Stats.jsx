@@ -21,12 +21,12 @@ const STATUS_ICONS = {
 };
 
 export default function Stats() {
-  const { roots, courseMaxPoints, courseMaxGauntletPoints, courseMaxVocabScore, meta } = useCourse();
+  const { roots, courseMaxPoints, courseMaxGauntletPoints, courseMaxVocabScore, meta, activeCourse } = useCourse();
   const courseId = meta.id;
   const { activeProfileId, activeProfile } = useProfile();
-  const stats = activeProfileId ? getProfileStats(activeProfileId, courseId, roots.length) : null;
+  const stats = activeProfileId && activeCourse ? getProfileStats(activeProfileId, courseId, roots.length) : null;
 
-  if (!stats) {
+  if (!activeCourse || !stats) {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
         <p className="text-zinc-500">No profile active.</p>
