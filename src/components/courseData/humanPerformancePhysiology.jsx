@@ -1,6 +1,6 @@
 // humanPerformancePhysiology.js
 // Human Performance Physiology — Noesis Course Data
-// Version: 2.0 — Full audit applied, all fields complete
+// Version: 3.0 — Legacy fields removed, rootDifficultyMap moved into COURSE_META
 
 export const COURSE_META = {
   id: 'exercise-science',
@@ -12,6 +12,16 @@ export const COURSE_META = {
   scope: 2,
   duration: 'long',
   learningMode: 'Mastery-Based',
+  rootDifficultyMap: {
+    1: 'mechanistic',
+    2: 'mechanistic',
+    3: 'mechanistic',
+    4: 'mechanistic',
+    5: 'mechanistic',
+    6: 'mechanistic',
+    7: 'applied',
+    8: 'applied',
+  },
   sections: [
     {
       id: 1,
@@ -80,9 +90,6 @@ export const ROOTS = [
   {
     id: 1,
     title: 'Muscle Fiber Architecture and Force Production',
-    domain: 'Muscle Physiology',
-    cognitiveLevel: 'Predictive Reasoning',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `A sprinter and a marathon runner have identical total quadriceps muscle volume confirmed by MRI. During a maximal sprint the sprinter produces 340 watts of peak power. The marathon runner produces 180 watts peak power from the same muscle volume. Neither athlete is injured. Explain the specific structural difference in muscle fiber composition that accounts for this power differential, explain why fiber type produces this difference mechanistically rather than just correlating with it, and predict what would happen to each athlete's power output and fatigue rate if both performed a 45-minute moderate intensity cycling session immediately before the sprint test.`,
     branches: [
       {
@@ -103,9 +110,6 @@ export const ROOTS = [
   {
     id: 2,
     title: 'Energy Systems and Their Interaction',
-    domain: 'Exercise Metabolism',
-    cognitiveLevel: 'Mechanistic Explanation',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `A cyclist is performing a 20-minute time trial at maximum sustainable effort. At the 30-second mark their power output is 420 watts. At the 5-minute mark it has dropped to 310 watts. At the 15-minute mark it has stabilized at 285 watts. They are not pacing — they are going as hard as possible at each moment. Explain the specific energy system transitions that account for this power output curve, identify the metabolic event that causes the drop from 420 to 310 watts specifically, and predict what the power output curve would look like if the same athlete performed the same test after 3 days of carbohydrate restriction to deplete muscle glycogen.`,
     branches: [
       {
@@ -126,9 +130,6 @@ export const ROOTS = [
   {
     id: 3,
     title: 'Neuromuscular Activation and Motor Unit Recruitment',
-    domain: 'Neuromuscular Physiology',
-    cognitiveLevel: 'Mechanistic Explanation',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `A powerlifter attempts a maximal deadlift of 250kg — a weight they have lifted before. On the first attempt they fail at the sticking point. On the second attempt 4 minutes later they successfully complete the lift. Their muscle strength has not changed between attempts. Explain the specific neuromuscular mechanism that allowed the second attempt to succeed where the first failed, identify what changed in the nervous system between attempts rather than in the muscle, and predict what would happen to their maximal lift capacity if they performed 30 minutes of light cardio immediately before the third attempt.`,
     branches: [
       {
@@ -149,9 +150,6 @@ export const ROOTS = [
   {
     id: 4,
     title: 'Acute Hormonal Response to Training',
-    domain: 'Endocrinology',
-    cognitiveLevel: 'Predictive Reasoning',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `Two athletes perform resistance training sessions of identical volume — same exercises, sets, reps, and total tonnage. Athlete A performs the session as straight sets with 3 minutes rest between sets over 60 minutes. Athlete B performs the same volume as supersets with 60 seconds rest between exercises over 35 minutes. Blood samples taken immediately after each session show dramatically different hormonal profiles — Athlete B has significantly higher testosterone, growth hormone, and cortisol. Both athletes have trained for 5 years. Explain the specific training variable that drives the hormonal difference, predict whether the higher hormonal response in Athlete B produces greater muscle protein synthesis over the following 48 hours, and explain why the answer to that prediction is less straightforward than it initially appears.`,
     branches: [
       {
@@ -172,9 +170,6 @@ export const ROOTS = [
   {
     id: 5,
     title: 'Muscle Protein Synthesis and the Hypertrophy Signal',
-    domain: 'Molecular Physiology',
-    cognitiveLevel: 'Mechanistic Explanation',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `A researcher gives two groups of subjects identical resistance training programs for 16 weeks. Group A consumes 1.6 grams of protein per kilogram of bodyweight daily evenly distributed across 4 meals. Group B consumes the same total daily protein in 2 meals — a small breakfast and a large dinner. Both groups gain strength equally. Group A gains significantly more muscle mass. Explain the specific molecular mechanism by which protein distribution affects muscle protein synthesis independent of total protein intake, identify the signaling pathway that is differentially activated, and predict the minimum meal protein dose required to maximally stimulate this pathway in a trained individual versus an untrained individual.`,
     branches: [
       {
@@ -195,9 +190,6 @@ export const ROOTS = [
   {
     id: 6,
     title: 'Cardiovascular Adaptation to Endurance Training',
-    domain: 'Cardiovascular Physiology',
-    cognitiveLevel: 'System Integration',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `An untrained 25-year-old begins an 8-month endurance training program. At baseline their resting heart rate is 72 bpm, stroke volume is 70ml, and VO2 max is 38 ml/kg/min. After 8 months their resting heart rate is 48 bpm, stroke volume is 105ml, and VO2 max is 52 ml/kg/min. Their maximum heart rate has not changed. Explain the specific structural cardiac adaptation that accounts for the stroke volume increase, explain why resting heart rate decreases as a mathematical consequence of stroke volume increase rather than as an independent adaptation, and predict what happens to each of these three variables during the first 3 weeks of complete detraining.`,
     branches: [
       {
@@ -218,9 +210,6 @@ export const ROOTS = [
   {
     id: 7,
     title: 'Connective Tissue Adaptation',
-    domain: 'Connective Tissue Biology',
-    cognitiveLevel: 'Predictive Reasoning',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `A 28-year-old recreational runner increases their weekly mileage from 30km to 60km over 6 weeks in preparation for a marathon. At week 5 they develop Achilles tendinopathy — pain and morning stiffness at the Achilles tendon insertion. Their cardiovascular fitness has improved normally throughout this period. The tendon has not ruptured. Explain the specific structural reason why connective tissue adaptation lags behind cardiovascular and muscular adaptation during rapid training load increases, identify the cellular mechanism responsible for tendon remodeling and why it is rate-limited, and predict what training modification would allow this athlete to reach 60km per week without developing tendinopathy given a longer timeline.`,
     branches: [
       {
@@ -241,9 +230,6 @@ export const ROOTS = [
   {
     id: 8,
     title: 'Training Principles: Overload, Specificity, and Recovery',
-    domain: 'Training Systems',
-    cognitiveLevel: 'System Integration',
-    branchCriteriaCounts: [3, 3, 3],
     rootQuestion: `Two athletes both want to improve their 400-meter sprint time. Athlete A runs 400-meter repeats at race pace 4 times per week. Athlete B runs a variety of distances — 100m, 200m, 400m, and 800m repeats — at varied intensities 5 times per week with one session per week of heavy resistance training. After 16 weeks Athlete A has improved their 400m time by 1.8 seconds. Athlete B has improved by 3.1 seconds. Both athletes recovered well with no injuries. Explain the specific training principle that accounts for Athlete B's superior improvement despite less specific training, predict which athlete has a higher ceiling for further improvement at the 400-meter distance, and explain why the optimal specificity ratio changes as an athlete approaches their genetic potential.`,
     branches: [
       {
@@ -809,15 +795,4 @@ export const BRANCH_RUBRICS = {
     branch_2: `Criterion 1: Correctly identifies that accumulated fatigue — CNS fatigue, connective tissue microtrauma, and hormonal suppression from sustained high volume — masks true strength capacity during the high-volume training phase, making performance appear plateaued when underlying fitness is still improving. Criterion 2: Correctly identifies that maintaining training intensity during a taper preserves the neural drive and fitness signal while the reduction in volume allows accumulated fatigue to dissipate, unmasking the fitness that was hidden underneath. Criterion 3: Correctly predicts that optimal taper parameters are approximately 2 to 3 weeks duration with 40 to 60 percent volume reduction while keeping intensity at or above pre-taper levels — enough to clear fatigue without allowing significant detraining.`,
     branch_3: `Criterion 1: Correctly identifies fatigue dissipation as the primary physiological mechanism of the performance increase — the taper removes accumulated fatigue that was suppressing neuromuscular expression of true fitness. Criterion 2: Correctly distinguishes fitness and fatigue as separate variables that both accumulate during high-volume training — fitness builds slowly, fatigue accumulates faster, and the taper selectively removes fatigue while preserving fitness. Criterion 3: Correctly predicts optimal taper parameters of 2 to 3 weeks duration and approximately 40 to 60 percent volume reduction while maintaining intensity, and identifies that tapers shorter than 2 weeks fail to fully clear fatigue while tapers longer than 3 weeks begin allowing meaningful detraining.`
   }
-};
-
-export const ROOT_DIFFICULTY_MAP = {
-  1: 'mechanistic',
-  2: 'mechanistic',
-  3: 'mechanistic',
-  4: 'mechanistic',
-  5: 'mechanistic',
-  6: 'mechanistic',
-  7: 'applied',
-  8: 'applied'
 };
