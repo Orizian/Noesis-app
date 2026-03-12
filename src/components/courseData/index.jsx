@@ -1,11 +1,19 @@
-import { COURSE_META, ROOTS, DICTIONARY, BRANCH_RUBRICS } from './humanPerformancePhysiology';
+// components/courseData/index.js
+import { COURSE_META as HPP_META, ROOTS as HPP_ROOTS, DICTIONARY as HPP_DICTIONARY, BRANCH_RUBRICS as HPP_BRANCH_RUBRICS } from './humanPerformancePhysiology';
+import { COURSE_META as HN_META, ROOTS as HN_ROOTS, DICTIONARY as HN_DICTIONARY, BRANCH_RUBRICS as HN_BRANCH_RUBRICS } from './humanNutrition'; // New import
 
 export const COURSES = [
   {
-    ...COURSE_META,
-    roots: ROOTS,
-    dictionary: DICTIONARY,
-    branchRubrics: BRANCH_RUBRICS,
+    ...HPP_META,
+    roots: HPP_ROOTS,
+    dictionary: HPP_DICTIONARY,
+    branchRubrics: HPP_BRANCH_RUBRICS,
+  },
+  {
+    ...HN_META, // New course
+    roots: HN_ROOTS,
+    dictionary: HN_DICTIONARY,
+    branchRubrics: HN_BRANCH_RUBRICS,
   },
   {
     id: 'applied-personal-training',
@@ -16,21 +24,6 @@ export const COURSES = [
     depth: 2,
     scope: 4,
     duration: 'marathon',
-    comingSoon: true,
-    rootSummaries: [],
-    roots: [],
-    dictionary: {},
-    branchRubrics: {},
-  },
-  {
-    id: 'nutrition-fundamentals',
-    title: 'Nutrition Fundamentals',
-    description: 'The physiological mechanisms behind macronutrient metabolism, energy availability, body composition, and performance nutrition — built on causal understanding rather than dietary rules.',
-    tag: 'Nutrition',
-    difficulty: 2,
-    depth: 2,
-    scope: 2,
-    duration: 'medium',
     comingSoon: true,
     rootSummaries: [],
     roots: [],
