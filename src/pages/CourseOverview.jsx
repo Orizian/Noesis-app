@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useCourse } from '../components/course/CourseContext';
 import RootCard from '../components/course/RootCard';
 import ProfileDropdown from '../components/profiles/ProfileDropdown';
@@ -53,7 +53,7 @@ function ProgressSection({ profileId }) {
 
 export default function CourseOverview() {
   const { roots, dictionary, meta, activeCourse, usesSections, orderedSections, rootsBySection } = useCourse();
-  const { activeProfileId, activeProfile, refresh } = useProfile();
+  const { activeProfileId, refresh } = useProfile();
   const [titleTaps, setTitleTaps] = useState(0);
   const [showDevTools, setShowDevTools] = useState(false);
   const [showCourseInfo, setShowCourseInfo] = useState(false);
