@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { COURSES } from '../courseData/index';
 
-// Default to the first registered course
-const DEFAULT_COURSE_ID = COURSES[0]?.id || '';
-
 // Platform scoring constants
 export const ROOT_CRITERIA_POINTS = 4;
 export const BRANCH_CRITERIA_POINTS = 3;
@@ -127,10 +124,27 @@ function buildCourseHelpers(course) {
 }
 
 export function CourseProvider({ children, courseId }) {
-  const [activeCourseId, setActiveCourseId] = useState(courseId || DEFAULT_COURSE_ID);
-  const course = COURSES.find(c => c.id === activeCourseId) || COURSES[0];
+  const [activeCourseId, setActiveCourseId] = useState(courseId || null);
+  const course = COURSES.find(c => c.id === activeCourseId) || null;
   const value = {
-    ...buildCourseHelpers(course),
+    ...(course ? buildCourseHelpers(course) : {
+      roots: [],
+      dictionary: {},
+      branchRubrics: {},
+      rootCount: 0,
+      courseMaxPoints: 0,
+      courseMaxGauntletPoints: 0,
+      courseMaxVocabScore: 0,
+      courseQuestionCount: 0,
+      getRootMaxPoints: () => 0,
+      getRootTermCount: () => 0,
+      rootDifficultyMap: {},
+      orderedSections: null,
+      rootsBySection: null,
+      usesSections: false,
+      sectionCount: 0,
+      meta: { id: null, title: '', description: '', tag: '' },
+    }),
     activeCourse: course,
     courses: COURSES,
     setActiveCourse: (id) => setActiveCourseId(id),
