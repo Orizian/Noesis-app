@@ -118,6 +118,12 @@ export default function CourseOverview() {
               <ProfileDropdown />
           </div>
 
+          {showWelcome && activeProfile && (
+            <div className="mb-4 px-4 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/50 text-sm text-zinc-300 animate-pulse-once transition-opacity duration-700">
+              Welcome back, <span className="font-semibold text-zinc-100">{activeProfile.name}</span>.
+            </div>
+          )}
+
           <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-6">
             {meta.description}
           </p>
