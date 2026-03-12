@@ -3,7 +3,6 @@ import { Lock } from 'lucide-react';
 import DotTagRow from './DotTagRow';
 import CourseSummaryOverlay from './CourseSummaryOverlay';
 import { DURATION_CONFIG } from './courseTagConfig';
-import { useCourse } from './CourseContext';
 import { useProfile } from '../profiles/ProfileContext';
 import { getTotalPoints, getTotalVocabScore, getGauntletRootPoints } from '../profiles/profileStorage';
 
