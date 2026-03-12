@@ -70,7 +70,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "ProfileSelectionPage",
+    mainPage: "ProfileSelect",
     Pages: PAGES,
     Layout: __Layout,
 };
