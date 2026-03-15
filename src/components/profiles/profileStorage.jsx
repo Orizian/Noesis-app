@@ -679,6 +679,21 @@ export function getEnrolledCourseIds(profileId) {
   return Object.keys(profile.courseData).filter(courseId => !!profile.courseData[courseId].enrolledAt);
 }
 
+// ─── Mobile UI Size setting ───────────────────────────────────────────────────
+
+const MOBILE_UI_SIZE_KEY = 'noesis_mobile_ui_size';
+const VALID_UI_SIZES = ['small', 'medium', 'large'];
+
+export function getMobileUiSize() {
+  const val = localStorage.getItem(MOBILE_UI_SIZE_KEY);
+  return VALID_UI_SIZES.includes(val) ? val : 'large';
+}
+
+export function setMobileUiSize(size) {
+  if (!VALID_UI_SIZES.includes(size)) return;
+  localStorage.setItem(MOBILE_UI_SIZE_KEY, size);
+}
+
 // ─── Stats helpers ────────────────────────────────────────────────────────────
 
 export function getProfileStats(profileId, courseId, rootCount) {
