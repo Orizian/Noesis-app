@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SplashScreen from './components/SplashScreen';
 import { getActiveProfileId } from './components/profiles/profileStorage';
 
+const ALWAYS_RENDER_PAGES = ['AccountPage'];
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
@@ -40,8 +41,6 @@ function AppShell({ children, currentPageName }) {
     </AnimatePresence>
   );
 }
-
-const ALWAYS_RENDER_PAGES = ['AccountPage'];
 
 function LayoutInner({ children, currentPageName }) {
   const [splashDone, setSplashDone] = useState(false);
