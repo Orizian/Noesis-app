@@ -8,25 +8,51 @@ import SideNav from './components/nav/SideNav';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
+const pageVariants = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit:    { opacity: 0, y: -4 },
+};
+const pageTransition = { duration: 0.18, ease: 'easeOut' };
+
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
+  const location = useLocation();
 
-  // Pages that should always render regardless of profile state
   const ALWAYS_RENDER_PAGES = ['AccountPage'];
   if (ALWAYS_RENDER_PAGES.includes(currentPageName)) {
     return <>{children}</>;
   }
 
+  let content;
+  let contentKey;
+
   if (!activeProfileId) {
-    return <ProfileSelect />;
+    content = <ProfileSelect />;
+    contentKey = 'profile-select';
+  } else if (!currentPageName || currentPageName === 'Home') {
+    content = <CourseSelectionPage />;
+    contentKey = 'course-selection-home';
+  } else {
+    content = children;
+    contentKey = location.pathname;
   }
 
-  // Default landing: go to course selection if profile already selected
-  if (!currentPageName || currentPageName === 'Home') {
-    return <CourseSelectionPage />;
-  }
-
-  return <>{children}</>;
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={contentKey}
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={pageTransition}
+        style={{ willChange: 'opacity, transform' }}
+      >
+        {content}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 export default function Layout({ children, currentPageName }) {
