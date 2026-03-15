@@ -4,7 +4,7 @@ import DotTagRow from './DotTagRow';
 import CourseSummaryOverlay from './CourseSummaryOverlay';
 import { DURATION_CONFIG } from './courseTagConfig';
 import { useProfile } from '../profiles/ProfileContext';
-import { getTotalPoints, getTotalVocabScore, getGauntletRootPoints } from '../profiles/profileStorage';
+import { getTotalPoints, getTotalVocabScore, getGauntletRootPoints, isEnrolledInCourse, enrollInCourse } from '../profiles/profileStorage';
 
 function MiniProgressBar({ label, value, max, colorClass }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;

@@ -655,6 +655,30 @@ export function clearGauntletCheckpoint(profileId, courseId) {
   localStorage.removeItem(key);
 }
 
+// ─── Enrollment ───────────────────────────────────────────────────────────────
+
+export function isEnrolledInCourse(profileId, courseId) {
+  const profile = getProfileById(profileId);
+  return !!(getCourseData(profile, courseId).enrolledAt);
+}
+
+export function enrollInCourse(profileId, courseId) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === profileId);
+  if (idx === -1) return;
+  const cd = ensureCourseData(profiles, idx, courseId);
+  if (!cd.enrolledAt) {
+    cd.enrolledAt = Date.now();
+    saveProfiles(profiles);
+  }
+}
+
+export function getEnrolledCourseIds(profileId) {
+  const profile = getProfileById(profileId);
+  if (!profile?.courseData) return [];
+  return Object.keys(profile.courseData).filter(courseId => !!profile.courseData[courseId].enrolledAt);
+}
+
 // ─── Stats helpers ────────────────────────────────────────────────────────────
 
 export function getProfileStats(profileId, courseId, rootCount) {
