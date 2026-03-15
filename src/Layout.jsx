@@ -7,51 +7,23 @@ import BottomNav from './components/nav/BottomNav';
 import SideNav from './components/nav/SideNav';
 
 
-const pageVariants = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -4 },
-};
-const pageTransition = { duration: 0.18, ease: 'easeOut' };
-
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
-  const location = useLocation();
 
   const ALWAYS_RENDER_PAGES = ['AccountPage'];
   if (ALWAYS_RENDER_PAGES.includes(currentPageName)) {
     return <>{children}</>;
   }
 
-  let content;
-  let contentKey;
-
   if (!activeProfileId) {
-    content = <ProfileSelect />;
-    contentKey = 'profile-select';
-  } else if (!currentPageName || currentPageName === 'Home') {
-    content = <CourseSelectionPage />;
-    contentKey = 'course-selection-home';
-  } else {
-    content = children;
-    contentKey = location.pathname;
+    return <ProfileSelect />;
   }
 
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={contentKey}
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        transition={pageTransition}
-        style={{ willChange: 'opacity, transform' }}
-      >
-        {content}
-      </motion.div>
-    </AnimatePresence>
-  );
+  if (!currentPageName || currentPageName === 'Home') {
+    return <CourseSelectionPage />;
+  }
+
+  return <>{children}</>;
 }
 
 export default function Layout({ children, currentPageName }) {
