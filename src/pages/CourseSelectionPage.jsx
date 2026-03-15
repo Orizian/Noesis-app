@@ -17,7 +17,7 @@ export default function CourseSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-20 md:pb-0">
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-16">
 
         <div className="flex items-center justify-between mb-10">
