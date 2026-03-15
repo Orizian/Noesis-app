@@ -2,7 +2,7 @@ import React from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
-import CourseSelectionPage from './pages/CourseSelectionPage';
+import CourseSelectionPage from './pages/CourseSelectionPage.jsx';
 import BottomNav from './components/nav/BottomNav';
 import DesktopSidebar from './components/nav/DesktopSidebar';
 
