@@ -39,6 +39,14 @@ export default function AccountPage() {
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(account.displayName || '');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [mobileUiSize, setMobileUiSizeState] = useState(() => getMobileUiSize());
+
+  const handleUiSizeChange = (size) => {
+    setMobileUiSize(size);
+    setMobileUiSizeState(size);
+    document.body.setAttribute('data-ui-size', size);
+    window.dispatchEvent(new Event('noesis-ui-size-changed'));
+  };
 
   const refresh = () => setAccountState(getAccount());
 
