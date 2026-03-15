@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Cpu, FlaskConical, Dumbbell, Brain, Heart, Leaf, Clock, Zap, CheckCircle2, Sparkles } from 'lucide-react';
+import { BookOpen, FlaskConical, Dumbbell, Brain, Heart, Leaf, Clock, CheckCircle2, Sparkles } from 'lucide-react';
 
 const ACTIVE_COURSES = [
   {
