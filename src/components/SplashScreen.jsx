@@ -4,7 +4,7 @@ import { BookOpen } from 'lucide-react';
 import { getActiveProfileId, getProfileById } from './profiles/profileStorage';
 
 // Duration in ms before the splash exits
-const SPLASH_DURATION = 1600;
+const SPLASH_DURATION = 3000;
 
 export default function SplashScreen({ onDone }) {
   const [phase, setPhase] = useState('logo');   // 'logo' | 'welcome' | 'done'
