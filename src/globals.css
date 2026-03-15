@@ -85,54 +85,6 @@
   }
 }
 
-/* ─── Mobile UI Size tokens ──────────────────────────────────────────────────
-   Only applied inside the max-width:767px breakpoint so tablet/desktop are
-   completely unaffected. Components should use var(--ui-text-sm) etc. on
-   mobile-specific elements. The default (no attribute / large) matches the
-   current feel exactly.
-*/
-@media (max-width: 767px) {
-  [data-ui-size="large"],
-  :not([data-ui-size]) {
-    --ui-text-xs:   0.75rem;   /* 12px */
-    --ui-text-sm:   0.875rem;  /* 14px */
-    --ui-text-base: 1rem;      /* 16px */
-    --ui-text-lg:   1.125rem;  /* 18px */
-    --ui-text-xl:   1.25rem;   /* 20px */
-    --ui-text-2xl:  1.5rem;    /* 24px */
-    --ui-pad-card:  1.25rem;   /* 20px  card/section padding */
-    --ui-gap:       1rem;      /* 16px  stack gap */
-    --ui-btn-py:    0.625rem;  /* 10px  button vertical padding */
-    --ui-radius:    1rem;      /* 16px  card border-radius */
-  }
-
-  [data-ui-size="medium"] {
-    --ui-text-xs:   0.6875rem; /* 11px */
-    --ui-text-sm:   0.8125rem; /* 13px */
-    --ui-text-base: 0.9375rem; /* 15px */
-    --ui-text-lg:   1.0625rem; /* 17px */
-    --ui-text-xl:   1.125rem;  /* 18px */
-    --ui-text-2xl:  1.25rem;   /* 20px */
-    --ui-pad-card:  1rem;      /* 16px */
-    --ui-gap:       0.75rem;   /* 12px */
-    --ui-btn-py:    0.5rem;    /* 8px  */
-    --ui-radius:    0.875rem;  /* 14px */
-  }
-
-  [data-ui-size="small"] {
-    --ui-text-xs:   0.625rem;  /* 10px */
-    --ui-text-sm:   0.75rem;   /* 12px */
-    --ui-text-base: 0.875rem;  /* 14px */
-    --ui-text-lg:   1rem;      /* 16px */
-    --ui-text-xl:   1.0625rem; /* 17px */
-    --ui-text-2xl:  1.125rem;  /* 18px */
-    --ui-pad-card:  0.75rem;   /* 12px */
-    --ui-gap:       0.5rem;    /* 8px  */
-    --ui-btn-py:    0.375rem;  /* 6px  */
-    --ui-radius:    0.75rem;   /* 12px */
-  }
-}
-
 /* Gauntlet glow — eligible root gauntlet button / tile */
 @keyframes gauntlet-glow-pulse {
   0%, 100% { box-shadow: 0 0 6px 1px rgba(217, 119, 6, 0.25), 0 0 0 1px rgba(217, 119, 6, 0.2); border-color: rgba(217, 119, 6, 0.5); }

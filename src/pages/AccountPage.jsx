@@ -8,8 +8,6 @@ import {
   exportAccountData,
   clearAllAccountData,
   getProfiles,
-  getMobileUiSize,
-  setMobileUiSize,
 } from '../components/profiles/profileStorage';
 import { createPageUrl } from '@/utils';
 
@@ -39,14 +37,6 @@ export default function AccountPage() {
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(account.displayName || '');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [mobileUiSize, setMobileUiSizeState] = useState(() => getMobileUiSize());
-
-  const handleUiSizeChange = (size) => {
-    setMobileUiSize(size);
-    setMobileUiSizeState(size);
-    document.body.setAttribute('data-ui-size', size);
-    window.dispatchEvent(new Event('noesis-ui-size-changed'));
-  };
 
   const refresh = () => setAccountState(getAccount());
 
@@ -182,45 +172,7 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Section 3 — Interface Size */}
-        <div>
-          <SectionHeader title="Interface Size" />
-          <div className="border border-zinc-800 rounded-2xl bg-zinc-900/50 p-5 space-y-3">
-            <p className="text-xs text-zinc-500">Adjusts font size and density on mobile only. Tablet and desktop are unaffected.</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { key: 'small',  label: 'Small',  desc: 'Compact' },
-                { key: 'medium', label: 'Medium', desc: 'Tighter' },
-                { key: 'large',  label: 'Large',  desc: 'Default' },
-              ].map(opt => {
-                const isActive = mobileUiSize === opt.key;
-                return (
-                  <button
-                    key={opt.key}
-                    onClick={() => handleUiSizeChange(opt.key)}
-                    className={`rounded-xl border p-3 text-center transition-colors ${
-                      isActive
-                        ? 'border-emerald-800/50 bg-emerald-950/20'
-                        : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-800/40'
-                    }`}
-                  >
-                    <p className={`text-xs font-semibold mb-0.5 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`}>
-                      {opt.label}
-                    </p>
-                    <p className="text-[10px] text-zinc-600">{opt.desc}</p>
-                    {isActive && (
-                      <div className="mt-1.5 flex justify-center">
-                        <Check className="w-3 h-3 text-emerald-500" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Section 4 — Data */}
+        {/* Section 3 — Data */}
         <div>
           <SectionHeader title="Your Data" />
           <div className="border border-zinc-800 rounded-2xl bg-zinc-900/50 p-5 space-y-3">

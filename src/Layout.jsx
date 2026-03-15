@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
@@ -8,7 +8,7 @@ import SideNav from './components/nav/SideNav';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SplashScreen from './components/SplashScreen';
-import { getActiveProfileId, getMobileUiSize } from './components/profiles/profileStorage';
+import { getActiveProfileId } from './components/profiles/profileStorage';
 
 const ALWAYS_RENDER_PAGES = ['AccountPage'];
 
@@ -45,17 +45,6 @@ function AppShell({ children, currentPageName }) {
 function LayoutInner({ children, currentPageName }) {
   const [splashDone, setSplashDone] = useState(false);
   const navigate = useNavigate();
-
-  // Apply mobile UI size as a data attribute on <body> (mobile CSS vars pick it up)
-  useEffect(() => {
-    const applySize = () => {
-      document.body.setAttribute('data-ui-size', getMobileUiSize());
-    };
-    applySize();
-    // Re-apply whenever storage changes (e.g. user updates setting in AccountPage)
-    window.addEventListener('noesis-ui-size-changed', applySize);
-    return () => window.removeEventListener('noesis-ui-size-changed', applySize);
-  }, []);
 
   const handleSplashDone = () => {
     const hasProfile = !!getActiveProfileId();
