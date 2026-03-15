@@ -3,6 +3,7 @@ import { ProfileProvider, useProfile } from './components/profiles/ProfileContex
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
 import CourseSelectionPage from './pages/CourseSelectionPage';
+import BottomNav from './components/nav/BottomNav';
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
