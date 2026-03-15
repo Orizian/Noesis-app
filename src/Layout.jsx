@@ -46,6 +46,17 @@ function LayoutInner({ children, currentPageName }) {
   const [splashDone, setSplashDone] = useState(false);
   const navigate = useNavigate();
 
+  // Apply mobile UI size as a data attribute on <body> (mobile CSS vars pick it up)
+  useEffect(() => {
+    const applySize = () => {
+      document.body.setAttribute('data-ui-size', getMobileUiSize());
+    };
+    applySize();
+    // Re-apply whenever storage changes (e.g. user updates setting in AccountPage)
+    window.addEventListener('noesis-ui-size-changed', applySize);
+    return () => window.removeEventListener('noesis-ui-size-changed', applySize);
+  }, []);
+
   const handleSplashDone = () => {
     const hasProfile = !!getActiveProfileId();
     if (hasProfile) {
