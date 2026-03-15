@@ -37,7 +37,8 @@ export default function MyCourses() {
   const { activeProfileId, activeProfile } = useProfile();
   const navigate = useNavigate();
 
-  const activeCourses = courses.filter(c => !c.comingSoon);
+  const enrolledIds = activeProfileId ? getEnrolledCourseIds(activeProfileId) : [];
+  const activeCourses = courses.filter(c => !c.comingSoon && enrolledIds.includes(c.id));
 
   const handleEnter = (course) => {
     setActiveCourse(course.id);
