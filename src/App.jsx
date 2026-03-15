@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import { AnimatePresence, motion } from 'framer-motion';
+
 
 
 const { Pages, Layout, mainPage } = pagesConfig;

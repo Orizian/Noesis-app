@@ -5,6 +5,8 @@ import ProfileSelect from './pages/ProfileSelect';
 import CourseSelectionPage from './pages/CourseSelectionPage';
 import BottomNav from './components/nav/BottomNav';
 import SideNav from './components/nav/SideNav';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 
 function AppShell({ children, currentPageName }) {
