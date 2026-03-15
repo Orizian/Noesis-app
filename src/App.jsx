@@ -42,36 +42,25 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        transition={{ duration: 0.18, ease: 'easeOut' }}
-        style={{ willChange: 'opacity, transform' }}
-      >
-        <Routes location={location}>
-          <Route path="/" element={
-            <LayoutWrapper currentPageName={mainPageKey}>
-              <MainPage />
+    <Routes location={location}>
+      <Route path="/" element={
+        <LayoutWrapper currentPageName={mainPageKey}>
+          <MainPage />
+        </LayoutWrapper>
+      } />
+      {Object.entries(Pages).map(([path, Page]) => (
+        <Route
+          key={path}
+          path={`/${path}`}
+          element={
+            <LayoutWrapper currentPageName={path}>
+              <Page />
             </LayoutWrapper>
-          } />
-          {Object.entries(Pages).map(([path, Page]) => (
-            <Route
-              key={path}
-              path={`/${path}`}
-              element={
-                <LayoutWrapper currentPageName={path}>
-                  <Page />
-                </LayoutWrapper>
-              }
-            />
-          ))}
-          <Route path="*" element={<PageNotFound />} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+          }
+        />
+      ))}
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
   );
 };
 
