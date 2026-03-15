@@ -8,6 +8,8 @@ import {
   exportAccountData,
   clearAllAccountData,
   getProfiles,
+  getMobileUiSize,
+  setMobileUiSize,
 } from '../components/profiles/profileStorage';
 import { createPageUrl } from '@/utils';
 
