@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ProfileProvider, useProfile } from './components/profiles/ProfileContext';
 import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
@@ -6,7 +6,9 @@ import CourseSelectionPage from './pages/CourseSelectionPage';
 import BottomNav from './components/nav/BottomNav';
 import SideNav from './components/nav/SideNav';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import SplashScreen from './components/SplashScreen';
+import { getActiveProfileId } from './components/profiles/profileStorage';
 
 
 function AppShell({ children, currentPageName }) {
