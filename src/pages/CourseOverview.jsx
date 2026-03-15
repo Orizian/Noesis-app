@@ -81,7 +81,7 @@ export default function CourseOverview() {
         <div className="mb-8">
           <button
             onClick={() => navigate(createPageUrl('CourseSelectionPage'))}
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-400 transition-colors mb-3"
+            className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-400 transition-all duration-150 active:scale-95 mb-3"
           >
             <ArrowLeft className="w-3 h-3" />
             All Courses
@@ -100,7 +100,7 @@ export default function CourseOverview() {
               </div>
               <button
               onClick={() => setShowCourseInfo(true)}
-              className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-700 flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors flex-shrink-0"
+              className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-700 flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-all duration-150 active:scale-90 flex-shrink-0"
               >
               <Info className="w-3.5 h-3.5" />
               </button>
