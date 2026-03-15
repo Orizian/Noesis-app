@@ -38,7 +38,7 @@ export default function ProfileDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/50 hover:border-zinc-600 transition-all"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/50 hover:border-zinc-600 transition-all duration-150 active:scale-95"
       >
         <ProfileAvatar profile={activeProfile} size="sm" />
         <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">{activeProfile.name}</span>
@@ -46,7 +46,7 @@ export default function ProfileDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-52 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 duration-150">
           <div className="px-4 py-3 border-b border-zinc-800">
             <p className="text-sm font-medium text-zinc-200 truncate">{activeProfile.name}</p>
             <p className="text-xs text-zinc-500">Profile</p>
@@ -54,14 +54,14 @@ export default function ProfileDropdown() {
           <div className="py-1">
             <button
               onClick={() => { setOpen(false); deselectProfile(); }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors text-left"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-all duration-150 text-left active:bg-zinc-700"
             >
               <LogOut className="w-4 h-4 text-zinc-500" />
               Switch Profile
             </button>
             <button
               onClick={() => { setOpen(false); setShowEdit(true); }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors text-left"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-all duration-150 text-left active:bg-zinc-700"
             >
               <Edit2 className="w-4 h-4 text-zinc-500" />
               Edit Profile
@@ -69,7 +69,7 @@ export default function ProfileDropdown() {
             <Link
               to={createPageUrl('Stats')}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors text-left"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 transition-all duration-150 text-left active:bg-zinc-700"
             >
               <BarChart2 className="w-4 h-4 text-zinc-500" />
               My Stats
@@ -78,7 +78,7 @@ export default function ProfileDropdown() {
           <div className="py-1 border-t border-zinc-800">
             <button
               onClick={() => { setOpen(false); setShowDelete(true); }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 transition-colors text-left"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 transition-all duration-150 text-left active:bg-zinc-700"
             >
               <Trash2 className="w-4 h-4" />
               Delete My Profile
