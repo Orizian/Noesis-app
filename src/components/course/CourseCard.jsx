@@ -55,8 +55,8 @@ export default function CourseCard({ course, onEnter }) {
 
   return (
     <>
-      <div className={`relative rounded-2xl border bg-zinc-900/60 p-5 flex flex-col gap-4 transition-all ${
-        course.comingSoon ? 'border-zinc-800/40' : 'border-zinc-800 hover:border-zinc-700'
+      <div className={`relative rounded-2xl border bg-zinc-900/60 p-5 flex flex-col gap-4 transition-all duration-200 ${
+        course.comingSoon ? 'border-zinc-800/40' : 'border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/80'
       }`}>
 
         {course.comingSoon && (
@@ -102,14 +102,14 @@ export default function CourseCard({ course, onEnter }) {
         <div className="flex gap-2 mt-auto pt-1">
           <button
             onClick={() => setShowSummary(true)}
-            className="flex-1 py-2 rounded-xl border border-zinc-700 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 text-xs font-medium transition-colors"
+            className="flex-1 py-2 rounded-xl border border-zinc-700 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 text-xs font-medium transition-all duration-150 active:scale-[0.97]"
           >
             View Summary
           </button>
           {isActive ? (
             <button
               onClick={handleEnrollOrEnter}
-              className="flex-1 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold transition-colors"
+              className="flex-1 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold transition-all duration-150 active:scale-[0.97]"
             >
               {enrolled ? 'Enter Course' : 'Enroll'}
             </button>

@@ -31,7 +31,7 @@ export default function SideNav() {
             <button
               key={page}
               onClick={() => navigate(createPageUrl(page))}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 text-left active:scale-[0.98] ${
                 isActive
                   ? 'bg-zinc-800 text-zinc-100'
                   : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'

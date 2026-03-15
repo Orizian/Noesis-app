@@ -25,7 +25,7 @@ export default function BottomNav() {
             <button
               key={page}
               onClick={() => navigate(createPageUrl(page))}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-all duration-200 active:scale-95 ${
                 isActive ? 'text-emerald-400' : 'text-zinc-600 hover:text-zinc-400'
               }`}
             >
