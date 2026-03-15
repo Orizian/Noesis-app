@@ -4,6 +4,7 @@ import { CourseProvider } from './components/course/CourseContext';
 import ProfileSelect from './pages/ProfileSelect';
 import CourseSelectionPage from './pages/CourseSelectionPage';
 import BottomNav from './components/nav/BottomNav';
+import SideNav from './components/nav/SideNav';
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
