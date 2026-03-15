@@ -11,22 +11,35 @@ import { useLocation } from 'react-router-dom';
 
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
+  const location = useLocation();
 
-  const ALWAYS_RENDER_PAGES = ['AccountPage'];
+  let content;
   if (ALWAYS_RENDER_PAGES.includes(currentPageName)) {
-    return <>{children}</>;
+    content = children;
+  } else if (!activeProfileId) {
+    content = <ProfileSelect />;
+  } else if (!currentPageName || currentPageName === 'Home') {
+    content = <CourseSelectionPage />;
+  } else {
+    content = children;
   }
 
-  if (!activeProfileId) {
-    return <ProfileSelect />;
-  }
-
-  if (!currentPageName || currentPageName === 'Home') {
-    return <CourseSelectionPage />;
-  }
-
-  return <>{children}</>;
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
+      >
+        {content}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
+
+const ALWAYS_RENDER_PAGES = ['AccountPage'];
 
 export default function Layout({ children, currentPageName }) {
   return (
