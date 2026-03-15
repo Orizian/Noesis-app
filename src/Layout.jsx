@@ -42,9 +42,14 @@ export default function Layout({ children, currentPageName }) {
             ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
             ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
           `}</style>
-          <AppShell currentPageName={currentPageName}>
-            {children}
-          </AppShell>
+          <div className="flex min-h-screen">
+            <SideNav />
+            <div className="flex-1 min-w-0">
+              <AppShell currentPageName={currentPageName}>
+                {children}
+              </AppShell>
+            </div>
+          </div>
           <BottomNav />
         </div>
       </ProfileProvider>
