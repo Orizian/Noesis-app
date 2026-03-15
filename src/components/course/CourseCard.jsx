@@ -26,9 +26,18 @@ function MiniProgressBar({ label, value, max, colorClass }) {
 
 export default function CourseCard({ course, onEnter }) {
   const [showSummary, setShowSummary] = useState(false);
-  const { activeProfileId } = useProfile();
+  const { activeProfileId, refresh } = useProfile();
   const duration = DURATION_CONFIG[course.duration] || DURATION_CONFIG.medium;
   const isActive = !course.comingSoon;
+  const enrolled = isActive && activeProfileId ? isEnrolledInCourse(activeProfileId, course.id) : false;
+
+  const handleEnrollOrEnter = () => {
+    if (!enrolled && activeProfileId) {
+      enrollInCourse(activeProfileId, course.id);
+      refresh();
+    }
+    onEnter();
+  };
 
   // Compute max points directly from this card's course data — never from context
   // (context may have a different or null active course at selection screen)
