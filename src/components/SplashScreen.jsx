@@ -58,16 +58,17 @@ export default function SplashScreen({ onDone }) {
         {/* Welcome back message */}
         <AnimatePresence>
           {phase === 'welcome' && profileName && (
-            <motion.p
+            <motion.div
               key="welcome"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="text-sm text-zinc-400 mt-1"
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="text-center mt-2"
             >
-              Welcome back, <span className="text-zinc-200 font-medium">{profileName}</span>
-            </motion.p>
+              <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Welcome back</p>
+              <p className="text-2xl font-semibold text-zinc-100 tracking-tight">{profileName}</p>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
