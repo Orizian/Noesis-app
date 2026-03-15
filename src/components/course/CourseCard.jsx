@@ -108,10 +108,10 @@ export default function CourseCard({ course, onEnter }) {
           </button>
           {isActive ? (
             <button
-              onClick={onEnter}
+              onClick={handleEnrollOrEnter}
               className="flex-1 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold transition-colors"
             >
-              Enter Course
+              {enrolled ? 'Enter Course' : 'Enroll'}
             </button>
           ) : (
             <button

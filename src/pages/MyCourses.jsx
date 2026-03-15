@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCourse } from '../components/course/CourseContext';
 import { useProfile } from '../components/profiles/ProfileContext';
-import { getTotalPoints, getTotalGauntletPoints, getTotalVocabScore } from '../components/profiles/profileStorage';
+import { getTotalPoints, getEnrolledCourseIds } from '../components/profiles/profileStorage';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { BookOpen, ArrowRight } from 'lucide-react';
