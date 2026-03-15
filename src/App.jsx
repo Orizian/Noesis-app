@@ -6,8 +6,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Roadmap from './pages/Roadmap';
-import MyCourses from './pages/MyCourses';
+import PageTransition from './components/nav/PageTransition';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -59,8 +58,6 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/Roadmap" element={<LayoutWrapper currentPageName="Roadmap"><Roadmap /></LayoutWrapper>} />
-      <Route path="/MyCourses" element={<LayoutWrapper currentPageName="MyCourses"><MyCourses /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
