@@ -106,13 +106,13 @@ export default function ProfileDropdown() {
             <div className="flex gap-3">
               <button
                 onClick={() => { setShowDelete(false); setDeleteInput(''); }}
-                className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-all duration-150 active:scale-[0.97]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 py-2.5 rounded-xl bg-red-800 hover:bg-red-700 text-white text-sm transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-red-800 hover:bg-red-700 text-white text-sm transition-all duration-150 active:scale-[0.97]"
               >
                 Delete
               </button>

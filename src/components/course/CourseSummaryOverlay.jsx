@@ -7,13 +7,13 @@ export default function CourseSummaryOverlay({ course, onClose, onEnter }) {
   const learningMode = course.learningMode ? LEARNING_MODE_CONFIG[course.learningMode] : null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-lg overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-lg overflow-y-auto animate-in fade-in-0 duration-200">
+      <div className="max-w-2xl mx-auto px-4 py-8 animate-in slide-in-from-bottom-4 fade-in-0 duration-300">
 
         <div className="flex justify-end mb-6">
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-zinc-200 transition-all duration-150 active:scale-90"
           >
             <X className="w-4 h-4" />
           </button>
@@ -114,7 +114,7 @@ export default function CourseSummaryOverlay({ course, onClose, onEnter }) {
         {!course.comingSoon && onEnter && (
           <button
             onClick={() => { onEnter(); onClose(); }}
-            className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm transition-colors"
+            className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm transition-all duration-150 active:scale-[0.98]"
           >
             Enter Course
           </button>
