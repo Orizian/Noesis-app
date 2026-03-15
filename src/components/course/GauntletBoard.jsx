@@ -54,7 +54,7 @@ function GauntletTile({ root, profileId, courseId }) {
   }
 
   const content = (
-    <div className={`border rounded-xl p-3 space-y-1 transition-all ${tileClass}`}>
+    <div className={`border rounded-xl p-3 space-y-1 transition-all duration-200 ${tileClass}`}>
       <p className="text-lg font-bold text-zinc-200">{String(root.id).padStart(2, '0')}</p>
       <p className="text-xs text-zinc-500 leading-snug line-clamp-2">{root.title}</p>
       {statusEl}
@@ -108,7 +108,7 @@ function AbsoluteGauntletButton({ profileId, roots, courseId }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full rounded-2xl border px-6 py-6 text-center transition-all
+      className="w-full rounded-2xl border px-6 py-6 text-center transition-all duration-200 active:scale-[0.99]
         border-red-700/60 bg-red-950/20 hover:bg-red-950/30 absolute-glow cursor-pointer"
     >
       <p className="text-red-200 font-bold text-xl">

@@ -91,14 +91,14 @@ export default function RootCard({ root, profileId }) {
     <Link to={createPageUrl('RootDetail') + `?rootId=${root.id}`}>
       <div
         className={`group relative border border-zinc-800 rounded-xl p-5 md:p-5 
-          hover:border-zinc-700 transition-all duration-[600ms] cursor-pointer
+          hover:border-zinc-700 transition-all duration-200 cursor-pointer
           ${cardBorder} bg-zinc-900/80 hover:bg-zinc-900`}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0 flex-1">
             <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 
               flex items-center justify-center text-xs font-mono text-zinc-400 
-              group-hover:border-zinc-600 transition-colors mt-0.5">
+              group-hover:border-zinc-600 transition-all duration-200 mt-0.5">
               {String(root.id).padStart(2, '0')}
             </div>
             <div className="min-w-0 flex-1">
@@ -106,7 +106,7 @@ export default function RootCard({ root, profileId }) {
                 {root.title}
               </h3>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full border transition-all duration-[600ms] ${cfg.badgeClass}`}>
+                <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full border transition-all duration-200 ${cfg.badgeClass}`}>
                   {cfg.label}
                 </span>
                 <DifficultyBars rootId={root.id} showLabel={true} size="sm" />
