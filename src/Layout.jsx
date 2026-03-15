@@ -6,10 +6,11 @@ import CourseSelectionPage from './pages/CourseSelectionPage';
 import BottomNav from './components/nav/BottomNav';
 import DesktopSidebar from './components/nav/DesktopSidebar';
 
+const SIDEBAR_PAGES = ['CourseSelectionPage', 'MyCourses', 'Roadmap', 'ProfileSelect', 'AccountPage', 'Stats', 'CourseOverview', 'RootDetail', 'RootGauntletPage', 'AbsoluteGauntletPage'];
+
 function AppShell({ children, currentPageName }) {
   const { activeProfileId } = useProfile();
 
-  // Pages that should always render regardless of profile state
   const ALWAYS_RENDER_PAGES = ['AccountPage'];
   if (ALWAYS_RENDER_PAGES.includes(currentPageName)) {
     return <>{children}</>;
@@ -19,12 +20,23 @@ function AppShell({ children, currentPageName }) {
     return <ProfileSelect />;
   }
 
-  // Default landing: go to course selection if profile already selected
   if (!currentPageName || currentPageName === 'Home') {
     return <CourseSelectionPage />;
   }
 
   return <>{children}</>;
+}
+
+function MainLayout({ children, currentPageName }) {
+  const showSidebar = SIDEBAR_PAGES.includes(currentPageName) || !currentPageName;
+  return (
+    <div className="flex min-h-screen">
+      {showSidebar && <DesktopSidebar />}
+      <main className="flex-1 min-w-0">
+        {children}
+      </main>
+    </div>
+  );
 }
 
 export default function Layout({ children, currentPageName }) {
@@ -43,7 +55,9 @@ export default function Layout({ children, currentPageName }) {
             ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
           `}</style>
           <AppShell currentPageName={currentPageName}>
-            {children}
+            <MainLayout currentPageName={currentPageName}>
+              {children}
+            </MainLayout>
           </AppShell>
           <BottomNav />
         </div>
