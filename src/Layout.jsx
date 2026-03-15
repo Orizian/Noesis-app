@@ -43,11 +43,58 @@ function AppShell({ children, currentPageName }) {
 
 const ALWAYS_RENDER_PAGES = ['AccountPage'];
 
+function LayoutInner({ children, currentPageName }) {
+  const [splashDone, setSplashDone] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSplashDone = () => {
+    const hasProfile = !!getActiveProfileId();
+    if (hasProfile) {
+      navigate('/MyCourses', { replace: true });
+    }
+    setSplashDone(true);
+  };
+
+  if (!splashDone) {
+    return <SplashScreen onDone={handleSplashDone} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-zinc-950">
+      <style>{`
+        body { background-color: #09090b; color: #fafafa; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+      `}</style>
+      <div className="flex min-h-screen">
+        <SideNav />
+        <div className="flex-1 min-w-0">
+          <AppShell currentPageName={currentPageName}>
+            {children}
+          </AppShell>
+        </div>
+      </div>
+      <BottomNav />
+    </div>
+  );
+}
+
 export default function Layout({ children, currentPageName }) {
   return (
     <CourseProvider>
       <ProfileProvider>
-        <div className="min-h-screen bg-zinc-950">
+        <LayoutInner currentPageName={currentPageName}>{children}</LayoutInner>
+      </ProfileProvider>
+    </CourseProvider>
+  );
+}
+
+// Keep the old inner shell for reference — replaced by LayoutInner above
+function _OldShellWrapper({ children, currentPageName }) {
+  return (
+    <div className="min-h-screen bg-zinc-950">
           <style>{`
             body {
               background-color: #09090b;
