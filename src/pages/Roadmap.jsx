@@ -102,7 +102,7 @@ function CourseItem({ course, showEta }) {
 export default function Roadmap() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-24 md:pb-8">
-      <div className="px-4 py-8 md:py-12 md:px-8 max-w-3xl">
+      <div className="max-w-2xl mx-auto px-4 py-8 md:py-14">
 
         {/* Header */}
         <div className="mb-10">

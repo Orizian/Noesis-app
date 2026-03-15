@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Roadmap from './pages/Roadmap';
 import MyCourses from './pages/MyCourses';
-import CourseSelectionPageNew from './pages/CourseSelectionPage.jsx';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -62,7 +61,6 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/Roadmap" element={<LayoutWrapper currentPageName="Roadmap"><Roadmap /></LayoutWrapper>} />
       <Route path="/MyCourses" element={<LayoutWrapper currentPageName="MyCourses"><MyCourses /></LayoutWrapper>} />
-      <Route path="/CourseSelectionPage" element={<LayoutWrapper currentPageName="CourseSelectionPage"><CourseSelectionPageNew /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
