@@ -44,6 +44,7 @@ export default function Layout({ children, currentPageName }) {
           <AppShell currentPageName={currentPageName}>
             {children}
           </AppShell>
+          <BottomNav />
         </div>
       </ProfileProvider>
     </CourseProvider>
