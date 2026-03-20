@@ -391,7 +391,10 @@ export default function DevToolsModal({ profileId, onClose, onChanged, roots, di
           </div>
         </div>
 
-        <div className="px-5 py-4">
+        </div>{/* end scrollable body */}
+
+        {/* Sticky footer */}
+        <div className="flex-shrink-0 px-5 py-4 border-t border-zinc-800">
           <button onClick={onClose} className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm transition-colors">Close</button>
         </div>
       </div>
