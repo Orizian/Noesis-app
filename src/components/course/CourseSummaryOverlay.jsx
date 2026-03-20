@@ -113,7 +113,7 @@ export default function CourseSummaryOverlay({ course, onClose, onEnter }) {
 
           {/* Sticky footer CTA */}
           {(!course.comingSoon && onEnter) || course.comingSoon ? (
-            <div className="flex-shrink-0 px-4 pb-6 pt-3 md:px-6 border-t border-zinc-800/60">
+            <div className="flex-shrink-0 px-4 pt-3 md:px-6 border-t border-zinc-800/60 pb-nav md:pb-6">
               {!course.comingSoon && onEnter ? (
                 <button
                   onClick={() => { onEnter(); onClose(); }}
