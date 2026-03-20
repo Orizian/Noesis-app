@@ -35,8 +35,7 @@ export default function BottomNav() {
           );
         })}
       </div>
-      {/* Safe area spacer for iOS home bar */}
-      <div className="h-safe-bottom" style={{ height: 'env(safe-area-inset-bottom)' }} />
+
     </nav>
   );
 }
