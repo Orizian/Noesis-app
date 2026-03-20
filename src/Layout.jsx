@@ -69,7 +69,8 @@ function LayoutInner({ children, currentPageName }) {
       `}</style>
       <div className="flex min-h-screen">
         <SideNav />
-        <div className="flex-1 min-w-0">
+        {/* pb-nav reserves space for the fixed bottom nav on mobile so content is never hidden */}
+        <div className="flex-1 min-w-0 pb-nav md:pb-0">
           <AppShell currentPageName={currentPageName}>
             {children}
           </AppShell>
