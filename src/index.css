@@ -89,7 +89,14 @@
 
 /* BottomNav offset — reserves space so mobile content never hides under the fixed bottom nav.
    BottomNav height ≈ 56px + iOS safe-area-inset-bottom.
-   Applied once in Layout to the main content wrapper. Desktop resets to 0 via md:pb-0. */
+   Applied to the main Layout content wrapper (md:pb-0 resets on desktop).
+   Also used on overlay/modal sticky footers and scrollable bodies on mobile. */
 .pb-nav {
   padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .pb-nav {
+    padding-bottom: 1.5rem; /* md:pb-6 equivalent — matches desktop overlay footer padding */
+  }
 }
