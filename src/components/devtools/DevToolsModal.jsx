@@ -310,6 +310,9 @@ export default function DevToolsModal({ profileId, onClose, onChanged, roots, di
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 transition-colors"><X className="w-4 h-4" /></button>
         </div>
 
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto">
+
         {/* Global Controls */}
         <div className="px-5 py-4 border-b border-zinc-800">
           <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider mb-3">Global Controls</p>
