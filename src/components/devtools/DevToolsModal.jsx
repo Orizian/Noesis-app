@@ -299,15 +299,15 @@ export default function DevToolsModal({ profileId, onClose, onChanged, roots, di
   const act = (fn) => { fn(); onChanged(); };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
-      <div className="bg-zinc-900 border-2 border-orange-600/60 rounded-2xl w-full max-w-lg my-4">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-orange-950/20">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col md:items-start md:justify-center md:p-4 overflow-hidden">
+      <div className="flex flex-col bg-zinc-900 border-2 border-orange-600/60 md:rounded-2xl w-full h-full md:h-auto md:max-h-[95vh] md:max-w-lg md:my-4">
+        {/* Sticky Header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-orange-950/20 md:rounded-t-2xl">
           <div>
             <span className="text-orange-500 font-bold text-base tracking-wider uppercase">⚠ Dev Tools</span>
             <p className="text-xs text-orange-600/70 mt-0.5">Current profile only — not a user feature</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 transition-colors"><X className="w-4 h-4" /></button>
         </div>
 
         {/* Global Controls */}
