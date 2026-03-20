@@ -355,7 +355,7 @@ export default function DevToolsModal({ profileId, onClose, onChanged, roots, di
         {/* Per-Root Controls */}
         <div className="border-b border-zinc-800">
           <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider px-5 py-3">Per Root — tap to expand</p>
-          <div className="max-h-[45vh] overflow-y-auto">
+          <div>
             {roots.map(root => (
               <RootSection key={root.id} root={root} profileId={profileId} courseId={courseId} onChanged={onChanged} dictionary={dictionary} />
             ))}
