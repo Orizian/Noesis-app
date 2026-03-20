@@ -304,7 +304,7 @@ export default function DevToolsModal({ profileId, onClose, onChanged, roots, di
         {/* Sticky Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-orange-950/20 md:rounded-t-2xl">
           <div>
-            <span className="text-orange-500 font-bold text-base tracking-wider uppercase">⚠ Dev Tools</span>
+            <span className="text-orange-500 font-bold text-base tracking-wider uppercase">&#9888; Dev Tools</span>
             <p className="text-xs text-orange-600/70 mt-0.5">Current profile only — not a user feature</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 transition-colors"><X className="w-4 h-4" /></button>
