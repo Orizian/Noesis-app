@@ -105,3 +105,9 @@
 .absolute-glow {
   animation: absolute-glow-pulse 2.8s ease-in-out infinite;
 }
+
+/* Bottom nav safe padding — used by the main content wrapper on mobile */
+/* BottomNav height ~56px + iOS safe area inset */
+.pb-nav {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
