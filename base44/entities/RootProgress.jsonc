@@ -1,0 +1,29 @@
+{
+  "name": "RootProgress",
+  "type": "object",
+  "properties": {
+    "root_id": {
+      "type": "number",
+      "description": "Root number (sequential, starting from 1)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "complete"
+      ],
+      "default": "not_started"
+    },
+    "question_criteria": {
+      "type": "object",
+      "description": "Dynamic map of question keys (root, branch_1, branch_2, ...) to criteria counts. Keys and counts vary per root based on branch count.",
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "root_id"
+  ]
+}
